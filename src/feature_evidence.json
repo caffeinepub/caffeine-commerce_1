@@ -2,9 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-all-internet-identity-ii-requirements-from-the-admin-login-experience-so-that-the-admin-area-does-not-require-an-internet-identity-session-to-log-in-or-to-access-the-dashboard",
-      "featureTitle": "Remove all Internet Identity (II) requirements from the admin login experience so that the /admin area does not require an Internet Identity session to log in or to access the dashboard.",
+      "featureId": "feature-ensure-the-admin-login-flow-succeeds-with-username-admin-and-password-admin-123-using-the-existing-admin-login-ui-frontend-src-pages-admin-adminloginpage-tsx-and-the-backend-adminauthenticate-username-password-method-without-requiring-internet-identity-for-admin-access",
+      "featureTitle": "Ensure the admin login flow succeeds with username \"admin\" and password \"Admin@123\" using the existing Admin Login UI (`frontend/src/pages/admin/AdminLoginPage.tsx`) and the backend `adminAuthenticate(username, password)` method, without requiring Internet Identity for admin access.",
       "files": [
+        "frontend/src/pages/admin/AdminLayoutPage.tsx",
         "frontend/src/pages/admin/AdminLoginPage.tsx"
       ],
       "components": [
@@ -18,15 +19,18 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-47"
+        "REQ-53"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-set-the-admin-credentials-to-username-admin-and-password-admin-123-and-ensure-these-credentials-successfully-authenticate-immediately-after-deployment",
-      "featureTitle": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
+      "featureId": "feature-add-a-new-admin-page-for-site-settings-and-add-it-as-a-new-navigation-item-tab-link-in-the-admin-sidebar-frontend-src-pages-admin-adminlayoutpage-tsx-so-admins-can-open-it-from-the-admin-dashboard-area",
+      "featureTitle": "Add a new Admin page for \"Site Settings\" and add it as a new navigation item (tab/link) in the Admin sidebar (`frontend/src/pages/admin/AdminLayoutPage.tsx`) so admins can open it from the admin dashboard area.",
       "files": [
-        "frontend/src/pages/admin/AdminLoginPage.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/i18n/index.tsx",
+        "frontend/src/pages/admin/AdminLayoutPage.tsx",
+        "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -39,16 +43,17 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-48"
+        "REQ-54"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-admin-route-gating-so-that-access-to-admin-and-all-nested-admin-routes-is-controlled-only-by-the-admin-session-token-state-and-optional-backend-token-validation-and-does-not-depend-on-the-caller-principal-id-or-internet-identity",
-      "featureTitle": "Update admin route gating so that access to /admin and all nested admin routes is controlled only by the admin session/token state (and optional backend token validation), and does not depend on the caller Principal ID or Internet Identity.",
+      "featureId": "feature-implement-the-admin-site-settings-page-ui-to-1-edit-shop-name-2-upload-select-a-new-logo-image-file-3-preview-the-chosen-logo-before-saving-and-4-save-changes-to-the-backend-use-english-for-all-labels-helper-text-and-validation-messages",
+      "featureTitle": "Implement the Admin \"Site Settings\" page UI to (1) edit Shop Name, (2) upload/select a new Logo image file, (3) preview the chosen logo before saving, and (4) save changes to the backend. Use English for all labels, helper text, and validation messages.",
       "files": [
-        "frontend/src/hooks/queries/useAuthz.ts",
-        "frontend/src/pages/admin/AdminLayoutPage.tsx"
+        "frontend/src/hooks/queries/queryClientKeys.ts",
+        "frontend/src/hooks/queries/useSiteSettings.ts",
+        "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -61,18 +66,16 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-49"
+        "REQ-55"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-admin-frontend-to-create-use-a-backend-actor-for-admin-pages-that-applies-the-stored-admin-token-even-when-the-user-is-not-logged-in-with-internet-identity",
-      "featureTitle": "Update the admin frontend to create/use a backend actor for admin pages that applies the stored admin token even when the user is not logged in with Internet Identity.",
+      "featureId": "feature-reflect-the-configured-branding-on-the-shopper-ui-by-rendering-the-saved-shop-name-and-logo-in-the-main-shopper-header-frontend-src-components-layout-header-tsx-in-place-of-the-hard-coded-shopease-logo-assets-when-site-settings-are-present",
+      "featureTitle": "Reflect the configured branding on the shopper UI by rendering the saved Shop Name and Logo in the main shopper header (`frontend/src/components/layout/Header.tsx`) in place of the hard-coded ShopEase logo assets when Site Settings are present.",
       "files": [
-        "frontend/src/components/admin/StripePaymentSetup.tsx",
-        "frontend/src/hooks/queries/useStripe.ts",
-        "frontend/src/hooks/useAdminActor.ts",
-        "frontend/src/pages/admin/AdminLayoutPage.tsx"
+        "frontend/src/components/layout/Header.tsx",
+        "frontend/src/hooks/queries/useSiteSettings.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -85,7 +88,7 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-51"
+        "REQ-56"
       ],
       "confidence": "high"
     }

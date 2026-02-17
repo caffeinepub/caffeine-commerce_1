@@ -153,6 +153,10 @@ export type Filter = {
     minPrice: bigint;
 };
 export type UserId = Principal;
+export interface SiteSettings {
+    logo: string;
+    shopName: string;
+}
 export interface Wishlist {
     productIds: Array<ProductId>;
 }
@@ -193,6 +197,10 @@ export interface CartItem {
     productId: ProductId;
     quantity: bigint;
 }
+export interface UserProfile {
+    name: string;
+    address: string;
+}
 export interface Product {
     id: ProductId;
     categoryId: CategoryId;
@@ -201,10 +209,6 @@ export interface Product {
     stock: bigint;
     imageUrl: string;
     price: bigint;
-}
-export interface UserProfile {
-    name: string;
-    address: string;
 }
 export enum Order {
     less = "less",
@@ -235,11 +239,6 @@ export interface backendInterface {
      * /    *************
      */
     adminAuthenticate(username: string, password: string): Promise<AdminToken>;
-    /**
-     * / ************
-     * /    * Types
-     * /    *************
-     */
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     /**
@@ -260,6 +259,12 @@ export interface backendInterface {
     getCategories(): Promise<Array<Category>>;
     getOrder(orderId: OrderId): Promise<Order__1>;
     getProducts(filters: Array<Filter>): Promise<Array<Product>>;
+    /**
+     * / ************
+     * /    * Site Settings Management
+     * /    *************
+     */
+    getSiteSettings(): Promise<SiteSettings>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     /**
@@ -280,6 +285,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
+    updateSiteSettings(newSettings: SiteSettings): Promise<void>;
     verifyAdminToken(adminToken: AdminToken): Promise<boolean>;
 }
 import type { CartItem as _CartItem, CategoryId as _CategoryId, Filter as _Filter, Order as _Order, OrderId as _OrderId, OrderStatus as _OrderStatus, Order__1 as _Order__1, StripeSessionStatus as _StripeSessionStatus, Time as _Time, UserId as _UserId, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
@@ -467,6 +473,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getSiteSettings(): Promise<SiteSettings> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSiteSettings();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSiteSettings();
+            return result;
+        }
+    }
     async getStripeSessionStatus(arg0: string): Promise<StripeSessionStatus> {
         if (this.processError) {
             try {
@@ -604,6 +624,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.transform(arg0);
+            return result;
+        }
+    }
+    async updateSiteSettings(arg0: SiteSettings): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateSiteSettings(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateSiteSettings(arg0);
             return result;
         }
     }

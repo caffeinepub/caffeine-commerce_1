@@ -13,6 +13,7 @@ import {
   Users,
   Ticket,
   CreditCard,
+  Settings,
   LogOut,
 } from 'lucide-react';
 
@@ -69,6 +70,7 @@ export default function AdminLayoutPage() {
     { to: '/admin/orders', label: t('admin.orders'), icon: ShoppingCart },
     { to: '/admin/users', label: t('admin.users'), icon: Users },
     { to: '/admin/coupons', label: t('admin.coupons'), icon: Ticket },
+    { to: '/admin/site-settings', label: t('admin.siteSettings'), icon: Settings },
     { to: '/admin/stripe-setup', label: t('admin.stripe'), icon: CreditCard },
   ];
 

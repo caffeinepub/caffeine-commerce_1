@@ -1,53 +1,35 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T10:05:47.729Z",
-  "summary": "The diff clearly updates the admin frontend to use a username/password login page and gates /admin routes via an admin token verified through a new admin-specific (anonymous) actor. However, key backend requirements (default credentials, token issuance/validation behavior, and token-based authorization for admin-only ops) are not fully verifiable from the truncated backend diff. Several unrelated changes (migration/userProfiles shape and Stripe admin setup hooks/UI) were also introduced.",
+  "generatedAt": "2026-02-17T11:07:58.860Z",
+  "summary": "Most requested functionality appears implemented: backend now has persisted SiteSettings with get/update methods; frontend has a new Admin Site Settings page, routing and sidebar nav item, React Query hooks, and shopper Header now reflects saved branding with fallback. One key requirement cannot be confirmed from the provided diff summary: backend admin credential support for username \"admin\" and password \"Admin@123\" (REQ-53).",
   "missing_requirements": [
     {
-      "id": "REQ-48",
-      "requirement": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
-      "reason": "The frontend calls `actor.adminAuthenticate(username, password)` but the backend implementation is truncated; the diff summary provides no evidence that the backend enforces exactly these credentials or that non-matching credentials fail with the required English error behavior.",
+      "id": "REQ-53",
+      "requirement": "Ensure the admin login flow succeeds with username \"admin\" and password \"Admin@123\" using backend adminAuthenticate(username, password), returning a token and enabling subsequent verifyAdminToken checks.",
+      "reason": "The diff summary shows frontend calling adminAuthenticate and storing the token, and AdminLayoutPage verifying a token, but does not show any backend change confirming that adminAuthenticate accepts the required credentials or that verifyAdminToken logic matches the frontend token storage. backend/main.mo is truncated before any admin authentication implementation, and the modified useAuthz.ts is only referenced in a file summary without code evidence.",
       "evidence": [
-        "backend/main.mo (adminAuthenticate truncated)",
-        "frontend/src/pages/admin/AdminLoginPage.tsx"
-      ]
-    },
-    {
-      "id": "REQ-50",
-      "requirement": "Implement backend admin authentication independent of caller being non-anonymous, issue/track an admin token, provide token validation, and authorize admin-only operations using the token (not Principal admin registration).",
-      "reason": "While the frontend expects `verifyAdminToken(adminToken)` and `adminAuthenticate`, the backend diff is truncated and does not show: (1) that anonymous callers are accepted, (2) token generation/return, (3) a `verifyAdminToken`/validate method implementation, or (4) that admin-only operations accept/authorize via token rather than Principal-based admin checks.",
-      "evidence": [
-        "backend/main.mo (adminAuthenticate truncated; no visible verify/validate implementation)",
-        "frontend/src/hooks/queries/useAuthz.ts (calls actor.verifyAdminToken(adminToken))"
-      ]
-    },
-    {
-      "id": "REQ-51",
-      "requirement": "Admin frontend should create/use a backend actor for admin pages that applies the stored admin token even without Internet Identity, enabling admin-only backend calls post-login.",
-      "reason": "A new `useAdminActor` creates an anonymous actor, and token verification is done by passing the token as a method argument. The diff provides no evidence that the stored admin token is applied/attached for subsequent admin-only backend calls (e.g., via actor configuration/headers/identity), nor that other admin mutations/queries (beyond explicit token verification) automatically use the stored token.",
-      "evidence": [
-        "frontend/src/hooks/useAdminActor.ts",
-        "frontend/src/hooks/queries/useAuthz.ts",
-        "frontend/src/hooks/queries/useStripe.ts"
+        "frontend/src/pages/admin/AdminLoginPage.tsx",
+        "frontend/src/pages/admin/AdminLayoutPage.tsx",
+        "backend/main.mo (truncated)",
+        "frontend-file-summaries.txt (mentions frontend/src/hooks/queries/useAuthz.ts but no code shown)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added a backend migration that changes the stored `userProfiles` value shape (removing `userId` field) and wires migration into the main actor.",
-      "reason": "The BuildRequest focuses on disabling Internet Identity for /admin and implementing token-based admin login; it does not request schema migrations or user profile shape changes.",
+      "description": "Added client-side logo file size validation (max 2MB) in the Admin Site Settings page.",
+      "reason": "REQ-55 requires a logo file input, preview, and save; it does not request a specific file size limit.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo ((with migration = Migration.run))"
+        "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
       ]
     },
     {
-      "description": "Introduced/modified Stripe admin setup UI and admin Stripe configuration hooks using the new admin actor.",
-      "reason": "Stripe setup changes are not part of the requested admin authentication change; they appear to extend admin capabilities unrelated to disabling Internet Identity for admin login.",
+      "description": "Introduced a default shop name \"Canfinity Store\" during migration/initial state.",
+      "reason": "REQ-52 requires persisted settings but does not specify default initial values.",
       "evidence": [
-        "frontend/src/components/admin/StripePaymentSetup.tsx",
-        "frontend/src/hooks/queries/useStripe.ts"
+        "backend/migration.mo",
+        "backend/main.mo (siteSettings initialization)"
       ]
     }
   ],
@@ -56,12 +38,14 @@
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/admin/StripePaymentSetup.tsx",
-    "frontend/src/hooks/queries/useAuthz.ts",
-    "frontend/src/hooks/queries/useStripe.ts",
-    "frontend/src/hooks/useAdminActor.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/components/layout/Header.tsx",
+    "frontend/src/hooks/queries/queryClientKeys.ts",
+    "frontend/src/hooks/queries/useSiteSettings.ts",
+    "frontend/src/i18n/index.tsx",
     "frontend/src/pages/admin/AdminLayoutPage.tsx",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
+    "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
     "project_state.json"
   ]
 }

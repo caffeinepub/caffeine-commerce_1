@@ -63,6 +63,7 @@ export interface ShoppingItem {
   'priceInCents' : bigint,
   'productDescription' : string,
 }
+export interface SiteSettings { 'logo' : string, 'shopName' : string }
 export interface StripeConfiguration {
   'allowedCountries' : Array<string>,
   'secretKey' : string,
@@ -107,11 +108,6 @@ export interface _SERVICE {
    * /    *************
    */
   'adminAuthenticate' : ActorMethod<[string, string], AdminToken>,
-  /**
-   * / ************
-   * /    * Types
-   * /    *************
-   */
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
@@ -135,6 +131,12 @@ export interface _SERVICE {
   'getCategories' : ActorMethod<[], Array<Category>>,
   'getOrder' : ActorMethod<[OrderId], Order__1>,
   'getProducts' : ActorMethod<[Array<Filter>], Array<Product>>,
+  /**
+   * / ************
+   * /    * Site Settings Management
+   * /    *************
+   */
+  'getSiteSettings' : ActorMethod<[], SiteSettings>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   /**
@@ -155,6 +157,7 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
+  'updateSiteSettings' : ActorMethod<[SiteSettings], undefined>,
   'verifyAdminToken' : ActorMethod<[AdminToken], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;

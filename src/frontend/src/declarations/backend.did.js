@@ -81,6 +81,10 @@ export const Product = IDL.Record({
   'imageUrl' : IDL.Text,
   'price' : IDL.Nat,
 });
+export const SiteSettings = IDL.Record({
+  'logo' : IDL.Text,
+  'shopName' : IDL.Text,
+});
 export const StripeSessionStatus = IDL.Variant({
   'completed' : IDL.Record({
     'userPrincipal' : IDL.Opt(IDL.Text),
@@ -130,6 +134,7 @@ export const idlService = IDL.Service({
   'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
   'getOrder' : IDL.Func([OrderId], [Order__1], ['query']),
   'getProducts' : IDL.Func([IDL.Vec(Filter)], [IDL.Vec(Product)], ['query']),
+  'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -148,6 +153,7 @@ export const idlService = IDL.Service({
       [TransformationOutput],
       ['query'],
     ),
+  'updateSiteSettings' : IDL.Func([SiteSettings], [], []),
   'verifyAdminToken' : IDL.Func([AdminToken], [IDL.Bool], ['query']),
 });
 
@@ -224,6 +230,7 @@ export const idlFactory = ({ IDL }) => {
     'imageUrl' : IDL.Text,
     'price' : IDL.Nat,
   });
+  const SiteSettings = IDL.Record({ 'logo' : IDL.Text, 'shopName' : IDL.Text });
   const StripeSessionStatus = IDL.Variant({
     'completed' : IDL.Record({
       'userPrincipal' : IDL.Opt(IDL.Text),
@@ -270,6 +277,7 @@ export const idlFactory = ({ IDL }) => {
     'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
     'getOrder' : IDL.Func([OrderId], [Order__1], ['query']),
     'getProducts' : IDL.Func([IDL.Vec(Filter)], [IDL.Vec(Product)], ['query']),
+    'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
@@ -288,6 +296,7 @@ export const idlFactory = ({ IDL }) => {
         [TransformationOutput],
         ['query'],
       ),
+    'updateSiteSettings' : IDL.Func([SiteSettings], [], []),
     'verifyAdminToken' : IDL.Func([AdminToken], [IDL.Bool], ['query']),
   });
 };

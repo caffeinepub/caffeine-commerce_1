@@ -1,92 +1,105 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "ShopEase: Username/password-only admin login (no Internet Identity) with token-gated /admin",
+  "title": "ShopEase: Admin Site Settings + Admin Login Verification + Shopper Branding",
   "requirements": [
     {
-      "id": "REQ-47",
-      "summary": "Remove all Internet Identity (II) UI and dependency from the /admin/login experience and use only username/password submission.",
+      "id": "REQ-53",
+      "summary": "Ensure admin login works with admin/Admin@123 using token-based auth (no Internet Identity) and keeps admin session gated by caffeineAdminToken.",
       "acceptanceCriteria": [
-        "Visiting /admin/login shows only a username and password form (no Internet Identity button, no “Step 1: Internet Identity” text, and no Principal ID display).",
-        "Submitting the form does not check for the presence of an Internet Identity identity object before calling the backend login API.",
-        "All user-facing text on the admin login page is in English."
+        "From `/admin/login`, submitting username `admin` and password `Admin@123` successfully returns a token from `adminAuthenticate` and navigates to `/admin`.",
+        "Admin routes under `/admin/*` remain accessible for the session after login due to token storage under the session key `caffeineAdminToken` and successful `verifyAdminToken` checks in `frontend/src/pages/admin/AdminLayoutPage.tsx`.",
+        "If invalid credentials are entered, the UI shows the existing English error message behavior (e.g., \"Invalid username or password\")."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
           "operation": "modify",
-          "description": "Remove all Internet Identity imports/state/handlers and any Principal display; render a single-step admin login form (username/password only) with English-only copy; on submit, call the backend admin authentication function without checking for an Internet Identity session."
+          "description": "Harden the existing admin login submit flow to reliably authenticate via the existing anonymous admin actor (useAdminActor) with trimmed username/password, store the returned token under `caffeineAdminToken`, preserve existing English error message behavior for invalid credentials, and navigate to `/admin` on success."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "operation": "modify",
+          "description": "Verify that admin-route gating continues to rely on `caffeineAdminToken` + `useVerifyAdminToken` and that invalid/expired tokens clear the session key and redirect to `/admin/login` without breaking nested admin navigation."
         }
       ]
     },
     {
-      "id": "REQ-48",
-      "summary": "Ensure the admin login flow succeeds with username 'admin' and password 'Admin@123', and fails for any other credentials with an English invalid-credentials message.",
+      "id": "REQ-54",
+      "summary": "Add an Admin \"Site Settings\" page and wire it into admin routing and sidebar navigation under AdminLayoutPage.",
       "acceptanceCriteria": [
-        "Logging in at /admin/login with username \"admin\" and password \"Admin@123\" succeeds and navigates to /admin.",
-        "Logging in with any other username/password fails with an English error message indicating invalid credentials (no mention of Internet Identity)."
+        "Admin sidebar includes a new navigation item labeled \"Site Settings\" (English) and it routes to a new admin nested route (e.g., `/admin/site-settings`).",
+        "The new route renders a dedicated Site Settings page component under the admin layout (`AdminLayoutPage`).",
+        "The Site Settings page is protected by the same admin-token gating already used for other admin pages (i.e., cannot be accessed without a valid `caffeineAdminToken`)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
-          "operation": "modify",
-          "description": "Use backendInterface.adminAuthenticate(username, password) for login; on success store the returned token in sessionStorage under the existing key (caffeineAdminToken) and navigate to /admin; on failure show an English 'Invalid username or password' style error with no Internet Identity wording."
+          "path": "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
+          "operation": "create",
+          "description": "Create the dedicated Admin Site Settings page component rendered within AdminLayoutPage’s outlet; it will host the Shop Name + Logo edit UI and use the site-settings hooks to load/save settings."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Verify /admin/login and /admin routes remain correctly registered and navigation after successful login goes to /admin (no additional routes introduced)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-49",
-      "summary": "Gate /admin and all nested admin routes using only stored admin token state (and optional backend token validation), not Principal/Internet Identity checks.",
-      "acceptanceCriteria": [
-        "A user can access /admin (dashboard) after a successful username/password login even when not logged into Internet Identity.",
-        "AdminLayoutPage does not call Principal-based admin checks (e.g., caller Principal admin status) as the primary gating mechanism; it gates based on presence/validity of the stored admin token.",
-        "If the admin token is missing/invalid, /admin routes redirect to /admin/login."
-      ],
-      "file_operations": [
+          "description": "Register a new nested admin route for `/admin/site-settings` under the existing `/admin` route and wire it to the new `AdminSiteSettingsPage` so it is navigable and not orphaned."
+        },
         {
           "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
           "operation": "modify",
-          "description": "Replace Principal-based gating (useIsCallerAdmin/isCallerAdmin) with token-based gating: require presence of caffeineAdminToken and validate it via backendInterface.verifyAdminToken; redirect to /admin/login when missing/invalid; keep all user-facing messages in English."
+          "description": "Add a new sidebar navigation item labeled \"Site Settings\" (English) pointing to `/admin/site-settings`, keeping it under the existing admin-token gating already implemented in this layout."
         },
         {
-          "path": "frontend/src/hooks/queries/useAuthz.ts",
+          "path": "frontend/src/i18n/index.tsx",
           "operation": "modify",
-          "description": "Stop using actor.isCallerAdmin() for admin route gating; add a token-based admin validation hook that uses backendInterface.verifyAdminToken(adminToken) so admin auth is not tied to Principal/Internet Identity."
+          "description": "Add a new translation key for the admin sidebar label (e.g., `admin.siteSettings`) with an English value of \"Site Settings\" (and a Hindi value for completeness) and use it from AdminLayoutPage."
         }
       ]
     },
     {
-      "id": "REQ-51",
-      "summary": "Create an admin-specific backend actor/hook for admin pages that applies the stored admin token without requiring Internet Identity, and use it for admin-only backend calls.",
+      "id": "REQ-55",
+      "summary": "Implement Admin Site Settings UI to edit Shop Name, upload/preview Logo, validate inputs, and save to backend with clear English feedback.",
       "acceptanceCriteria": [
-        "Admin pages can successfully call admin-only backend methods after username/password login even when there is no Internet Identity session.",
-        "The implementation does not require editing the immutable frontend hook files listed in system constraints (a safe alternative approach is used for admin-specific actor creation)."
+        "Site Settings page displays a \"Shop Name\" text input and a \"Logo\" file input (accepting common image formats).",
+        "When an image file is selected, a visible preview is shown on the page before saving.",
+        "Clicking \"Save\" updates the backend Site Settings and shows a clear success confirmation in English; subsequent reload of the page shows the updated Shop Name and Logo preview.",
+        "If Shop Name is empty when saving, the page shows an English validation error and does not call the backend update method."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useAdminActor.ts",
+          "path": "frontend/src/hooks/queries/queryClientKeys.ts",
+          "operation": "modify",
+          "description": "Add React Query cache keys for Site Settings (e.g., `siteSettings`) to standardize fetching/invalidation across shopper header and admin settings page."
+        },
+        {
+          "path": "frontend/src/hooks/queries/useSiteSettings.ts",
           "operation": "create",
-          "description": "Create a dedicated admin actor/hook that can communicate with the backend without an Internet Identity session and that applies the stored admin token for authorization; do not modify immutable hooks (useInternetIdentity/useActor)."
+          "description": "Create Site Settings React Query hooks to (1) fetch current settings via `getSiteSettings` using an anonymous actor and (2) update settings via `updateSiteSettings`, then invalidate the Site Settings query on success so reloads and other UI (Header) reflect changes."
         },
         {
-          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "path": "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
           "operation": "modify",
-          "description": "Switch admin area backend calls used for gating/validation to the new useAdminActor-based flow so /admin works without Internet Identity; ensure the token validation and logout clearing logic remains consistent for all nested admin routes."
+          "description": "Build the Site Settings form UI: Shop Name text input, Logo file input accepting common image types, client-side file-to-data-URL conversion for preview (and backend storage as text), required validation for non-empty Shop Name, Save action calling the update hook, and English success/error messaging (e.g., toast or inline alert) consistent with existing admin patterns."
+        }
+      ]
+    },
+    {
+      "id": "REQ-56",
+      "summary": "Render configured Shop Name and Logo in the shopper Header, falling back to existing generated ShopEase logo assets when settings are not configured.",
+      "acceptanceCriteria": [
+        "When Site Settings has a logo value, the Header renders that logo instead of the static `/assets/generated/shopease-logo...` images.",
+        "When Site Settings has a shop name value, the Header uses it as the logo alt text and/or visible shop title (English).",
+        "If Site Settings is not configured yet, the existing generated ShopEase logo behavior remains as a fallback."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/queries/useSiteSettings.ts",
+          "operation": "modify",
+          "description": "Ensure the Site Settings fetch hook is usable from public shopper UI (Header) without requiring Internet Identity, and returns safe defaults/handling when settings are not yet configured."
         },
         {
-          "path": "frontend/src/components/admin/StripePaymentSetup.tsx",
+          "path": "frontend/src/components/layout/Header.tsx",
           "operation": "modify",
-          "description": "Update the Stripe admin view to use an admin-capable query path (via useAdminActor or an admin-specific query hook) so it continues to work when there is no Internet Identity session."
-        },
-        {
-          "path": "frontend/src/hooks/queries/useStripe.ts",
-          "operation": "modify",
-          "description": "Add an admin-compatible variant or adapt the existing Stripe configured query to optionally use the admin actor when inside /admin, enabling Stripe configuration checks without Internet Identity."
+          "description": "Replace the hard-coded ShopEase logo rendering with conditional branding: fetch Site Settings, render the saved logo (data URL or URL) and use the saved shop name for alt text/label when present; otherwise keep the existing fallback behavior using `frontend/public/assets/generated/shopease-logo.dim_512x256.png` and `frontend/public/assets/generated/shopease-logo-dark.dim_512x256.png`."
         }
       ]
     }

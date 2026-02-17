@@ -25,6 +25,7 @@ import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminCouponsPage from './pages/admin/AdminCouponsPage';
+import AdminSiteSettingsPage from './pages/admin/AdminSiteSettingsPage';
 import StripePaymentSetup from './components/admin/StripePaymentSetup';
 
 const rootRoute = createRootRoute({
@@ -163,6 +164,12 @@ const adminCouponsRoute = createRoute({
   component: AdminCouponsPage,
 });
 
+const adminSiteSettingsRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: '/site-settings',
+  component: AdminSiteSettingsPage,
+});
+
 const adminStripeRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/stripe-setup',
@@ -192,6 +199,7 @@ const routeTree = rootRoute.addChildren([
     adminOrdersRoute,
     adminUsersRoute,
     adminCouponsRoute,
+    adminSiteSettingsRoute,
     adminStripeRoute,
   ]),
 ]);

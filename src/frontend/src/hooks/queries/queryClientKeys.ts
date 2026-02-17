@@ -11,4 +11,5 @@ export const queryKeys = {
   userRole: ['userRole'] as const,
   referrals: (userId: string) => ['referrals', userId] as const,
   stripeConfigured: ['stripeConfigured'] as const,
+  siteSettings: ['siteSettings'] as const,
 };

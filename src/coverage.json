@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T10:05:47.733Z",
+  "generatedAt": "2026-02-17T11:07:58.864Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,63 +11,68 @@
     "implemented": 4,
     "items": [
       {
-        "id": "REQ-47",
-        "summary": "Remove all Internet Identity (II) requirements from the admin login experience so that the /admin area does not require an Internet Identity session to log in or to access the dashboard.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-48",
-        "summary": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-49",
-        "summary": "Update admin route gating so that access to /admin and all nested admin routes is controlled only by the admin session/token state (and optional backend token validation), and does not depend on the caller Principal ID or Internet Identity.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/hooks/queries/useAuthz.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/hooks/queries/useAuthz.ts"
-        ]
-      },
-      {
-        "id": "REQ-50",
-        "summary": "Implement backend admin authentication that does not depend on the caller being non-anonymous, and issue/track an admin token that can be used to authorize admin-only operations without requiring Internet Identity.",
+        "id": "REQ-52",
+        "summary": "Add backend support for site-wide branding settings by introducing a persisted Site Settings record that stores (1) Shop Name (Text) and (2) Logo (Text, stored as a data URL string or a plain URL string). Provide backend methods to read and update these settings, where updates are admin-only.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-51",
-        "summary": "Update the admin frontend to create/use a backend actor for admin pages that applies the stored admin token even when the user is not logged in with Internet Identity.",
+        "id": "REQ-53",
+        "summary": "Ensure the admin login flow succeeds with username \"admin\" and password \"Admin@123\" using the existing Admin Login UI (`frontend/src/pages/admin/AdminLoginPage.tsx`) and the backend `adminAuthenticate(username, password)` method, without requiring Internet Identity for admin access.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useAdminActor.ts",
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/components/admin/StripePaymentSetup.tsx",
-          "frontend/src/hooks/queries/useStripe.ts"
+          "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "frontend/src/pages/admin/AdminLayoutPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useAdminActor.ts",
+          "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "frontend/src/pages/admin/AdminLayoutPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-54",
+        "summary": "Add a new Admin page for \"Site Settings\" and add it as a new navigation item (tab/link) in the Admin sidebar (`frontend/src/pages/admin/AdminLayoutPage.tsx`) so admins can open it from the admin dashboard area.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
+          "frontend/src/App.tsx",
           "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/components/admin/StripePaymentSetup.tsx",
-          "frontend/src/hooks/queries/useStripe.ts"
+          "frontend/src/i18n/index.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "frontend/src/i18n/index.tsx"
+        ]
+      },
+      {
+        "id": "REQ-55",
+        "summary": "Implement the Admin \"Site Settings\" page UI to (1) edit Shop Name, (2) upload/select a new Logo image file, (3) preview the chosen logo before saving, and (4) save changes to the backend. Use English for all labels, helper text, and validation messages.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/queries/queryClientKeys.ts",
+          "frontend/src/hooks/queries/useSiteSettings.ts",
+          "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/queries/queryClientKeys.ts",
+          "frontend/src/hooks/queries/useSiteSettings.ts",
+          "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-56",
+        "summary": "Reflect the configured branding on the shopper UI by rendering the saved Shop Name and Logo in the main shopper header (`frontend/src/components/layout/Header.tsx`) in place of the hard-coded ShopEase logo assets when Site Settings are present.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/queries/useSiteSettings.ts",
+          "frontend/src/components/layout/Header.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/queries/useSiteSettings.ts",
+          "frontend/src/components/layout/Header.tsx"
         ]
       }
     ]
@@ -79,16 +84,18 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/admin/StripePaymentSetup.tsx",
+    "frontend/src/components/layout/Header.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/queries/useAuthz.ts",
-    "frontend/src/hooks/queries/useStripe.ts",
-    "frontend/src/hooks/useAdminActor.ts",
+    "frontend/src/hooks/queries/queryClientKeys.ts",
+    "frontend/src/hooks/queries/useSiteSettings.ts",
+    "frontend/src/i18n/index.tsx",
     "frontend/src/pages/admin/AdminLayoutPage.tsx",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
+    "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

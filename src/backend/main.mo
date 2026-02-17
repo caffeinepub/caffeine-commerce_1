@@ -7,13 +7,14 @@ import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
+import Migration "migration";
 
 import Stripe "stripe/stripe";
 import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
 
+// Run migration logic on upgrade
 (with migration = Migration.run)
 actor {
   /**************
@@ -101,6 +102,11 @@ actor {
     referrals : [UserId];
   };
 
+  public type SiteSettings = {
+    shopName : Text;
+    logo : Text;
+  };
+
   /**************
    * State
    **************/
@@ -125,6 +131,26 @@ actor {
 
   // Track active admin sessions (caller principal -> token)
   let adminSessions = Map.empty<Principal, AdminToken>();
+
+  // Persisted site settings (shop name and logo)
+  var siteSettings : SiteSettings = {
+    shopName = "Canfinity Store";
+    logo = "";
+  };
+
+  /**************
+   * Site Settings Management
+   **************/
+  public query ({ caller }) func getSiteSettings() : async SiteSettings {
+    siteSettings;
+  };
+
+  public shared ({ caller }) func updateSiteSettings(newSettings : SiteSettings) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update site settings");
+    };
+    siteSettings := newSettings;
+  };
 
   /**************
    * User Profile Management

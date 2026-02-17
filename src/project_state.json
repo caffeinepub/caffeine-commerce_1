@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
+  "projectStateVersion": 23,
   "summary": "Shift admin authentication from Internet Identity to a simple username/password login for the admin panel (remove Internet Identity usage for admin access).",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
@@ -9,7 +9,8 @@
     "Include admin panel capabilities for catalog/order/user management and sales analytics.",
     "Seed the app with 3 sample products (including image URLs or bundled placeholder assets) to demonstrate add-to-cart flow and cart badge count in header.",
     "Admin panel authentication must use a simple username/password login (no Internet Identity) with secure credential storage and session/token-based access control for admin routes/APIs.",
-    "Admin credentials need a defined reset/default-password process for deployment; user requested resetting the admin password and redeploying to restore access."
+    "Admin credentials need a defined reset/default-password process for deployment; user requested resetting the admin password and redeploying to restore access.",
+    "Admin dashboard should include a 'Site Settings' section for branding (shop name + logo upload/change)."
   ],
   "known_issues": [
     "Automated build for the smart search feature failed with: “AI couldn't process your request successfully. Try simplifying or rewording it.”",
@@ -339,6 +340,38 @@
         "REQ-51"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-login-flow-succeeds-with-username-admin-and-password-admin-123-using-the-existing-admin-login-ui-frontend-src-pages-admin-adminloginpage-tsx-and-the-backend-adminauthenticate-username-password-method-without-requiring-internet-identity-for-admin-access",
+      "title": "Ensure the admin login flow succeeds with username \"admin\" and password \"Admin@123\" using the existing Admin Login UI (`frontend/src/pages/admin/AdminLoginPage.tsx`) and the backend `adminAuthenticate(username, password)` method, without requiring Internet Identity for admin access.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-admin-page-for-site-settings-and-add-it-as-a-new-navigation-item-tab-link-in-the-admin-sidebar-frontend-src-pages-admin-adminlayoutpage-tsx-so-admins-can-open-it-from-the-admin-dashboard-area",
+      "title": "Add a new Admin page for \"Site Settings\" and add it as a new navigation item (tab/link) in the Admin sidebar (`frontend/src/pages/admin/AdminLayoutPage.tsx`) so admins can open it from the admin dashboard area.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-admin-site-settings-page-ui-to-1-edit-shop-name-2-upload-select-a-new-logo-image-file-3-preview-the-chosen-logo-before-saving-and-4-save-changes-to-the-backend-use-english-for-all-labels-helper-text-and-validation-messages",
+      "title": "Implement the Admin \"Site Settings\" page UI to (1) edit Shop Name, (2) upload/select a new Logo image file, (3) preview the chosen logo before saving, and (4) save changes to the backend. Use English for all labels, helper text, and validation messages.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-reflect-the-configured-branding-on-the-shopper-ui-by-rendering-the-saved-shop-name-and-logo-in-the-main-shopper-header-frontend-src-components-layout-header-tsx-in-place-of-the-hard-coded-shopease-logo-assets-when-site-settings-are-present",
+      "title": "Reflect the configured branding on the shopper UI by rendering the saved Shop Name and Logo in the main shopper header (`frontend/src/components/layout/Header.tsx`) in place of the hard-coded ShopEase logo assets when Site Settings are present.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -565,6 +598,20 @@
       "summary": "Implement backend admin authentication that does not depend on the caller being non-anonymous, and issue/track an admin token that can be used to authorize admin-only operations without requiring Internet Identity.",
       "reqIds": [
         "REQ-50"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Add a 'Site Settings' tab in the admin dashboard to update the Shop Name and upload/change the site Logo (branding settings)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Add backend support for site-wide branding settings by introducing a persisted Site Settings record that stores (1) Shop Name (Text) and (2) Logo (Text, stored as a data URL string or a plain URL string). Provide backend methods to read and update these settings, where updates are admin-only.",
+      "reqIds": [
+        "REQ-52"
       ],
       "status": "pending"
     }

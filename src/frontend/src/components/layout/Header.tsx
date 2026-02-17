@@ -9,6 +9,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useTranslation } from '../../i18n';
 import { useIsCallerAdmin } from '../../hooks/queries/useAuthz';
 import { useGetCart } from '../../hooks/queries/useCartWishlist';
+import { useGetSiteSettings } from '../../hooks/queries/useSiteSettings';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ export default function Header() {
   const { language, setLanguage, t } = useTranslation();
   const { data: isAdmin } = useIsCallerAdmin();
   const { data: cart } = useGetCart();
+  const { data: siteSettings } = useGetSiteSettings();
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -35,6 +37,10 @@ export default function Header() {
 
   // Calculate total cart items count
   const cartItemCount = cart?.items.reduce((sum, item) => sum + Number(item.quantity), 0) || 0;
+
+  // Get shop branding from site settings or use defaults
+  const shopName = siteSettings?.shopName || 'ShopEase';
+  const shopLogo = siteSettings?.logo || '';
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -73,24 +79,37 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between gap-4">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img
-              src="/assets/generated/shopease-logo.dim_512x256.png"
-              alt="ShopEase"
-              className="h-8 dark:hidden"
-            />
-            <img
-              src="/assets/generated/shopease-logo-dark.dim_512x256.png"
-              alt="ShopEase"
-              className="h-8 hidden dark:block"
-            />
+            {shopLogo ? (
+              <img
+                src={shopLogo}
+                alt={shopName}
+                className="h-8 w-auto object-contain"
+              />
+            ) : (
+              <>
+                <img
+                  src="/assets/generated/shopease-logo.dim_512x256.png"
+                  alt={shopName}
+                  className="h-8 dark:hidden"
+                />
+                <img
+                  src="/assets/generated/shopease-logo-dark.dim_512x256.png"
+                  alt={shopName}
+                  className="hidden h-8 dark:block"
+                />
+              </>
+            )}
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden items-center gap-6 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 className="text-sm font-medium transition-colors hover:text-primary"
+                activeProps={{
+                  className: 'text-primary',
+                }}
               >
                 {link.label}
               </Link>
@@ -98,12 +117,12 @@ export default function Header() {
           </nav>
         </div>
 
-        <form onSubmit={handleSearch} className="hidden lg:flex items-center gap-2 flex-1 max-w-md">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <form onSubmit={handleSearch} className="hidden flex-1 max-w-md md:flex">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search products..."
+              placeholder={t('common.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -120,12 +139,14 @@ export default function Header() {
           >
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
                 <Globe className="h-5 w-5" />
+                <span className="sr-only">Change language</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -139,107 +160,94 @@ export default function Header() {
           </DropdownMenu>
 
           {isAuthenticated && (
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/wishlist">
-                <Heart className="h-5 w-5" />
-              </Link>
-            </Button>
+            <>
+              <Button variant="ghost" size="icon" asChild className="relative">
+                <Link to="/cart">
+                  <ShoppingCart className="h-5 w-5" />
+                  {cartItemCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -right-1 -top-1 h-5 min-w-5 rounded-full px-1 text-xs"
+                    >
+                      {cartItemCount}
+                    </Badge>
+                  )}
+                  <span className="sr-only">{t('nav.cart')}</span>
+                </Link>
+              </Button>
+
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/wishlist">
+                  <Heart className="h-5 w-5" />
+                  <span className="sr-only">{t('nav.wishlist')}</span>
+                </Link>
+              </Button>
+            </>
           )}
 
-          <Button variant="ghost" size="icon" asChild className="relative">
-            <Link to="/cart">
-              <ShoppingCart className="h-5 w-5" />
-              {cartItemCount > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 px-1 text-xs"
-                >
-                  {cartItemCount}
-                </Badge>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+                <span className="sr-only">User menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isAuthenticated ? (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">{t('nav.profile')}</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/orders">{t('orders.title')}</Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin">{t('nav.admin')}</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleAuth}>
+                    {t('nav.logout')}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem onClick={handleAuth} disabled={isLoggingIn}>
+                  {isLoggingIn ? t('common.loading') : t('nav.login')}
+                </DropdownMenuItem>
               )}
-            </Link>
-          </Button>
-
-          {isAuthenticated && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/profile">{t('nav.profile')}</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/orders">{t('profile.myOrders')}</Link>
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin">{t('nav.admin')}</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleAuth}>
-                  {t('nav.logout')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
-          <Button
-            onClick={handleAuth}
-            disabled={isLoggingIn}
-            variant={isAuthenticated ? 'outline' : 'default'}
-            className="hidden sm:inline-flex"
-          >
-            {isLoggingIn ? 'Logging in...' : isAuthenticated ? t('nav.logout') : t('nav.login')}
-          </Button>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
-              <nav className="flex flex-col gap-4 mt-8">
+              <nav className="flex flex-col gap-4">
                 {navLinks.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className="text-lg font-medium transition-colors hover:text-primary"
+                    className="text-lg font-medium"
                   >
                     {link.label}
                   </Link>
                 ))}
-                {isAuthenticated && (
-                  <>
-                    <Link to="/wishlist" className="text-lg font-medium">
-                      {t('nav.wishlist')}
-                    </Link>
-                    <Link to="/cart" className="text-lg font-medium flex items-center gap-2">
-                      {t('nav.cart')}
-                      {cartItemCount > 0 && (
-                        <Badge variant="destructive">{cartItemCount}</Badge>
-                      )}
-                    </Link>
-                    <Link to="/profile" className="text-lg font-medium">
-                      {t('nav.profile')}
-                    </Link>
-                    {isAdmin && (
-                      <Link to="/admin" className="text-lg font-medium">
-                        {t('nav.admin')}
-                      </Link>
-                    )}
-                  </>
-                )}
-                <Button onClick={handleAuth} disabled={isLoggingIn} className="mt-4">
-                  {isLoggingIn ? 'Logging in...' : isAuthenticated ? t('nav.logout') : t('nav.login')}
-                </Button>
+                <form onSubmit={handleSearch} className="mt-4">
+                  <Input
+                    type="search"
+                    placeholder={t('common.search')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </form>
               </nav>
             </SheetContent>
           </Sheet>

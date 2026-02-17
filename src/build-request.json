@@ -1,120 +1,113 @@
 {
   "kind": "build_request",
-  "title": "Disable Internet Identity for /admin and use username/password-only admin login",
+  "title": "Add Admin Site Settings (Shop Name + Logo) and verify admin login credentials",
   "projectName": "ShopEase",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-47",
-      "text": "Remove all Internet Identity (II) requirements from the admin login experience so that the /admin area does not require an Internet Identity session to log in or to access the dashboard.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Please completely disable Internet Identity for the /admin route. Make it a simple login page that only asks for a username and password."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Visiting /admin/login shows only a username and password form (no Internet Identity button, no “Step 1: Internet Identity” text, and no Principal ID display).",
-        "Submitting the form does not check for the presence of an Internet Identity identity object before calling the backend login API.",
-        "All user-facing text on the admin login page is in English."
-      ]
-    },
-    {
-      "id": "REQ-48",
-      "text": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Set the username to admin and password to Admin@123."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Logging in at /admin/login with username \"admin\" and password \"Admin@123\" succeeds and navigates to /admin.",
-        "Logging in with any other username/password fails with an English error message indicating invalid credentials (no mention of Internet Identity)."
-      ]
-    },
-    {
-      "id": "REQ-49",
-      "text": "Update admin route gating so that access to /admin and all nested admin routes is controlled only by the admin session/token state (and optional backend token validation), and does not depend on the caller Principal ID or Internet Identity.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Ensure that no Principal ID check is required to see the dashboard."
-        ]
-      },
-      "acceptanceCriteria": [
-        "A user can access /admin (dashboard) after a successful username/password login even when not logged into Internet Identity.",
-        "AdminLayoutPage does not call Principal-based admin checks (e.g., caller Principal admin status) as the primary gating mechanism; it gates based on presence/validity of the stored admin token.",
-        "If the admin token is missing/invalid, /admin routes redirect to /admin/login."
-      ]
-    },
-    {
-      "id": "REQ-50",
-      "text": "Implement backend admin authentication that does not depend on the caller being non-anonymous, and issue/track an admin token that can be used to authorize admin-only operations without requiring Internet Identity.",
+      "id": "REQ-52",
+      "text": "Add backend support for site-wide branding settings by introducing a persisted Site Settings record that stores (1) Shop Name (Text) and (2) Logo (Text, stored as a data URL string or a plain URL string). Provide backend methods to read and update these settings, where updates are admin-only.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Please completely disable Internet Identity for the /admin route. Make it a simple login page that only asks for a username and password."
+          "Now, please add a 'Site Settings' tab in the admin dashboard where I can change the Shop Name and upload a new Logo."
         ]
       },
       "acceptanceCriteria": [
-        "The backend adminLogin method accepts username/password and returns an admin token string on success without requiring Internet Identity (no rejection solely because the caller is anonymous).",
-        "The backend provides a way for the frontend to validate whether an admin token is currently authorized (e.g., a validate method returning boolean).",
-        "Admin-only backend operations can be authorized using the issued admin token via the project’s existing access-control initialization path (e.g., actor secret initialization), without requiring the caller Principal to be registered as admin."
+        "Backend exposes a query method to fetch current Site Settings (Shop Name + Logo) without trapping for normal app usage.",
+        "Backend exposes an admin-only method to update Shop Name and Logo in Site Settings.",
+        "Site Settings values persist across page refreshes and subsequent reads after being updated."
       ]
     },
     {
-      "id": "REQ-51",
-      "text": "Update the admin frontend to create/use a backend actor for admin pages that applies the stored admin token even when the user is not logged in with Internet Identity.",
-      "target": "frontend",
+      "id": "REQ-53",
+      "text": "Ensure the admin login flow succeeds with username \"admin\" and password \"Admin@123\" using the existing Admin Login UI (`frontend/src/pages/admin/AdminLoginPage.tsx`) and the backend `adminAuthenticate(username, password)` method, without requiring Internet Identity for admin access.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Please completely disable Internet Identity for the /admin route."
+          "Also, confirm that I can finally log in with admin / Admin@123 without any errors."
         ]
       },
       "acceptanceCriteria": [
-        "Admin pages can successfully call admin-only backend methods after username/password login even when there is no Internet Identity session.",
-        "The implementation does not require editing the immutable frontend hook files listed in system constraints (a safe alternative approach is used for admin-specific actor creation)."
+        "From `/admin/login`, submitting username `admin` and password `Admin@123` successfully returns a token from `adminAuthenticate` and navigates to `/admin`.",
+        "Admin routes under `/admin/*` remain accessible for the session after login due to token storage under the session key `caffeineAdminToken` and successful `verifyAdminToken` checks in `frontend/src/pages/admin/AdminLayoutPage.tsx`.",
+        "If invalid credentials are entered, the UI shows the existing English error message behavior (e.g., \"Invalid username or password\")."
+      ]
+    },
+    {
+      "id": "REQ-54",
+      "text": "Add a new Admin page for \"Site Settings\" and add it as a new navigation item (tab/link) in the Admin sidebar (`frontend/src/pages/admin/AdminLayoutPage.tsx`) so admins can open it from the admin dashboard area.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "add a 'Site Settings' tab in the admin dashboard"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin sidebar includes a new navigation item labeled \"Site Settings\" (English) and it routes to a new admin nested route (e.g., `/admin/site-settings`).",
+        "The new route renders a dedicated Site Settings page component under the admin layout (`AdminLayoutPage`).",
+        "The Site Settings page is protected by the same admin-token gating already used for other admin pages (i.e., cannot be accessed without a valid `caffeineAdminToken`)."
+      ]
+    },
+    {
+      "id": "REQ-55",
+      "text": "Implement the Admin \"Site Settings\" page UI to (1) edit Shop Name, (2) upload/select a new Logo image file, (3) preview the chosen logo before saving, and (4) save changes to the backend. Use English for all labels, helper text, and validation messages.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "where I can change the Shop Name and upload a new Logo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Site Settings page displays a \"Shop Name\" text input and a \"Logo\" file input (accepting common image formats).",
+        "When an image file is selected, a visible preview is shown on the page before saving.",
+        "Clicking \"Save\" updates the backend Site Settings and shows a clear success confirmation in English; subsequent reload of the page shows the updated Shop Name and Logo preview.",
+        "If Shop Name is empty when saving, the page shows an English validation error and does not call the backend update method."
+      ]
+    },
+    {
+      "id": "REQ-56",
+      "text": "Reflect the configured branding on the shopper UI by rendering the saved Shop Name and Logo in the main shopper header (`frontend/src/components/layout/Header.tsx`) in place of the hard-coded ShopEase logo assets when Site Settings are present.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "change the Shop Name and upload a new Logo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When Site Settings has a logo value, the Header renders that logo instead of the static `/assets/generated/shopease-logo...` images.",
+        "When Site Settings has a shop name value, the Header uses it as the logo alt text and/or visible shop title (English).",
+        "If Site Settings is not configured yet, the existing generated ShopEase logo behavior remains as a fallback."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (immutable paths).",
-    "Use English for all user-facing admin text related to this change."
+    "Backend must remain a single Motoko actor in `backend/main.mo` (no additional backend services).",
+    "Do not edit files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything under `frontend/src/components/ui`; compose these components instead.",
+    "Do not add backend image storage; logo must be stored as text (e.g., data URL) or referenced by URL, and served/used by the frontend accordingly."
   ],
   "nonGoals": [
-    "Do not remove or change Internet Identity authentication for shopper/user flows outside /admin.",
-    "Do not add third-party authentication providers for admin (no OAuth, no Internet Identity for admin).",
-    "Do not introduce external databases or backend services."
+    "Do not add multi-tenant settings, per-user branding, or theme customization beyond Shop Name and Logo.",
+    "Do not implement advanced media processing (cropping, resizing on backend) beyond basic client-side preview and upload handling.",
+    "Do not introduce third-party authentication providers or remove shopper Internet Identity authentication (only admin flow must work as specified)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

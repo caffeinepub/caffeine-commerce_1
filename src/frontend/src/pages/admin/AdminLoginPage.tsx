@@ -21,7 +21,10 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
 
-    if (!username.trim() || !password.trim()) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
       setError('Please enter both username and password');
       return;
     }
@@ -34,8 +37,8 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      // Call backend to authenticate with username/password
-      const token = await actor.adminAuthenticate(username, password);
+      // Call backend to authenticate with trimmed username/password
+      const token = await actor.adminAuthenticate(trimmedUsername, trimmedPassword);
       
       if (!token || typeof token !== 'string') {
         throw new Error('Invalid response from server');

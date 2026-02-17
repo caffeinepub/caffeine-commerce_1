@@ -72,6 +72,7 @@ const translations: Record<Language, Translations> = {
     'admin.orders': 'Orders',
     'admin.users': 'Users',
     'admin.coupons': 'Coupons',
+    'admin.siteSettings': 'Site Settings',
     'admin.stripe': 'Stripe Setup',
     
     // Common
@@ -155,6 +156,7 @@ const translations: Record<Language, Translations> = {
     'admin.orders': 'ऑर्डर',
     'admin.users': 'यूजर्स',
     'admin.coupons': 'कूपन',
+    'admin.siteSettings': 'साइट सेटिंग्स',
     'admin.stripe': 'स्ट्राइप सेटअप',
     
     // Common

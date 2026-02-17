@@ -1,8 +1,8 @@
 {
-  "frontend/src/App.tsx": "Main application component with TanStack Router setup, defining all routes including the new /admin/login route for username/password authentication, wrapped with ThemeProvider and I18nProvider.",
-  "frontend/src/i18n/index.tsx": "Internationalization provider and hook implementing English and Hindi translations with localStorage persistence for language preference.",
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup including the new /admin/site-settings route nested under the admin layout, wrapped with ThemeProvider and I18nProvider.",
+  "frontend/src/i18n/index.tsx": "Internationalization provider with English and Hindi translations including the new admin.siteSettings translation key for the Site Settings menu item.",
   "frontend/src/hooks/useTheme.ts": "Theme management hook wrapping next-themes for light/dark mode switching.",
-  "frontend/src/hooks/queries/queryClientKeys.ts": "Centralized React Query cache keys for consistent data fetching and invalidation across products, cart, wishlist, orders, coupons, and user data.",
+  "frontend/src/hooks/queries/queryClientKeys.ts": "Centralized React Query cache keys including the new siteSettings key for consistent data fetching and invalidation across the application.",
   "frontend/src/hooks/queries/useAuthz.ts": "Authorization hooks including useVerifyAdminToken for token-based admin authentication validation without Principal checks.",
   "frontend/src/hooks/queries/useCatalog.ts": "React Query hooks for fetching products with filters and categories, including automatic one-time sample product migration when catalog is empty.",
   "frontend/src/hooks/queries/useCartWishlist.ts": "React Query hooks for cart and wishlist operations including fetching cart/wishlist data (gated by authentication) and a mutation hook for adding products to cart with automatic cache invalidation.",
@@ -11,7 +11,7 @@
   "frontend/src/hooks/queries/useReferrals.ts": "React Query hook for fetching user referral data based on authenticated principal.",
   "frontend/src/hooks/queries/useStripe.ts": "React Query hooks for Stripe configuration including admin-specific useAdminStripeConfigured that works without Internet Identity.",
   "frontend/src/components/layout/AppLayout.tsx": "Root layout component rendering Header, main content outlet, and Footer with initialization loading state.",
-  "frontend/src/components/layout/Header.tsx": "Responsive header with ShopEase logo, navigation links, desktop search input that navigates to catalog with URL query parameter, authentication controls, theme toggle, language switcher, and cart icon with live badge.",
+  "frontend/src/components/layout/Header.tsx": "Responsive header that displays custom shop name and logo from site settings when configured, falling back to default ShopEase branding, with navigation, search, authentication controls, and cart badge.",
   "frontend/src/components/layout/Footer.tsx": "Footer component with copyright notice and caffeine.ai attribution link with UTM tracking.",
   "frontend/src/components/ui/LoadingSkeletons.tsx": "Reusable skeleton loading components for product cards, grids, categories, and order rows using shadcn/ui Skeleton primitives.",
   "frontend/src/components/product/ProductImage.tsx": "Product image component with automatic fallback to placeholder when URL is missing or invalid.",
@@ -32,7 +32,7 @@
   "frontend/src/pages/profile/ProfileLayoutPage.tsx": "Profile section layout with tabs for overview, addresses, and settings.",
   "frontend/src/pages/profile/AddressesPage.tsx": "Address management page placeholder for future CRUD functionality.",
   "frontend/src/pages/profile/SettingsPage.tsx": "Settings page with dark mode toggle and language selection controls.",
-  "frontend/src/pages/admin/AdminLayoutPage.tsx": "Admin panel layout with token-based authentication gating using verifyAdminToken, redirecting to login when token is missing or invalid.",
+  "frontend/src/pages/admin/AdminLayoutPage.tsx": "Admin panel layout with token-based authentication gating, sidebar navigation including the new Site Settings menu item, and logout functionality.",
   "frontend/src/pages/admin/AdminDashboardPage.tsx": "Admin dashboard showing summary statistics for orders, revenue, and products.",
   "frontend/src/pages/admin/AdminProductsPage.tsx": "Admin product management page with search input and sorting controls (by name/price ascending/descending) that filter products via React Query, displaying results in a responsive table with product details.",
   "frontend/src/pages/admin/AdminCategoriesPage.tsx": "Admin category management page displaying category count.",
@@ -46,9 +46,11 @@
   "frontend/public/assets/generated/sample-iphone-15.dim_800x800.png": "Generated product image asset for Apple iPhone 15 sample product (800x800px).",
   "frontend/public/assets/generated/sample-nike-air-max.dim_800x800.png": "Generated product image asset for Nike Air Max shoes sample product (800x800px).",
   "frontend/public/assets/generated/sample-samsung-4k-tv.dim_800x800.png": "Generated product image asset for Samsung 4K TV sample product (800x800px).",
-  "frontend/src/pages/admin/AdminLoginPage.tsx": "Simple username/password admin login page without Internet Identity, using useAdminActor for authentication with hardcoded credentials (admin/Admin@123).",
+  "frontend/src/pages/admin/AdminLoginPage.tsx": "Simple username/password admin login page that trims input values before authentication, stores token on success, and displays clear English error messages for invalid credentials.",
   "frontend/src/hooks/useActor.ts": "Actor initialization hook that creates backend actor with Internet Identity or anonymous identity, with safe optional initialization of access control if the method exists.",
   "frontend/src/utils/urlParams.ts": "Utility functions for managing URL parameters and sessionStorage, including secure secret parameter handling for admin tokens with automatic URL cleanup.",
   "frontend/src/backend.d.ts": "TypeScript interface definitions for backend canister methods, including new admin authentication methods (adminLogin, adminLogout, _initializeAccessControlWithSecret) for username/password login flow.",
-  "frontend/src/hooks/useAdminActor.ts": "Admin-specific actor hook that creates an anonymous actor using createActorWithConfig for admin authentication without requiring Internet Identity."
+  "frontend/src/hooks/useAdminActor.ts": "Admin-specific actor hook that creates an anonymous actor using createActorWithConfig for admin authentication without requiring Internet Identity.",
+  "frontend/src/hooks/queries/useSiteSettings.ts": "React Query hooks for fetching site settings (shop name and logo) via anonymous actor and updating settings via admin actor with automatic cache invalidation.",
+  "frontend/src/pages/admin/AdminSiteSettingsPage.tsx": "Admin Site Settings page with form UI for editing shop name and uploading logo with client-side preview, validation, and success/error feedback using toast notifications."
 }
