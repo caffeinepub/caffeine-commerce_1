@@ -10,6 +10,7 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type AdminToken = string;
 export interface Cart { 'items' : Array<CartItem> }
 export interface CartItem { 'productId' : ProductId, 'quantity' : bigint }
 export interface Category { 'id' : CategoryId, 'name' : string }
@@ -81,6 +82,7 @@ export interface TransformationOutput {
   'headers' : Array<http_header>,
 }
 export type UserId = Principal;
+export interface UserProfile { 'name' : string, 'address' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -95,10 +97,21 @@ export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   /**
    * / ************
-   * /    * Cart & Wishlist Management (public functions required by frontend)
+   * /    * Cart & Wishlist Management
    * /    *************
    */
   'addToCart' : ActorMethod<[ProductId], undefined>,
+  /**
+   * / ************
+   * /    * Admin Authentication
+   * /    *************
+   */
+  'adminAuthenticate' : ActorMethod<[string, string], AdminToken>,
+  /**
+   * / ************
+   * /    * Types
+   * /    *************
+   */
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
@@ -106,20 +119,27 @@ export interface _SERVICE {
   >,
   /**
    * / ************
-   * /    * Coupon Management (public functions required by frontend)
+   * /    * Coupon Management
    * /    *************
    */
   'getAllCoupons' : ActorMethod<[], Array<Coupon>>,
   'getAllCustomerOrders' : ActorMethod<[UserId], Array<Order__1>>,
+  /**
+   * / ************
+   * /    * User Profile Management
+   * /    *************
+   */
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCart' : ActorMethod<[], Cart>,
   'getCategories' : ActorMethod<[], Array<Category>>,
   'getOrder' : ActorMethod<[OrderId], Order__1>,
   'getProducts' : ActorMethod<[Array<Filter>], Array<Product>>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   /**
    * / ************
-   * /    * Referral & Order Management (public functions required by frontend)
+   * /    * Referral & Order Management
    * /    *************
    */
   'getUserReferrals' : ActorMethod<[UserId], Array<UserId>>,
@@ -128,12 +148,14 @@ export interface _SERVICE {
   'isStripeConfigured' : ActorMethod<[], boolean>,
   /**
    * / ************
-   * /    * Migration 3 Sample Products (needed only once)
+   * /    * Migration Sample Products (needed only once)
    * /    *************
    */
   'migrateSampleProducts' : ActorMethod<[], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
+  'verifyAdminToken' : ActorMethod<[AdminToken], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

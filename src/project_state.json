@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
+  "projectStateVersion": 21,
   "summary": "Shift admin authentication from Internet Identity to a simple username/password login for the admin panel (remove Internet Identity usage for admin access).",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
@@ -15,7 +15,8 @@
     "Automated build for the smart search feature failed with: “AI couldn't process your request successfully. Try simplifying or rewording it.”",
     "Admin panel deployment/build failed (deployment encountered an error); needs fix and redeploy so draft is accessible.",
     "On the Access Denied page, the “Back to login” button/link is broken and does not navigate to the admin login form; needs link/route fix.",
-    "Admin password is unknown/not set from the user's perspective; requires password reset and redeploy to restore admin access."
+    "Admin password is unknown/not set from the user's perspective; requires password reset and redeploy to restore admin access.",
+    "Admin login page shows: \"Admin login is not yet configured on the backend\"; backend admin username/password login logic needs to be implemented/configured so credentials (admin / Admin@123) work."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -306,6 +307,38 @@
         "REQ-42"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-remove-all-internet-identity-ii-requirements-from-the-admin-login-experience-so-that-the-admin-area-does-not-require-an-internet-identity-session-to-log-in-or-to-access-the-dashboard",
+      "title": "Remove all Internet Identity (II) requirements from the admin login experience so that the /admin area does not require an Internet Identity session to log in or to access the dashboard.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-set-the-admin-credentials-to-username-admin-and-password-admin-123-and-ensure-these-credentials-successfully-authenticate-immediately-after-deployment",
+      "title": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-admin-route-gating-so-that-access-to-admin-and-all-nested-admin-routes-is-controlled-only-by-the-admin-session-token-state-and-optional-backend-token-validation-and-does-not-depend-on-the-caller-principal-id-or-internet-identity",
+      "title": "Update admin route gating so that access to /admin and all nested admin routes is controlled only by the admin session/token state (and optional backend token validation), and does not depend on the caller Principal ID or Internet Identity.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-frontend-to-create-use-a-backend-actor-for-admin-pages-that-applies-the-stored-admin-token-even-when-the-user-is-not-logged-in-with-internet-identity",
+      "title": "Update the admin frontend to create/use a backend actor for admin pages that applies the stored admin token even when the user is not logged in with Internet Identity.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -500,6 +533,38 @@
       "summary": "Update the frontend documentation to explicitly state the admin login URL and the current default admin credentials (username `admin`, password `Admin@123`) in English.",
       "reqIds": [
         "REQ-43"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-50",
+      "summary": "Implement the backend admin login API expected by the Admin Login UI by adding a public method `adminLogin(username : Text, password : Text) : async Text` in `backend/main.mo` that authenticates the admin user and returns an admin token string on success.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-51",
+      "summary": "Configure the backend to accept the default admin credentials username `admin` and password `Admin@123` immediately after deployment, so the existing `frontend/src/pages/admin/AdminLoginPage.tsx` login form can successfully authenticate.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-52",
+      "summary": "Ensure the admin token returned by `adminLogin` integrates with the existing backend access-control initialization path used by the frontend (`actor._initializeAccessControlWithSecret(adminToken)`), so that after a successful admin login, admin-only operations (e.g., methods guarded by `AccessControl.isAdmin(...)`) are authorized when the token is provided.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Implement backend admin authentication that does not depend on the caller being non-anonymous, and issue/track an admin token that can be used to authorize admin-only operations without requiring Internet Identity.",
+      "reqIds": [
+        "REQ-50"
       ],
       "status": "pending"
     }

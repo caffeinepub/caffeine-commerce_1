@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import { Outlet, Link, useNavigate } from '@tanstack/react-router';
-import { useIsCallerAdmin } from '../../hooks/queries/useAuthz';
+import { useVerifyAdminToken } from '../../hooks/queries/useAuthz';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '../../i18n';
 import { useQueryClient } from '@tanstack/react-query';
 import { getSessionParameter, clearSessionParameter } from '../../utils/urlParams';
-import { useActor } from '../../hooks/useActor';
 import {
   LayoutDashboard,
   Package,
@@ -18,47 +17,26 @@ import {
 } from 'lucide-react';
 
 export default function AdminLayoutPage() {
-  const { data: isAdmin, isLoading } = useIsCallerAdmin();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { actor } = useActor();
 
   // Check for admin token
   const adminToken = getSessionParameter('caffeineAdminToken');
+  
+  // Verify token with backend
+  const { data: isValidToken, isLoading, isError } = useVerifyAdminToken(adminToken);
 
-  // Redirect to login if no token
+  // Redirect to login if no token or invalid token
   useEffect(() => {
-    if (!isLoading && !adminToken) {
+    if (!adminToken || (!isLoading && (isError || !isValidToken))) {
+      clearSessionParameter('caffeineAdminToken');
       navigate({ to: '/admin/login' });
     }
-  }, [adminToken, isLoading, navigate]);
+  }, [adminToken, isValidToken, isLoading, isError, navigate]);
 
   const handleLogout = async () => {
-    try {
-      // Call backend to invalidate token if method exists
-      if (actor && adminToken) {
-        try {
-          // @ts-ignore - Backend method will be added
-          await actor.adminLogout(adminToken);
-        } catch (err) {
-          console.warn('Backend logout failed:', err);
-        }
-      }
-    } finally {
-      // Clear token from session
-      clearSessionParameter('caffeineAdminToken');
-      
-      // Clear all cached queries
-      queryClient.clear();
-      
-      // Navigate to login
-      navigate({ to: '/admin/login' });
-    }
-  };
-
-  const handleBackToLogin = () => {
-    // Clear the invalid/expired token
+    // Clear token from session
     clearSessionParameter('caffeineAdminToken');
     
     // Clear all cached queries
@@ -68,7 +46,7 @@ export default function AdminLayoutPage() {
     navigate({ to: '/admin/login' });
   };
 
-  if (!adminToken) {
+  if (!adminToken || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -76,29 +54,10 @@ export default function AdminLayoutPage() {
     );
   }
 
-  if (isLoading) {
+  if (isError || !isValidToken) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="container py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-        <p className="text-muted-foreground mb-4">
-          Your session may have expired or you don't have permission to access this area
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Button onClick={handleBackToLogin}>
-            Back to Login
-          </Button>
-          <Button variant="outline" onClick={() => navigate({ to: '/' })}>
-            Go to Home
-          </Button>
-        </div>
       </div>
     );
   }

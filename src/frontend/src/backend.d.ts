@@ -7,10 +7,12 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export type OrderId = bigint;
 export interface Category {
     id: CategoryId;
     name: string;
 }
+export type AdminToken = string;
 export interface TransformationOutput {
     status: bigint;
     body: Uint8Array;
@@ -118,7 +120,10 @@ export interface Product {
     imageUrl: string;
     price: bigint;
 }
-export type OrderId = bigint;
+export interface UserProfile {
+    name: string;
+    address: string;
+}
 export enum Order {
     less = "less",
     equal = "equal",
@@ -137,28 +142,46 @@ export enum UserRole {
 export interface backendInterface {
     /**
      * / ************
-     * /    * Cart & Wishlist Management (public functions required by frontend)
+     * /    * Cart & Wishlist Management
      * /    *************
      */
     addToCart(productId: ProductId): Promise<void>;
+    /**
+     * / ************
+     * /    * Admin Authentication
+     * /    *************
+     */
+    adminAuthenticate(username: string, password: string): Promise<AdminToken>;
+    /**
+     * / ************
+     * /    * Types
+     * /    *************
+     */
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     /**
      * / ************
-     * /    * Coupon Management (public functions required by frontend)
+     * /    * Coupon Management
      * /    *************
      */
     getAllCoupons(): Promise<Array<Coupon>>;
     getAllCustomerOrders(userId: UserId): Promise<Array<Order__1>>;
+    /**
+     * / ************
+     * /    * User Profile Management
+     * /    *************
+     */
+    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCart(): Promise<Cart>;
     getCategories(): Promise<Array<Category>>;
     getOrder(orderId: OrderId): Promise<Order__1>;
     getProducts(filters: Array<Filter>): Promise<Array<Product>>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
+    getUserProfile(user: Principal): Promise<UserProfile | null>;
     /**
      * / ************
-     * /    * Referral & Order Management (public functions required by frontend)
+     * /    * Referral & Order Management
      * /    *************
      */
     getUserReferrals(userId: UserId): Promise<Array<UserId>>;
@@ -167,10 +190,12 @@ export interface backendInterface {
     isStripeConfigured(): Promise<boolean>;
     /**
      * / ************
-     * /    * Migration 3 Sample Products (needed only once)
+     * /    * Migration Sample Products (needed only once)
      * /    *************
      */
     migrateSampleProducts(): Promise<void>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
+    verifyAdminToken(adminToken: AdminToken): Promise<boolean>;
 }

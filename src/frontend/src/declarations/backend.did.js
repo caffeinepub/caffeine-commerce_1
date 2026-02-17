@@ -9,6 +9,7 @@
 import { IDL } from '@icp-sdk/core/candid';
 
 export const ProductId = IDL.Nat;
+export const AdminToken = IDL.Text;
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -47,6 +48,10 @@ export const Order__1 = IDL.Record({
   'totalAmount' : IDL.Nat,
   'timestamp' : Time,
   'items' : IDL.Vec(CartItem),
+});
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'address' : IDL.Text,
 });
 export const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
 export const CategoryId = IDL.Nat;
@@ -110,6 +115,7 @@ export const TransformationOutput = IDL.Record({
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addToCart' : IDL.Func([ProductId], [], []),
+  'adminAuthenticate' : IDL.Func([IDL.Text, IDL.Text], [AdminToken], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createCheckoutSession' : IDL.Func(
       [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
@@ -118,29 +124,38 @@ export const idlService = IDL.Service({
     ),
   'getAllCoupons' : IDL.Func([], [IDL.Vec(Coupon)], ['query']),
   'getAllCustomerOrders' : IDL.Func([UserId], [IDL.Vec(Order__1)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCart' : IDL.Func([], [Cart], ['query']),
   'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
   'getOrder' : IDL.Func([OrderId], [Order__1], ['query']),
   'getProducts' : IDL.Func([IDL.Vec(Filter)], [IDL.Vec(Product)], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
   'getUserReferrals' : IDL.Func([UserId], [IDL.Vec(UserId)], ['query']),
   'getWishlist' : IDL.Func([], [Wishlist], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
   'migrateSampleProducts' : IDL.Func([], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'transform' : IDL.Func(
       [TransformationInput],
       [TransformationOutput],
       ['query'],
     ),
+  'verifyAdminToken' : IDL.Func([AdminToken], [IDL.Bool], ['query']),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
   const ProductId = IDL.Nat;
+  const AdminToken = IDL.Text;
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -180,6 +195,7 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : Time,
     'items' : IDL.Vec(CartItem),
   });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text, 'address' : IDL.Text });
   const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
   const CategoryId = IDL.Nat;
   const Category = IDL.Record({ 'id' : CategoryId, 'name' : IDL.Text });
@@ -239,6 +255,7 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addToCart' : IDL.Func([ProductId], [], []),
+    'adminAuthenticate' : IDL.Func([IDL.Text, IDL.Text], [AdminToken], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createCheckoutSession' : IDL.Func(
         [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
@@ -247,23 +264,31 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getAllCoupons' : IDL.Func([], [IDL.Vec(Coupon)], ['query']),
     'getAllCustomerOrders' : IDL.Func([UserId], [IDL.Vec(Order__1)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCart' : IDL.Func([], [Cart], ['query']),
     'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
     'getOrder' : IDL.Func([OrderId], [Order__1], ['query']),
     'getProducts' : IDL.Func([IDL.Vec(Filter)], [IDL.Vec(Product)], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
     'getUserReferrals' : IDL.Func([UserId], [IDL.Vec(UserId)], ['query']),
     'getWishlist' : IDL.Func([], [Wishlist], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
     'migrateSampleProducts' : IDL.Func([], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'transform' : IDL.Func(
         [TransformationInput],
         [TransformationOutput],
         ['query'],
       ),
+    'verifyAdminToken' : IDL.Func([AdminToken], [IDL.Bool], ['query']),
   });
 };
 

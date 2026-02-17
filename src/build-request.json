@@ -1,75 +1,120 @@
 {
   "kind": "build_request",
-  "title": "Reset admin password to Admin@123 and redeploy",
+  "title": "Disable Internet Identity for /admin and use username/password-only admin login",
   "projectName": "ShopEase",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-41",
-      "text": "Reset the default admin credentials so that the admin username remains `admin` and the admin password is set to `Admin@123`, ensuring that the admin username/password login flow accepts these credentials immediately after deployment.",
+      "id": "REQ-47",
+      "text": "Remove all Internet Identity (II) requirements from the admin login experience so that the /admin area does not require an Internet Identity session to log in or to access the dashboard.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Please completely disable Internet Identity for the /admin route. Make it a simple login page that only asks for a username and password."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Visiting /admin/login shows only a username and password form (no Internet Identity button, no “Step 1: Internet Identity” text, and no Principal ID display).",
+        "Submitting the form does not check for the presence of an Internet Identity identity object before calling the backend login API.",
+        "All user-facing text on the admin login page is in English."
+      ]
+    },
+    {
+      "id": "REQ-48",
+      "text": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Set the username to admin and password to Admin@123."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Logging in at /admin/login with username \"admin\" and password \"Admin@123\" succeeds and navigates to /admin.",
+        "Logging in with any other username/password fails with an English error message indicating invalid credentials (no mention of Internet Identity)."
+      ]
+    },
+    {
+      "id": "REQ-49",
+      "text": "Update admin route gating so that access to /admin and all nested admin routes is controlled only by the admin session/token state (and optional backend token validation), and does not depend on the caller Principal ID or Internet Identity.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Ensure that no Principal ID check is required to see the dashboard."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A user can access /admin (dashboard) after a successful username/password login even when not logged into Internet Identity.",
+        "AdminLayoutPage does not call Principal-based admin checks (e.g., caller Principal admin status) as the primary gating mechanism; it gates based on presence/validity of the stored admin token.",
+        "If the admin token is missing/invalid, /admin routes redirect to /admin/login."
+      ]
+    },
+    {
+      "id": "REQ-50",
+      "text": "Implement backend admin authentication that does not depend on the caller being non-anonymous, and issue/track an admin token that can be used to authorize admin-only operations without requiring Internet Identity.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-1"
         ],
         "quotes": [
-          "I don't remember setting a password. Please reset the admin password to 'Admin@123' and redeploy so I can log in immediately."
+          "Please completely disable Internet Identity for the /admin route. Make it a simple login page that only asks for a username and password."
         ]
       },
       "acceptanceCriteria": [
-        "Calling the backend admin login method with username `admin` and password `Admin@123` succeeds and returns a non-empty admin token.",
-        "Calling the backend admin login method with username `admin` and an incorrect password fails with an error message that includes the text \"Invalid username or password\".",
-        "This change is effective after redeployment without requiring any manual setup steps from the user."
+        "The backend adminLogin method accepts username/password and returns an admin token string on success without requiring Internet Identity (no rejection solely because the caller is anonymous).",
+        "The backend provides a way for the frontend to validate whether an admin token is currently authorized (e.g., a validate method returning boolean).",
+        "Admin-only backend operations can be authorized using the issued admin token via the project’s existing access-control initialization path (e.g., actor secret initialization), without requiring the caller Principal to be registered as admin."
       ]
     },
     {
-      "id": "REQ-42",
-      "text": "Update the admin login UI copy to reflect the reset password in English (do not change the username text), so the login screen does not incorrectly state that the password was set during deployment.",
+      "id": "REQ-51",
+      "text": "Update the admin frontend to create/use a backend actor for admin pages that applies the stored admin token even when the user is not logged in with Internet Identity.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-1"
         ],
         "quotes": [
-          "Please reset the admin password to 'Admin@123' and redeploy so I can log in immediately."
+          "Please completely disable Internet Identity for the /admin route."
         ]
       },
       "acceptanceCriteria": [
-        "On `/admin/login`, the helper text under \"Default admin username: admin\" indicates the current password is `Admin@123` (English text).",
-        "All existing admin login form validations and error messaging remain functional."
-      ]
-    },
-    {
-      "id": "REQ-43",
-      "text": "Update the frontend documentation to explicitly state the admin login URL and the current default admin credentials (username `admin`, password `Admin@123`) in English.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "Please reset the admin password to 'Admin@123' and redeploy so I can log in immediately."
-        ]
-      },
-      "acceptanceCriteria": [
-        "`frontend/README.md` includes the admin login URL `/admin/login` and lists the default admin username as `admin` and password as `Admin@123` in English.",
-        "Documentation is consistent with the actual deployed behavior (credentials work as written)."
+        "Admin pages can successfully call admin-only backend methods after username/password login even when there is no Internet Identity session.",
+        "The implementation does not require editing the immutable frontend hook files listed in system constraints (a safe alternative approach is used for admin-specific actor creation)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor with all logic in `backend/main.mo` (no additional backend services).",
-    "Only add `backend/migration.mo` if state migration is required by the implementation and follows the project’s conditional migration policy.",
-    "Do not edit files under `frontend/src/components/ui` or any other frontend immutable paths listed in SYSTEM_CONTEXT.",
-    "Use English for any user-facing text."
+    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (immutable paths).",
+    "Use English for all user-facing admin text related to this change."
   ],
   "nonGoals": [
-    "Do not add a user-facing admin password reset workflow or email-based reset flow.",
-    "Do not change customer authentication (Internet Identity) behavior.",
-    "Do not introduce third-party authentication providers or external databases/services."
+    "Do not remove or change Internet Identity authentication for shopper/user flows outside /admin.",
+    "Do not add third-party authentication providers for admin (no OAuth, no Internet Identity for admin).",
+    "Do not introduce external databases or backend services."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getSessionParameter, storeSessionParameter } from '../../utils/urlParams';
-import { useActor } from '../../hooks/useActor';
+import { storeSessionParameter } from '../../utils/urlParams';
+import { useAdminActor } from '../../hooks/useAdminActor';
 import { AlertCircle } from 'lucide-react';
 
 export default function AdminLoginPage() {
@@ -15,22 +15,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { actor } = useActor();
-
-  // Only redirect if token exists AND we're not coming from an error state
-  // This prevents the redirect loop when access is denied
-  useEffect(() => {
-    const existingToken = getSessionParameter('caffeineAdminToken');
-    // Only auto-redirect if we have a token and no error state
-    // If user manually navigates here or comes from access denied, show the form
-    if (existingToken && !error) {
-      // Small delay to prevent flash
-      const timer = setTimeout(() => {
-        navigate({ to: '/admin' });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [navigate, error]);
+  const { actor } = useAdminActor();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,9 +34,8 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      // Call backend to authenticate
-      // @ts-ignore - Backend method will be added
-      const token = await actor.adminLogin(username, password);
+      // Call backend to authenticate with username/password
+      const token = await actor.adminAuthenticate(username, password);
       
       if (!token || typeof token !== 'string') {
         throw new Error('Invalid response from server');
@@ -68,10 +52,10 @@ export default function AdminLoginPage() {
       // Parse error message
       let errorMessage = 'Login failed. Please try again.';
       if (err.message) {
-        if (err.message.includes('Invalid username or password')) {
+        if (err.message.includes('Invalid admin credentials') || err.message.includes('Unauthorized')) {
           errorMessage = 'Invalid username or password';
-        } else if (err.message.includes('adminLogin')) {
-          errorMessage = 'Admin login is not yet configured on the backend. Please contact the system administrator.';
+        } else if (err.message.includes('adminAuthenticate')) {
+          errorMessage = 'Admin login is not configured. Please contact support.';
         } else {
           errorMessage = err.message;
         }
@@ -89,11 +73,11 @@ export default function AdminLoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access the admin panel
+            Enter your admin credentials to access the admin panel
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-6">
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -101,54 +85,57 @@ export default function AdminLoginPage() {
               </Alert>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Enter username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Enter username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isLoading}
+                  autoComplete="username"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={isLoading}
-                autoComplete="username"
-                required
-              />
-            </div>
+              >
+                {isLoading ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                    Logging in...
+                  </>
+                ) : (
+                  'Login to Admin Panel'
+                )}
+              </Button>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                autoComplete="current-password"
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                  Logging in...
-                </>
-              ) : (
-                'Login'
-              )}
-            </Button>
-
-            <div className="text-center text-sm text-muted-foreground">
-              <p>Default admin username: <span className="font-mono font-semibold">admin</span></p>
-              <p className="mt-1 text-xs">Default admin password: <span className="font-mono font-semibold">Admin@123</span></p>
-            </div>
-          </form>
+              <div className="rounded-md border bg-muted p-3 text-center text-sm text-muted-foreground">
+                <p>Default credentials:</p>
+                <p className="mt-1">Username: <span className="font-mono font-semibold text-foreground">admin</span></p>
+                <p className="mt-1">Password: <span className="font-mono font-semibold text-foreground">Admin@123</span></p>
+              </div>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </div>

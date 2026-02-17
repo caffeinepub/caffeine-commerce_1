@@ -1,11 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Reset the default admin password to `Admin@123`, update admin login UI copy, and update frontend documentation so admin login works immediately after deployment.
+**Goal:** Disable Internet Identity requirements for the `/admin` area and use a username/password-only admin login with token-based authorization.
 
 **Planned changes:**
-- Update backend default admin credentials so `admin` / `Admin@123` can successfully log in immediately after deployment, while incorrect passwords return an "Invalid username or password" error.
-- Update `/admin/login` helper text to state the current default password is `Admin@123` (English), without changing the username text and without affecting existing validations/errors.
-- Update `frontend/README.md` to document the admin login URL (`/admin/login`) and default admin credentials (`admin` / `Admin@123`) in English.
+- Update `/admin/login` UI to show only an English username + password form and remove all Internet Identity/Principal-related UI and checks.
+- Set fixed admin credentials to username `admin` and password `Admin@123`, and show an English “invalid credentials” error for any other combination.
+- Change frontend admin route gating for `/admin` and nested routes to rely only on stored/validated admin token state, redirecting to `/admin/login` when missing/invalid (no Principal/Internet Identity dependency).
+- Implement backend admin authentication that accepts username/password for anonymous callers, issues an admin token, and provides a token validation method.
+- Update admin frontend API/actor usage so admin pages call admin-only backend methods using the stored admin token even without an Internet Identity session.
 
-**User-visible outcome:** An admin can log in at `/admin/login` using username `admin` and password `Admin@123` right after redeployment, and the UI + README reflect these credentials.
+**User-visible outcome:** Visiting `/admin/login` presents a simple username/password login; logging in with `admin` / `Admin@123` grants access to the admin dashboard and admin features without requiring Internet Identity.

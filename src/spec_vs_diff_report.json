@@ -1,60 +1,66 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T09:13:23.769Z",
-  "summary": "The diff does not provide evidence that the backend default admin password was reset to Admin@123 or that the frontend UI copy and documentation were updated accordingly. It also appears to introduce/describe changes related to shifting admin auth away from Internet Identity and other admin-login UX behavior that were not requested.",
+  "generatedAt": "2026-02-17T10:05:47.729Z",
+  "summary": "The diff clearly updates the admin frontend to use a username/password login page and gates /admin routes via an admin token verified through a new admin-specific (anonymous) actor. However, key backend requirements (default credentials, token issuance/validation behavior, and token-based authorization for admin-only ops) are not fully verifiable from the truncated backend diff. Several unrelated changes (migration/userProfiles shape and Stripe admin setup hooks/UI) were also introduced.",
   "missing_requirements": [
     {
-      "id": "REQ-41",
-      "requirement": "Reset the default admin credentials so that username remains `admin` and password is set to `Admin@123`, and the admin username/password login flow accepts these credentials immediately after deployment (including failing incorrect passwords with an error containing \"Invalid username or password\").",
-      "reason": "No evidence in the provided `backend/main.mo` diff snippet that a default admin password is set/updated to `Admin@123` or that the backend `adminLogin` implementation enforces/accepts these credentials. The frontend even contains a comment indicating the backend method will be added.",
+      "id": "REQ-48",
+      "requirement": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
+      "reason": "The frontend calls `actor.adminAuthenticate(username, password)` but the backend implementation is truncated; the diff summary provides no evidence that the backend enforces exactly these credentials or that non-matching credentials fail with the required English error behavior.",
       "evidence": [
-        "backend/main.mo",
+        "backend/main.mo (adminAuthenticate truncated)",
         "frontend/src/pages/admin/AdminLoginPage.tsx"
       ]
     },
     {
-      "id": "REQ-42",
-      "requirement": "Update the admin login UI copy on `/admin/login` so helper text under \"Default admin username: admin\" indicates the current password is `Admin@123` (English), without changing username text, and keep validations/error messaging functional.",
-      "reason": "The shown portion of `AdminLoginPage.tsx` does not include the required helper text mentioning the default password `Admin@123`. The diff is truncated and does not demonstrate that this specific copy exists elsewhere in the file.",
+      "id": "REQ-50",
+      "requirement": "Implement backend admin authentication independent of caller being non-anonymous, issue/track an admin token, provide token validation, and authorize admin-only operations using the token (not Principal admin registration).",
+      "reason": "While the frontend expects `verifyAdminToken(adminToken)` and `adminAuthenticate`, the backend diff is truncated and does not show: (1) that anonymous callers are accepted, (2) token generation/return, (3) a `verifyAdminToken`/validate method implementation, or (4) that admin-only operations accept/authorize via token rather than Principal-based admin checks.",
       "evidence": [
-        "frontend/src/pages/admin/AdminLoginPage.tsx"
+        "backend/main.mo (adminAuthenticate truncated; no visible verify/validate implementation)",
+        "frontend/src/hooks/queries/useAuthz.ts (calls actor.verifyAdminToken(adminToken))"
       ]
     },
     {
-      "id": "REQ-43",
-      "requirement": "Update `frontend/README.md` to state the admin login URL `/admin/login` and default credentials (admin / Admin@123) in English.",
-      "reason": "`frontend/README.md` is not shown as modified in the diff summary, and no documentation change evidence is provided.",
-      "evidence": []
+      "id": "REQ-51",
+      "requirement": "Admin frontend should create/use a backend actor for admin pages that applies the stored admin token even without Internet Identity, enabling admin-only backend calls post-login.",
+      "reason": "A new `useAdminActor` creates an anonymous actor, and token verification is done by passing the token as a method argument. The diff provides no evidence that the stored admin token is applied/attached for subsequent admin-only backend calls (e.g., via actor configuration/headers/identity), nor that other admin mutations/queries (beyond explicit token verification) automatically use the stored token.",
+      "evidence": [
+        "frontend/src/hooks/useAdminActor.ts",
+        "frontend/src/hooks/queries/useAuthz.ts",
+        "frontend/src/hooks/queries/useStripe.ts"
+      ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Admin login page auto-redirect behavior based on an existing token and logic to avoid redirect loops.",
-      "reason": "Not requested by the BuildRequest (which only asks to update UI copy about the reset password and keep existing validations/error messaging functional).",
+      "description": "Added a backend migration that changes the stored `userProfiles` value shape (removing `userId` field) and wires migration into the main actor.",
+      "reason": "The BuildRequest focuses on disabling Internet Identity for /admin and implementing token-based admin login; it does not request schema migrations or user profile shape changes.",
       "evidence": [
-        "frontend/src/pages/admin/AdminLoginPage.tsx"
+        "backend/migration.mo",
+        "backend/main.mo ((with migration = Migration.run))"
       ]
     },
     {
-      "description": "Frontend error message indicating \"Admin login is not yet configured on the backend\" when errors include 'adminLogin'.",
-      "reason": "Not requested; the request expects admin login to work with the reset credentials immediately after deployment, not to add messaging about missing backend configuration.",
+      "description": "Introduced/modified Stripe admin setup UI and admin Stripe configuration hooks using the new admin actor.",
+      "reason": "Stripe setup changes are not part of the requested admin authentication change; they appear to extend admin capabilities unrelated to disabling Internet Identity for admin login.",
       "evidence": [
-        "frontend/src/pages/admin/AdminLoginPage.tsx"
-      ]
-    },
-    {
-      "description": "Project state/documentation change indicating a shift of admin authentication away from Internet Identity to username/password for admin access.",
-      "reason": "This conflicts with the stated non-goal: \"Do not change customer authentication (Internet Identity) behavior.\" The BuildRequest only asks to reset the default admin password and update UI copy/docs accordingly.",
-      "evidence": [
-        "project_state.json"
+        "frontend/src/components/admin/StripePaymentSetup.tsx",
+        "frontend/src/hooks/queries/useStripe.ts"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/components/admin/StripePaymentSetup.tsx",
+    "frontend/src/hooks/queries/useAuthz.ts",
+    "frontend/src/hooks/queries/useStripe.ts",
+    "frontend/src/hooks/useAdminActor.ts",
+    "frontend/src/pages/admin/AdminLayoutPage.tsx",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
     "project_state.json"
   ]

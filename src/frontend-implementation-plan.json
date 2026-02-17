@@ -1,35 +1,92 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "ShopEase: Update admin login UI copy and frontend documentation for reset default credentials",
+  "title": "ShopEase: Username/password-only admin login (no Internet Identity) with token-gated /admin",
   "requirements": [
     {
-      "id": "REQ-42",
-      "summary": "Update `/admin/login` helper text to state the reset default admin password is `Admin@123` (keep username text unchanged).",
+      "id": "REQ-47",
+      "summary": "Remove all Internet Identity (II) UI and dependency from the /admin/login experience and use only username/password submission.",
       "acceptanceCriteria": [
-        "On `/admin/login`, the helper text under \"Default admin username: admin\" indicates the current password is `Admin@123` (English text).",
-        "All existing admin login form validations and error messaging remain functional."
+        "Visiting /admin/login shows only a username and password form (no Internet Identity button, no “Step 1: Internet Identity” text, and no Principal ID display).",
+        "Submitting the form does not check for the presence of an Internet Identity identity object before calling the backend login API.",
+        "All user-facing text on the admin login page is in English."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
           "operation": "modify",
-          "description": "Update the helper text beneath \"Default admin username: admin\" to explicitly state the current default password is `Admin@123` in English, replacing the existing deployment-time wording, without altering existing validation, submit handling, or error messaging."
+          "description": "Remove all Internet Identity imports/state/handlers and any Principal display; render a single-step admin login form (username/password only) with English-only copy; on submit, call the backend admin authentication function without checking for an Internet Identity session."
         }
       ]
     },
     {
-      "id": "REQ-43",
-      "summary": "Update frontend README to document the admin login URL and default admin credentials (admin / Admin@123) in English.",
+      "id": "REQ-48",
+      "summary": "Ensure the admin login flow succeeds with username 'admin' and password 'Admin@123', and fails for any other credentials with an English invalid-credentials message.",
       "acceptanceCriteria": [
-        "`frontend/README.md` includes the admin login URL `/admin/login` and lists the default admin username as `admin` and password as `Admin@123` in English.",
-        "Documentation is consistent with the actual deployed behavior (credentials work as written)."
+        "Logging in at /admin/login with username \"admin\" and password \"Admin@123\" succeeds and navigates to /admin.",
+        "Logging in with any other username/password fails with an English error message indicating invalid credentials (no mention of Internet Identity)."
       ],
       "file_operations": [
         {
-          "path": "frontend/README.md",
+          "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
           "operation": "modify",
-          "description": "Add an \"Admin Login\" section (or equivalent) that explicitly documents the admin login URL `/admin/login` and the default admin credentials: username `admin`, password `Admin@123`, using English user-facing text."
+          "description": "Use backendInterface.adminAuthenticate(username, password) for login; on success store the returned token in sessionStorage under the existing key (caffeineAdminToken) and navigate to /admin; on failure show an English 'Invalid username or password' style error with no Internet Identity wording."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Verify /admin/login and /admin routes remain correctly registered and navigation after successful login goes to /admin (no additional routes introduced)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-49",
+      "summary": "Gate /admin and all nested admin routes using only stored admin token state (and optional backend token validation), not Principal/Internet Identity checks.",
+      "acceptanceCriteria": [
+        "A user can access /admin (dashboard) after a successful username/password login even when not logged into Internet Identity.",
+        "AdminLayoutPage does not call Principal-based admin checks (e.g., caller Principal admin status) as the primary gating mechanism; it gates based on presence/validity of the stored admin token.",
+        "If the admin token is missing/invalid, /admin routes redirect to /admin/login."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "operation": "modify",
+          "description": "Replace Principal-based gating (useIsCallerAdmin/isCallerAdmin) with token-based gating: require presence of caffeineAdminToken and validate it via backendInterface.verifyAdminToken; redirect to /admin/login when missing/invalid; keep all user-facing messages in English."
+        },
+        {
+          "path": "frontend/src/hooks/queries/useAuthz.ts",
+          "operation": "modify",
+          "description": "Stop using actor.isCallerAdmin() for admin route gating; add a token-based admin validation hook that uses backendInterface.verifyAdminToken(adminToken) so admin auth is not tied to Principal/Internet Identity."
+        }
+      ]
+    },
+    {
+      "id": "REQ-51",
+      "summary": "Create an admin-specific backend actor/hook for admin pages that applies the stored admin token without requiring Internet Identity, and use it for admin-only backend calls.",
+      "acceptanceCriteria": [
+        "Admin pages can successfully call admin-only backend methods after username/password login even when there is no Internet Identity session.",
+        "The implementation does not require editing the immutable frontend hook files listed in system constraints (a safe alternative approach is used for admin-specific actor creation)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useAdminActor.ts",
+          "operation": "create",
+          "description": "Create a dedicated admin actor/hook that can communicate with the backend without an Internet Identity session and that applies the stored admin token for authorization; do not modify immutable hooks (useInternetIdentity/useActor)."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "operation": "modify",
+          "description": "Switch admin area backend calls used for gating/validation to the new useAdminActor-based flow so /admin works without Internet Identity; ensure the token validation and logout clearing logic remains consistent for all nested admin routes."
+        },
+        {
+          "path": "frontend/src/components/admin/StripePaymentSetup.tsx",
+          "operation": "modify",
+          "description": "Update the Stripe admin view to use an admin-capable query path (via useAdminActor or an admin-specific query hook) so it continues to work when there is no Internet Identity session."
+        },
+        {
+          "path": "frontend/src/hooks/queries/useStripe.ts",
+          "operation": "modify",
+          "description": "Add an admin-compatible variant or adapt the existing Stripe configured query to optionally use the admin actor when inside /admin, enabling Stripe configuration checks without Internet Identity."
         }
       ]
     }

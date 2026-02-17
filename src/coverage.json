@@ -1,25 +1,18 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T09:13:23.772Z",
+  "generatedAt": "2026-02-17T10:05:47.733Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 1,
+    "total": 5,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-41",
-        "summary": "Reset the default admin credentials so that the admin username remains `admin` and the admin password is set to `Admin@123`, ensuring that the admin username/password login flow accepts these credentials immediately after deployment.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-42",
-        "summary": "Update the admin login UI copy to reflect the reset password in English (do not change the username text), so the login screen does not incorrectly state that the password was set during deployment.",
+        "id": "REQ-47",
+        "summary": "Remove all Internet Identity (II) requirements from the admin login experience so that the /admin area does not require an Internet Identity session to log in or to access the dashboard.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/admin/AdminLoginPage.tsx"
@@ -29,25 +22,72 @@
         ]
       },
       {
-        "id": "REQ-43",
-        "summary": "Update the frontend documentation to explicitly state the admin login URL and the current default admin credentials (username `admin`, password `Admin@123`) in English.",
-        "status": "missing",
+        "id": "REQ-48",
+        "summary": "Set the admin credentials to username \"admin\" and password \"Admin@123\" and ensure these credentials successfully authenticate immediately after deployment.",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/README.md"
+          "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "frontend/src/App.tsx"
         ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/AdminLoginPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-49",
+        "summary": "Update admin route gating so that access to /admin and all nested admin routes is controlled only by the admin session/token state (and optional backend token validation), and does not depend on the caller Principal ID or Internet Identity.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "frontend/src/hooks/queries/useAuthz.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "frontend/src/hooks/queries/useAuthz.ts"
+        ]
+      },
+      {
+        "id": "REQ-50",
+        "summary": "Implement backend admin authentication that does not depend on the caller being non-anonymous, and issue/track an admin token that can be used to authorize admin-only operations without requiring Internet Identity.",
+        "status": "unknown",
+        "plannedFiles": [],
         "matchedFiles": []
+      },
+      {
+        "id": "REQ-51",
+        "summary": "Update the admin frontend to create/use a backend actor for admin pages that applies the stored admin token even when the user is not logged in with Internet Identity.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useAdminActor.ts",
+          "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "frontend/src/components/admin/StripePaymentSetup.tsx",
+          "frontend/src/hooks/queries/useStripe.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useAdminActor.ts",
+          "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "frontend/src/components/admin/StripePaymentSetup.tsx",
+          "frontend/src/hooks/queries/useStripe.ts"
+        ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/admin/StripePaymentSetup.tsx",
     "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/queries/useAuthz.ts",
+    "frontend/src/hooks/queries/useStripe.ts",
+    "frontend/src/hooks/useAdminActor.ts",
+    "frontend/src/pages/admin/AdminLayoutPage.tsx",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

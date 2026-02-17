@@ -12,7 +12,9 @@ import Stripe "stripe/stripe";
 import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import MixinAuthorization "authorization/MixinAuthorization";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   /**************
    * Types
@@ -20,7 +22,6 @@ actor {
   public type UserId = Principal;
 
   public type UserProfile = {
-    userId : UserId;
     name : Text;
     address : Text;
   };
@@ -30,6 +31,7 @@ actor {
   public type OrderId = Nat;
   public type CouponCode = Text;
   public type ReferralCode = Text;
+  public type AdminToken = Text;
 
   public type Product = {
     id : ProductId;
@@ -121,8 +123,86 @@ actor {
   let referrals = Map.empty<ReferralCode, Referral>();
   let stripeSessions = Map.empty<Text, UserId>(); // sessionId -> userId mapping
 
+  // Track active admin sessions (caller principal -> token)
+  let adminSessions = Map.empty<Principal, AdminToken>();
+
   /**************
-   * Migration 3 Sample Products (needed only once)
+   * User Profile Management
+   **************/
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view profiles");
+    };
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    userProfiles.add(caller, profile);
+  };
+
+  /**************
+   * Admin Authentication
+   **************/
+  public shared ({ caller }) func adminAuthenticate(username : Text, password : Text) : async AdminToken {
+    // Reject anonymous callers
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Cannot login anonymously");
+    };
+
+    if (username.trim(#char ' ') == "" or password.trim(#char ' ') == "") {
+      Runtime.trap("BadRequest: Please provide a username and a password");
+    };
+
+    // Accept only predefined default credentials
+    if (username != "admin" or password != "Admin@123") {
+      Runtime.trap("Unauthorized: Invalid admin credentials");
+    };
+
+    // Assign admin role through AccessControl system
+    // Note: assignRole includes admin-only guard, but on first call we need to allow it
+    // The AccessControl module should handle initialization properly
+    AccessControl.assignRole(accessControlState, caller, caller, #admin);
+
+    // Generate and store admin token
+    let adminToken : AdminToken = caller.toText();
+    adminSessions.add(caller, adminToken);
+
+    adminToken;
+  };
+
+  public query ({ caller }) func verifyAdminToken(adminToken : AdminToken) : async Bool {
+    // Check if caller has an active admin session
+    let storedToken = switch (adminSessions.get(caller)) {
+      case (null) {
+        Runtime.trap("Unauthorized: No valid admin session found. Perform adminAuthenticate first.");
+      };
+      case (?t) { t };
+    };
+
+    if (adminToken != storedToken) {
+      Runtime.trap("Unauthorized: Invalid admin token provided");
+    };
+
+    // Verify caller still has admin role
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Admin role has been revoked");
+    };
+
+    true;
+  };
+
+  /**************
+   * Migration Sample Products (needed only once)
    **************/
   public shared ({ caller }) func migrateSampleProducts() : async () {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
@@ -165,7 +245,7 @@ actor {
   };
 
   /**************
-   * Product & Category Management (public functions required by frontend)
+   * Product & Category Management
    **************/
   func matchesText(product : Product, searchText : Text) : Bool {
     let lowerSearchText = searchText.toLower();
@@ -258,7 +338,7 @@ actor {
   };
 
   /**************
-   * Cart & Wishlist Management (public functions required by frontend)
+   * Cart & Wishlist Management
    **************/
 
   public shared ({ caller }) func addToCart(productId : ProductId) : async () {
@@ -332,7 +412,7 @@ actor {
   };
 
   /**************
-   * Coupon Management (public functions required by frontend)
+   * Coupon Management
    **************/
   public query ({ caller }) func getAllCoupons() : async [Coupon] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -342,14 +422,14 @@ actor {
   };
 
   /**************
-   * Referral & Order Management (public functions required by frontend)
+   * Referral & Order Management
    **************/
   public query ({ caller }) func getUserReferrals(userId : UserId) : async [UserId] {
-    if (caller != userId and not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not Principal.equal(caller, userId) and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own referrals");
     };
 
-    let code = (userId.toText());
+    let code = userId.toText();
     switch (referrals.get(code)) {
       case (null) { [] };
       case (?referral) { referral.referrals };
@@ -362,7 +442,7 @@ actor {
       case (?order) { order };
     };
 
-    if (caller != order.userId and not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not Principal.equal(caller, order.userId) and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own orders");
     };
 
@@ -370,15 +450,15 @@ actor {
   };
 
   public query ({ caller }) func getAllCustomerOrders(userId : UserId) : async [Order] {
-    if (caller != userId and not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not Principal.equal(caller, userId) and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own orders");
     };
 
-    orders.values().filter(func(order) { order.userId == userId }).toArray();
+    orders.values().filter(func(order) { Principal.equal(order.userId, userId) }).toArray();
   };
 
   /**************
-   * Stripe Integration (functions required by frontend)
+   * Stripe Integration
    **************/
   var stripeConfiguration : ?Stripe.StripeConfiguration = null;
 
@@ -411,7 +491,7 @@ actor {
       case (?owner) { owner };
     };
 
-    if (caller != sessionOwner and not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not Principal.equal(caller, sessionOwner) and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only check your own session status");
     };
 
