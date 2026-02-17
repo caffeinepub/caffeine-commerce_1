@@ -1,0 +1,479 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 15,
+  "summary": "Shift admin authentication from Internet Identity to a simple username/password login for the admin panel (remove Internet Identity usage for admin access).",
+  "architectural_notes": [
+    "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
+    "Backend to use Firebase or Supabase, including secure authentication, real-time database updates, and cloud image storage.",
+    "Payments must support Razorpay, Stripe, and Cash on Delivery.",
+    "Include admin panel capabilities for catalog/order/user management and sales analytics.",
+    "Seed the app with 3 sample products (including image URLs or bundled placeholder assets) to demonstrate add-to-cart flow and cart badge count in header.",
+    "Admin panel authentication must use a simple username/password login (no Internet Identity) with secure credential storage and session/token-based access control for admin routes/APIs."
+  ],
+  "known_issues": [
+    "Automated build for the smart search feature failed with: “AI couldn't process your request successfully. Try simplifying or rewording it.”",
+    "Admin panel deployment/build failed (deployment encountered an error); needs fix and redeploy so draft is accessible.",
+    "On the Access Denied page, the “Back to login” button/link is broken and does not navigate to the admin login form; needs link/route fix."
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-create-the-shopease-app-shell-with-smooth-navigation-and-fast-loading-pages-including-a-coherent-modern-visual-theme-clean-minimal-amazon-flipkart-inspired-applied-consistently-across-all-screens",
+      "title": "Create the ShopEase app shell with smooth navigation and fast-loading pages, including a coherent modern visual theme (clean, minimal, Amazon/Flipkart-inspired) applied consistently across all screens.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-authentication-using-internet-identity-and-store-a-user-profile-linked-to-the-authenticated-principal-include-login-logout-ui-and-protected-routes-for-user-only-and-admin-only-areas",
+      "title": "Implement authentication using Internet Identity and store a user profile linked to the authenticated Principal; include login/logout UI and protected routes for user-only and admin-only areas.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-shopper-home-page-with-banner-carousel-strip-featured-products-and-categories-with-navigation-into-category-product-listing",
+      "title": "Build the shopper Home page with banner carousel/strip, featured products, and categories, with navigation into category/product listing.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-product-listing-catalog-with-filtering-price-range-rating-threshold-category-and-sorting-options-plus-pagination-or-incremental-loading-for-performance",
+      "title": "Implement product listing (catalog) with filtering (price range, rating threshold, category) and sorting options, plus pagination or incremental loading for performance.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-product-details-page-with-image-carousel-description-price-and-reviews-ratings-display-plus-actions-to-add-to-cart-and-wishlist",
+      "title": "Implement product details page with image carousel, description, price, and reviews/ratings display, plus actions to add to cart and wishlist.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-cart-management-add-remove-update-quantity-and-wishlist-management-add-remove-list-view-persisted-per-user-in-the-backend",
+      "title": "Implement cart management (add/remove/update quantity) and wishlist management (add/remove, list view) persisted per user in the backend.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-checkout-flow-with-address-management-and-order-placement-include-secure-order-summary-and-create-an-order-record-with-status-history",
+      "title": "Implement checkout flow with address management and order placement; include secure order summary and create an order record with status history.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-payment-options-selection-at-checkout-stripe-payment-option-and-cash-on-delivery-cod-record-the-selected-payment-method-and-payment-status-on-the-order",
+      "title": "Add payment options selection at checkout: Stripe payment option and Cash on Delivery (COD). Record the selected payment method and payment status on the order.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-order-history-and-order-tracking-with-live-status-updates-by-periodically-refreshing-order-status-from-the-backend-and-display-a-status-timeline-per-order",
+      "title": "Implement order history and order tracking with “live” status updates by periodically refreshing order status from the backend, and display a status timeline per order.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-the-user-profile-section-with-tabs-pages-for-my-orders-addresses-and-settings",
+      "title": "Create the user profile section with tabs/pages for My Orders, Addresses, and Settings.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-admin-panel-with-admin-login-gating-including-product-management-add-edit-delete-images-price-inventory-category-management-order-management-view-update-status-user-management-view-and-a-sales-analytics-dashboard-daily-weekly-monthly-summaries",
+      "title": "Implement an admin panel with admin login gating, including: product management (add/edit/delete, images, price, inventory), category management, order management (view/update status), user management (view), and a sales analytics dashboard (daily/weekly/monthly summaries).",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-coupons-discount-system-that-supports-creating-coupon-codes-admin-and-applying-a-coupon-at-checkout-user-with-validation-rules-and-discount-calculation",
+      "title": "Implement coupons/discount system that supports creating coupon codes (admin) and applying a coupon at checkout (user) with validation rules and discount calculation.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-referral-system-that-generates-a-referral-code-per-user-and-records-referral-attribution-when-a-new-user-signs-up-via-a-code-with-simple-referral-stats-in-the-profile",
+      "title": "Implement a referral system that generates a referral code per user and records referral attribution when a new user signs up via a code, with simple referral stats in the profile.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-dark-mode-support-with-a-theme-toggle-and-ensure-all-main-screens-are-readable-and-visually-consistent-in-both-light-and-dark-themes",
+      "title": "Add dark mode support with a theme toggle and ensure all main screens are readable and visually consistent in both light and dark themes.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-multi-language-support-for-english-and-hindi-across-shopper-and-admin-ui-with-a-language-switcher-and-translated-labels-messages",
+      "title": "Add multi-language support for English and Hindi across shopper and admin UI, with a language switcher and translated labels/messages.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-product-image-handling-by-storing-image-urls-in-product-records-and-serving-any-app-provided-default-images-as-static-frontend-assets-no-backend-image-storage",
+      "title": "Implement product image handling by storing image URLs in product records and serving any app-provided default images as static frontend assets (no backend image storage).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-frontend-data-fetching-via-react-query-with-caching-pagination-and-invalidation-for-admin-mutations-optimize-key-screens-for-perceived-performance-skeletons-memoized-lists-where-appropriate",
+      "title": "Add frontend data fetching via React Query with caching, pagination, and invalidation for admin mutations; optimize key screens for perceived performance (skeletons, memoized lists where appropriate).",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-deployment-instructions-for-building-and-deploying-the-app-to-the-internet-computer-using-the-project-s-standard-tooling-including-local-development-steps-and-production-deployment-steps",
+      "title": "Provide deployment instructions for building and deploying the app to the Internet Computer using the project’s standard tooling, including local development steps and production deployment steps.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-generated-static-assets-logo-banners-placeholders-under-frontend-public-assets-generated-and-render-them-in-the-ui-where-appropriate-e-g-header-logo-home-banners-product-placeholders",
+      "title": "Add generated static assets (logo, banners, placeholders) under frontend/public/assets/generated and render them in the UI where appropriate (e.g., header logo, home banners, product placeholders).",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-header-to-always-show-a-cart-icon-entry-that-navigates-to-cart-and-display-an-item-count-badge-on-the-cart-icon-that-reflects-the-current-cart-quantity-sum-0-when-unauthenticated-or-empty",
+      "title": "Update the header to always show a Cart icon entry that navigates to /cart, and display an item-count badge on the Cart icon that reflects the current cart quantity sum (0 when unauthenticated or empty).",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-simple-add-to-cart-button-to-each-product-card-in-the-product-grid-e-g-home-featured-products-and-catalog-listing-that-adds-1-quantity-of-that-product-to-the-authenticated-user-s-cart-if-unauthenticated-show-an-english-error-toast-prompting-the-user-to-login",
+      "title": "Add a simple “Add to Cart” button to each product card in the product grid (e.g., Home featured products and Catalog listing) that adds 1 quantity of that product to the authenticated user’s cart; if unauthenticated, show an English error toast prompting the user to login.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-seed-exactly-3-sample-products-in-the-backend-product-catalog-with-non-empty-name-description-price-stock-categoryid-and-imageurl-pointing-to-static-frontend-assets-so-they-appear-in-home-featured-products-and-catalog-immediately-after-deployment-when-the-product-list-is-empty",
+      "title": "Seed exactly 3 sample products in the backend product catalog (with non-empty name, description, price, stock, categoryId, and imageUrl pointing to static frontend assets) so they appear in Home featured products and Catalog immediately after deployment when the product list is empty.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-the-existing-admin-products-page-frontend-src-pages-admin-adminproductspage-tsx-from-a-count-only-placeholder-to-a-simple-product-management-ui-that-lets-an-admin-list-products-and-add-edit-and-delete-products-using-the-motoko-backend-with-react-query-mutations-and-cache-invalidation",
+      "title": "Upgrade the existing Admin Products page (`frontend/src/pages/admin/AdminProductsPage.tsx`) from a count-only placeholder to a simple product management UI that lets an admin list products and add, edit, and delete products using the Motoko backend, with React Query mutations and cache invalidation.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-frontend-react-query-hooks-for-admin-product-mutations-create-update-delete-that-call-the-new-backend-methods-via-the-existing-actor-pattern-and-invalidate-querykeys-products-after-successful-mutations",
+      "title": "Add frontend React Query hooks for admin product mutations (create/update/delete) that call the new backend methods via the existing actor pattern, and invalidate `queryKeys.products` after successful mutations.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-identify-the-root-cause-of-the-current-deployment-build-error-preventing-the-shopease-frontend-including-the-admin-routes-from-deploying-and-implement-the-minimal-code-config-changes-needed-to-make-the-project-build-and-deploy-successfully",
+      "title": "Identify the root cause of the current deployment/build error preventing the ShopEase frontend (including the /admin routes) from deploying, and implement the minimal code/config changes needed to make the project build and deploy successfully.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-after-fixing-the-deployment-error-ensure-the-admin-panel-is-accessible-in-the-deployed-draft-at-the-admin-route-including-navigation-to-admin-products-admin-categories-admin-orders-admin-users-admin-coupons-and-admin-stripe-setup-under-the-existing-internet-identity-admin-gating-behavior",
+      "title": "After fixing the deployment error, ensure the admin panel is accessible in the deployed draft at the /admin route (including navigation to /admin/products, /admin/categories, /admin/orders, /admin/users, /admin/coupons, and /admin/stripe-setup) under the existing Internet Identity admin-gating behavior.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-product-quick-search-input-to-the-shopper-header-frontend-src-components-layout-header-tsx-that-lets-users-type-a-query-and-navigate-to-the-catalog-page-with-the-query-applied",
+      "title": "Add a product quick-search input to the shopper header (frontend/src/components/layout/Header.tsx) that lets users type a query and navigate to the Catalog page with the query applied.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-extend-the-catalog-page-frontend-src-pages-catalogpage-tsx-to-read-the-search-query-from-the-url-and-include-it-in-the-product-fetch-filters-so-search-results-are-reflected-in-the-product-grid",
+      "title": "Extend the Catalog page (frontend/src/pages/CatalogPage.tsx) to read the search query from the URL and include it in the product fetch filters so search results are reflected in the product grid.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-quick-search-and-sorting-controls-to-the-admin-products-page-frontend-src-pages-admin-adminproductspage-tsx-so-an-admin-can-quickly-find-and-organize-products",
+      "title": "Add quick search and sorting controls to the Admin Products page (frontend/src/pages/admin/AdminProductsPage.tsx) so an admin can quickly find and organize products.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-dedicated-admin-username-password-login-flow-for-the-admin-panel-that-does-not-rely-on-internet-identity-including-a-new-admin-login-route-and-ui-form",
+      "title": "Add a dedicated admin username/password login flow for the admin panel that does not rely on Internet Identity, including a new admin login route and UI form.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-persist-the-admin-token-in-the-frontend-for-the-current-browser-session-and-ensure-it-is-applied-to-backend-actor-initialization-so-admin-only-api-calls-succeed-without-internet-identity",
+      "title": "Persist the admin token in the frontend for the current browser session and ensure it is applied to backend actor initialization so admin-only API calls succeed without Internet Identity.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-admin-route-gating-to-stop-requiring-an-internet-identity-identity-object-for-admin-access-and-instead-gate-by-admin-token-authentication-state-and-or-backend-admin-authorization-check",
+      "title": "Update admin route gating to stop requiring an Internet Identity identity object for admin access, and instead gate by admin-token authentication state and/or backend admin authorization check.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-clear-english-documentation-in-the-frontend-readme-or-an-appropriate-existing-doc-location-that-states-the-admin-login-url-and-how-to-set-configure-the-default-admin-username-and-password-for-local-development-and-deployment",
+      "title": "Provide clear English documentation in the frontend README (or an appropriate existing doc location) that states the admin login URL and how to set/configure the default admin username and password for local development and deployment.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-back-to-login-button-on-the-admin-access-denied-screen-so-it-always-navigates-to-the-admin-login-form-route-admin-login",
+      "title": "Fix the “Back to Login” button on the Admin “Access Denied” screen so it always navigates to the admin login form route `/admin/login`.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-default-admin-username-is-clearly-communicated-in-app-and-in-documentation-confirm-the-admin-login-route-is-admin-login-and-the-default-admin-username-is-admin-english-user-facing-text",
+      "title": "Ensure the default admin username is clearly communicated in-app and in documentation: confirm the admin login route is `/admin/login` and the default admin username is `admin` (English user-facing text).",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Implement user authentication: signup/login via Email, Phone OTP, and Google login",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Create Home page with banners, featured products, and categories",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Build product listing with filters (price, rating, category) and sorting",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Build product details page with image carousel, description, price, reviews, and ratings",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Implement Cart and Wishlist features",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Implement secure checkout flow",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Integrate payments: Razorpay, Stripe, and Cash on Delivery options",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Implement order tracking with live status updates",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Create user profile section (My Orders, Address, Settings)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Add push notifications for offers and order updates",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Build admin panel: admin login/dashboard; manage products, categories, orders, users; sales analytics reports",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement backend using Firebase or Supabase with secure auth, real-time updates, and cloud image storage",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add coupon & discount system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add referral system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add dark mode support",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add multi-language support (English + Hindi)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Ensure responsive, fast, performance-optimized UI and provide structured code + deployment instructions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Design backend data models and Motoko APIs to support: users, admins, products, categories, banners, reviews, cart, wishlist, addresses, coupons, referrals, orders, and order status history; ensure stable persistence across canister upgrades.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Add header shopping cart icon (with item count badge), basic “Add to Cart” button on product cards/pages, and seed 3 sample products with images",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Build a simple admin panel to add, edit, and delete products (CRUD) using the existing Motoko backend",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Add admin-only backend APIs in `backend/main.mo` to create, update, and delete products in the product catalog, reusing the existing `Product` type and enforcing that only admins can perform these mutations.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Add a search bar in the shopper Home page header for users to quickly search products",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Add quick search and sorting controls in the admin panel (e.g., Admin Products management) to find and organize products more efficiently",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Update the backend product filtering API (backend/main.mo: getProducts(filters : [Filter])) to support a text search filter for matching products by name (and optionally description) in a case-insensitive manner.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-42",
+      "summary": "If current backend sorting options are insufficient for the Admin Products page sorting UI, extend backend Filter/getProducts to support the additional sort(s) needed (e.g., sorting by name) while keeping compatibility with existing consumers (Catalog page).",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Remove Internet Identity for admin access and implement simple admin username/password authentication (login UI + backend validation + session/token handling) for the admin panel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "Implement backend admin credential validation and token issuance for the admin panel (username/password -> admin token), and use that token to authorize admin-only backend operations.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "ShopEase",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

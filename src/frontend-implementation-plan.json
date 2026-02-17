@@ -1,0 +1,47 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix admin Access Denied login navigation and clarify default admin username",
+  "requirements": [
+    {
+      "id": "REQ-39",
+      "summary": "Make the AdminLayoutPage “Access Denied” Back to Login action always route to /admin/login and reliably show the admin login form, even after deep-links/refreshes.",
+      "acceptanceCriteria": [
+        "When an unauthorized user hits the AdminLayoutPage “Access Denied” state, clicking “Back to Login” navigates to `/admin/login` and renders the AdminLoginPage form.",
+        "Navigation works reliably (no no-op click) across refreshes and direct deep-links into `/admin/*` routes."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "operation": "modify",
+          "description": "Update the “Access Denied” UI so “Back to Login” reliably navigates to `/admin/login` by clearing any stored admin session token before navigation (preventing immediate redirect loops), and ensure the navigation is handled in a way that works consistently across deep-links/refreshes."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "operation": "modify",
+          "description": "Adjust the admin login page behavior so visiting `/admin/login` always renders the login form (avoid auto-redirecting away solely due to a cached token), ensuring the Access Denied -> Back to Login flow is never a no-op."
+        }
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "summary": "Clearly communicate the admin login route and default admin username (admin) in the Admin login UI and frontend documentation.",
+      "acceptanceCriteria": [
+        "The Admin login UI displays the default username as `admin` (and does not contradict it elsewhere in the UI).",
+        "The frontend documentation (frontend/README.md) explicitly states: admin login URL `/admin/login` and default admin username `admin` (in English)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "operation": "modify",
+          "description": "Update the Admin login UI helper text to explicitly state the default admin username is `admin` (English user-facing text) and remove/adjust any credential hints that could contradict the requirement."
+        },
+        {
+          "path": "frontend/README.md",
+          "operation": "modify",
+          "description": "Add/update an Admin Access section explicitly documenting the admin login URL `/admin/login` and default admin username `admin` in English, ensuring it is not contradicted elsewhere in the README."
+        }
+      ]
+    }
+  ]
+}

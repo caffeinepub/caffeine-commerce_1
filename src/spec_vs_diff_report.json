@@ -1,0 +1,49 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-17T08:58:57.569Z",
+  "summary": "REQ-39 appears implemented by wiring the Admin “Access Denied” screen’s “Back to Login” button to an explicit navigate({ to: '/admin/login' }) flow. REQ-40 is not evidenced in the diff: the admin login UI and frontend/README.md updates communicating default username `admin` and URL `/admin/login` are not shown. The diff also introduces broader token-based admin login/logout behaviors that were not requested and may conflict with stated non-goals.",
+  "missing_requirements": [
+    {
+      "id": "REQ-40",
+      "requirement": "Admin login UI displays the default username as `admin` and does not contradict it elsewhere in the UI.",
+      "reason": "The provided AdminLoginPage snippet shows generic copy (e.g., \"Enter your credentials\" and a username placeholder \"Enter username\"), but no explicit in-app text stating the default username is `admin`. The file is truncated, so there is no reliable evidence this was added.",
+      "evidence": [
+        "frontend/src/pages/admin/AdminLoginPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "requirement": "frontend/README.md explicitly states: admin login URL `/admin/login` and default admin username `admin` (in English).",
+      "reason": "No diff entry shows any change to frontend/README.md, so there is no evidence the documentation was updated.",
+      "evidence": [
+        "File diff summary: Modified files list does not include frontend/README.md"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Introduced username/password admin login token issuance flow via actor.adminLogin(...) and sessionStorage token persistence.",
+      "reason": "BuildRequest non-goals explicitly include not changing the admin authentication mechanism/token issuance; requirements only ask to fix navigation and clarify default credentials. The diff shows new/expanded login mechanics and token storage logic beyond those requirements.",
+      "evidence": [
+        "frontend/src/pages/admin/AdminLoginPage.tsx (calls actor.adminLogin(username, password); stores 'caffeineAdminToken' in sessionStorage; redirects to '/admin')",
+        "frontend/src/pages/admin/AdminLayoutPage.tsx (reads 'caffeineAdminToken' from sessionStorage; redirects to '/admin/login' if missing)"
+      ]
+    },
+    {
+      "description": "Added an admin logout flow calling a backend method actor.adminLogout(adminToken) with cache clearing.",
+      "reason": "Not requested by REQ-39/REQ-40 (navigation fix + credential communication). This is additional admin behavior beyond the stated scope.",
+      "evidence": [
+        "frontend/src/pages/admin/AdminLayoutPage.tsx (handleLogout with actor.adminLogout; queryClient.clear(); navigate to '/admin/login')"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/src/pages/admin/AdminLayoutPage.tsx",
+    "frontend/src/pages/admin/AdminLoginPage.tsx",
+    "frontend/src/utils/urlParams.ts",
+    "project_state.json"
+  ]
+}

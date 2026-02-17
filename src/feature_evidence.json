@@ -1,0 +1,48 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-fix-the-back-to-login-button-on-the-admin-access-denied-screen-so-it-always-navigates-to-the-admin-login-form-route-admin-login",
+      "featureTitle": "Fix the “Back to Login” button on the Admin “Access Denied” screen so it always navigates to the admin login form route `/admin/login`.",
+      "files": [
+        "frontend/src/pages/admin/AdminLayoutPage.tsx",
+        "frontend/src/pages/admin/AdminLoginPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-39"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-default-admin-username-is-clearly-communicated-in-app-and-in-documentation-confirm-the-admin-login-route-is-admin-login-and-the-default-admin-username-is-admin-english-user-facing-text",
+      "featureTitle": "Ensure the default admin username is clearly communicated in-app and in documentation: confirm the admin login route is `/admin/login` and the default admin username is `admin` (English user-facing text).",
+      "files": [
+        "frontend/src/pages/admin/AdminLoginPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-40"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "kind": "build_request",
+  "title": "Fix Access Denied “Back to Login” navigation and confirm admin username",
+  "projectName": "ShopEase",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-39",
+      "text": "Fix the “Back to Login” button on the Admin “Access Denied” screen so it always navigates to the admin login form route `/admin/login`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "the 'back to login' button on the access denied page is not working. please fix the link so it takes me to the login form."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When an unauthorized user hits the AdminLayoutPage “Access Denied” state, clicking “Back to Login” navigates to `/admin/login` and renders the AdminLoginPage form.",
+        "Navigation works reliably (no no-op click) across refreshes and direct deep-links into `/admin/*` routes."
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "text": "Ensure the default admin username is clearly communicated in-app and in documentation: confirm the admin login route is `/admin/login` and the default admin username is `admin` (English user-facing text).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Also, tell me the admin username so I can log in once it's fixed."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The Admin login UI displays the default username as `admin` (and does not contradict it elsewhere in the UI).",
+        "The frontend documentation (frontend/README.md) explicitly states: admin login URL `/admin/login` and default admin username `admin` (in English)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files under frontend/src/components/ui (Shadcn UI components are read-only).",
+    "Do not modify any paths listed in frontend.immutablePaths (e.g., frontend/src/hooks/useActor.ts, frontend/src/main.tsx)."
+  ],
+  "nonGoals": [
+    "Changing the admin authentication mechanism, token issuance, or backend authorization logic.",
+    "Adding new admin roles/permissions or implementing new admin features beyond fixing the broken navigation and clarifying default credentials."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

@@ -1,0 +1,14 @@
+export const queryKeys = {
+  products: ['products'] as const,
+  product: (id: string) => ['product', id] as const,
+  categories: ['categories'] as const,
+  cart: ['cart'] as const,
+  wishlist: ['wishlist'] as const,
+  orders: ['orders'] as const,
+  order: (id: string) => ['order', id] as const,
+  coupons: ['coupons'] as const,
+  userProfile: ['userProfile'] as const,
+  userRole: ['userRole'] as const,
+  referrals: (userId: string) => ['referrals', userId] as const,
+  stripeConfigured: ['stripeConfigured'] as const,
+};
