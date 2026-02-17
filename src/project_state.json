@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
+  "projectStateVersion": 17,
   "summary": "Shift admin authentication from Internet Identity to a simple username/password login for the admin panel (remove Internet Identity usage for admin access).",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
@@ -8,12 +8,14 @@
     "Payments must support Razorpay, Stripe, and Cash on Delivery.",
     "Include admin panel capabilities for catalog/order/user management and sales analytics.",
     "Seed the app with 3 sample products (including image URLs or bundled placeholder assets) to demonstrate add-to-cart flow and cart badge count in header.",
-    "Admin panel authentication must use a simple username/password login (no Internet Identity) with secure credential storage and session/token-based access control for admin routes/APIs."
+    "Admin panel authentication must use a simple username/password login (no Internet Identity) with secure credential storage and session/token-based access control for admin routes/APIs.",
+    "Admin credentials need a defined reset/default-password process for deployment; user requested resetting the admin password and redeploying to restore access."
   ],
   "known_issues": [
     "Automated build for the smart search feature failed with: “AI couldn't process your request successfully. Try simplifying or rewording it.”",
     "Admin panel deployment/build failed (deployment encountered an error); needs fix and redeploy so draft is accessible.",
-    "On the Access Denied page, the “Back to login” button/link is broken and does not navigate to the admin login form; needs link/route fix."
+    "On the Access Denied page, the “Back to login” button/link is broken and does not navigate to the admin login form; needs link/route fix.",
+    "Admin password is unknown/not set from the user's perspective; requires password reset and redeploy to restore admin access."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -296,6 +298,14 @@
         "REQ-40"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-login-ui-copy-to-reflect-the-reset-password-in-english-do-not-change-the-username-text-so-the-login-screen-does-not-incorrectly-state-that-the-password-was-set-during-deployment",
+      "title": "Update the admin login UI copy to reflect the reset password in English (do not change the username text), so the login screen does not incorrectly state that the password was set during deployment.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -468,6 +478,28 @@
       "summary": "Implement backend admin credential validation and token issuance for the admin panel (username/password -> admin token), and use that token to authorize admin-only backend operations.",
       "reqIds": [
         "REQ-35"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Reset admin password to 'Admin@123' and redeploy so admin can log in immediately",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-47",
+      "summary": "Reset the default admin credentials so that the admin username remains `admin` and the admin password is set to `Admin@123`, ensuring that the admin username/password login flow accepts these credentials immediately after deployment.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Update the frontend documentation to explicitly state the admin login URL and the current default admin credentials (username `admin`, password `Admin@123`) in English.",
+      "reqIds": [
+        "REQ-43"
       ],
       "status": "pending"
     }

@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Admin “Access Denied” page’s “Back to Login” navigation and clearly communicate the default admin login route and username.
+**Goal:** Reset the default admin password to `Admin@123`, update admin login UI copy, and update frontend documentation so admin login works immediately after deployment.
 
 **Planned changes:**
-- Update the Admin “Access Denied” screen’s “Back to Login” button to reliably navigate to `/admin/login` (including from refreshes and deep-linked `/admin/*` routes).
-- Ensure the Admin login UI clearly displays the default username `admin` and does not contradict it elsewhere in the UI.
-- Update `frontend/README.md` to explicitly state the admin login URL `/admin/login` and default admin username `admin` (English).
+- Update backend default admin credentials so `admin` / `Admin@123` can successfully log in immediately after deployment, while incorrect passwords return an "Invalid username or password" error.
+- Update `/admin/login` helper text to state the current default password is `Admin@123` (English), without changing the username text and without affecting existing validations/errors.
+- Update `frontend/README.md` to document the admin login URL (`/admin/login`) and default admin credentials (`admin` / `Admin@123`) in English.
 
-**User-visible outcome:** When blocked by “Access Denied,” users can click “Back to Login” and always reach the admin login form at `/admin/login`, and they can see (in the app and README) that the default admin username is `admin`.
+**User-visible outcome:** An admin can log in at `/admin/login` using username `admin` and password `Admin@123` right after redeployment, and the UI + README reflect these credentials.

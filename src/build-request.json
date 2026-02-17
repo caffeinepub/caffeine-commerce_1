@@ -1,51 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Fix Access Denied “Back to Login” navigation and confirm admin username",
+  "title": "Reset admin password to Admin@123 and redeploy",
   "projectName": "ShopEase",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-39",
-      "text": "Fix the “Back to Login” button on the Admin “Access Denied” screen so it always navigates to the admin login form route `/admin/login`.",
-      "target": "frontend",
+      "id": "REQ-41",
+      "text": "Reset the default admin credentials so that the admin username remains `admin` and the admin password is set to `Admin@123`, ensuring that the admin username/password login flow accepts these credentials immediately after deployment.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-5"
         ],
         "quotes": [
-          "the 'back to login' button on the access denied page is not working. please fix the link so it takes me to the login form."
+          "I don't remember setting a password. Please reset the admin password to 'Admin@123' and redeploy so I can log in immediately."
         ]
       },
       "acceptanceCriteria": [
-        "When an unauthorized user hits the AdminLayoutPage “Access Denied” state, clicking “Back to Login” navigates to `/admin/login` and renders the AdminLoginPage form.",
-        "Navigation works reliably (no no-op click) across refreshes and direct deep-links into `/admin/*` routes."
+        "Calling the backend admin login method with username `admin` and password `Admin@123` succeeds and returns a non-empty admin token.",
+        "Calling the backend admin login method with username `admin` and an incorrect password fails with an error message that includes the text \"Invalid username or password\".",
+        "This change is effective after redeployment without requiring any manual setup steps from the user."
       ]
     },
     {
-      "id": "REQ-40",
-      "text": "Ensure the default admin username is clearly communicated in-app and in documentation: confirm the admin login route is `/admin/login` and the default admin username is `admin` (English user-facing text).",
+      "id": "REQ-42",
+      "text": "Update the admin login UI copy to reflect the reset password in English (do not change the username text), so the login screen does not incorrectly state that the password was set during deployment.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-5"
         ],
         "quotes": [
-          "Also, tell me the admin username so I can log in once it's fixed."
+          "Please reset the admin password to 'Admin@123' and redeploy so I can log in immediately."
         ]
       },
       "acceptanceCriteria": [
-        "The Admin login UI displays the default username as `admin` (and does not contradict it elsewhere in the UI).",
-        "The frontend documentation (frontend/README.md) explicitly states: admin login URL `/admin/login` and default admin username `admin` (in English)."
+        "On `/admin/login`, the helper text under \"Default admin username: admin\" indicates the current password is `Admin@123` (English text).",
+        "All existing admin login form validations and error messaging remain functional."
+      ]
+    },
+    {
+      "id": "REQ-43",
+      "text": "Update the frontend documentation to explicitly state the admin login URL and the current default admin credentials (username `admin`, password `Admin@123`) in English.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "Please reset the admin password to 'Admin@123' and redeploy so I can log in immediately."
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/README.md` includes the admin login URL `/admin/login` and lists the default admin username as `admin` and password as `Admin@123` in English.",
+        "Documentation is consistent with the actual deployed behavior (credentials work as written)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/components/ui (Shadcn UI components are read-only).",
-    "Do not modify any paths listed in frontend.immutablePaths (e.g., frontend/src/hooks/useActor.ts, frontend/src/main.tsx)."
+    "Backend must remain a single Motoko actor with all logic in `backend/main.mo` (no additional backend services).",
+    "Only add `backend/migration.mo` if state migration is required by the implementation and follows the project’s conditional migration policy.",
+    "Do not edit files under `frontend/src/components/ui` or any other frontend immutable paths listed in SYSTEM_CONTEXT.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Changing the admin authentication mechanism, token issuance, or backend authorization logic.",
-    "Adding new admin roles/permissions or implementing new admin features beyond fixing the broken navigation and clarifying default credentials."
+    "Do not add a user-facing admin password reset workflow or email-based reset flow.",
+    "Do not change customer authentication (Internet Identity) behavior.",
+    "Do not introduce third-party authentication providers or external databases/services."
   ],
   "imageRequirements": {
     "required": [],

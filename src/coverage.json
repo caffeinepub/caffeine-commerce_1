@@ -1,50 +1,54 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T08:58:57.572Z",
+  "generatedAt": "2026-02-17T09:13:23.772Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 3,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-39",
-        "summary": "Fix the “Back to Login” button on the Admin “Access Denied” screen so it always navigates to the admin login form route `/admin/login`.",
+        "id": "REQ-41",
+        "summary": "Reset the default admin credentials so that the admin username remains `admin` and the admin password is set to `Admin@123`, ensuring that the admin username/password login flow accepts these credentials immediately after deployment.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-42",
+        "summary": "Update the admin login UI copy to reflect the reset password in English (do not change the username text), so the login screen does not incorrectly state that the password was set during deployment.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
           "frontend/src/pages/admin/AdminLoginPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
           "frontend/src/pages/admin/AdminLoginPage.tsx"
         ]
       },
       {
-        "id": "REQ-40",
-        "summary": "Ensure the default admin username is clearly communicated in-app and in documentation: confirm the admin login route is `/admin/login` and the default admin username is `admin` (English user-facing text).",
-        "status": "implemented",
+        "id": "REQ-43",
+        "summary": "Update the frontend documentation to explicitly state the admin login URL and the current default admin credentials (username `admin`, password `Admin@123`) in English.",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx",
           "frontend/README.md"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx"
-        ]
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/admin/AdminLayoutPage.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
-    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

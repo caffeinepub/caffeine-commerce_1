@@ -146,7 +146,7 @@ export default function AdminLoginPage() {
 
             <div className="text-center text-sm text-muted-foreground">
               <p>Default admin username: <span className="font-mono font-semibold">admin</span></p>
-              <p className="mt-1 text-xs">Use the password set during deployment</p>
+              <p className="mt-1 text-xs">Default admin password: <span className="font-mono font-semibold">Admin@123</span></p>
             </div>
           </form>
         </CardContent>

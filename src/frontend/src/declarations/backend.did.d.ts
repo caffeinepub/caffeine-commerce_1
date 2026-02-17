@@ -99,11 +99,6 @@ export interface _SERVICE {
    * /    *************
    */
   'addToCart' : ActorMethod<[ProductId], undefined>,
-  /**
-   * / ************
-   * /    * Types
-   * /    *************
-   */
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],

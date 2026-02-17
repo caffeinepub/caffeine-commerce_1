@@ -1,49 +1,61 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T08:58:57.569Z",
-  "summary": "REQ-39 appears implemented by wiring the Admin “Access Denied” screen’s “Back to Login” button to an explicit navigate({ to: '/admin/login' }) flow. REQ-40 is not evidenced in the diff: the admin login UI and frontend/README.md updates communicating default username `admin` and URL `/admin/login` are not shown. The diff also introduces broader token-based admin login/logout behaviors that were not requested and may conflict with stated non-goals.",
+  "generatedAt": "2026-02-17T09:13:23.769Z",
+  "summary": "The diff does not provide evidence that the backend default admin password was reset to Admin@123 or that the frontend UI copy and documentation were updated accordingly. It also appears to introduce/describe changes related to shifting admin auth away from Internet Identity and other admin-login UX behavior that were not requested.",
   "missing_requirements": [
     {
-      "id": "REQ-40",
-      "requirement": "Admin login UI displays the default username as `admin` and does not contradict it elsewhere in the UI.",
-      "reason": "The provided AdminLoginPage snippet shows generic copy (e.g., \"Enter your credentials\" and a username placeholder \"Enter username\"), but no explicit in-app text stating the default username is `admin`. The file is truncated, so there is no reliable evidence this was added.",
+      "id": "REQ-41",
+      "requirement": "Reset the default admin credentials so that username remains `admin` and password is set to `Admin@123`, and the admin username/password login flow accepts these credentials immediately after deployment (including failing incorrect passwords with an error containing \"Invalid username or password\").",
+      "reason": "No evidence in the provided `backend/main.mo` diff snippet that a default admin password is set/updated to `Admin@123` or that the backend `adminLogin` implementation enforces/accepts these credentials. The frontend even contains a comment indicating the backend method will be added.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/pages/admin/AdminLoginPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-42",
+      "requirement": "Update the admin login UI copy on `/admin/login` so helper text under \"Default admin username: admin\" indicates the current password is `Admin@123` (English), without changing username text, and keep validations/error messaging functional.",
+      "reason": "The shown portion of `AdminLoginPage.tsx` does not include the required helper text mentioning the default password `Admin@123`. The diff is truncated and does not demonstrate that this specific copy exists elsewhere in the file.",
       "evidence": [
         "frontend/src/pages/admin/AdminLoginPage.tsx"
       ]
     },
     {
-      "id": "REQ-40",
-      "requirement": "frontend/README.md explicitly states: admin login URL `/admin/login` and default admin username `admin` (in English).",
-      "reason": "No diff entry shows any change to frontend/README.md, so there is no evidence the documentation was updated.",
-      "evidence": [
-        "File diff summary: Modified files list does not include frontend/README.md"
-      ]
+      "id": "REQ-43",
+      "requirement": "Update `frontend/README.md` to state the admin login URL `/admin/login` and default credentials (admin / Admin@123) in English.",
+      "reason": "`frontend/README.md` is not shown as modified in the diff summary, and no documentation change evidence is provided.",
+      "evidence": []
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Introduced username/password admin login token issuance flow via actor.adminLogin(...) and sessionStorage token persistence.",
-      "reason": "BuildRequest non-goals explicitly include not changing the admin authentication mechanism/token issuance; requirements only ask to fix navigation and clarify default credentials. The diff shows new/expanded login mechanics and token storage logic beyond those requirements.",
+      "description": "Admin login page auto-redirect behavior based on an existing token and logic to avoid redirect loops.",
+      "reason": "Not requested by the BuildRequest (which only asks to update UI copy about the reset password and keep existing validations/error messaging functional).",
       "evidence": [
-        "frontend/src/pages/admin/AdminLoginPage.tsx (calls actor.adminLogin(username, password); stores 'caffeineAdminToken' in sessionStorage; redirects to '/admin')",
-        "frontend/src/pages/admin/AdminLayoutPage.tsx (reads 'caffeineAdminToken' from sessionStorage; redirects to '/admin/login' if missing)"
+        "frontend/src/pages/admin/AdminLoginPage.tsx"
       ]
     },
     {
-      "description": "Added an admin logout flow calling a backend method actor.adminLogout(adminToken) with cache clearing.",
-      "reason": "Not requested by REQ-39/REQ-40 (navigation fix + credential communication). This is additional admin behavior beyond the stated scope.",
+      "description": "Frontend error message indicating \"Admin login is not yet configured on the backend\" when errors include 'adminLogin'.",
+      "reason": "Not requested; the request expects admin login to work with the reset credentials immediately after deployment, not to add messaging about missing backend configuration.",
       "evidence": [
-        "frontend/src/pages/admin/AdminLayoutPage.tsx (handleLogout with actor.adminLogout; queryClient.clear(); navigate to '/admin/login')"
+        "frontend/src/pages/admin/AdminLoginPage.tsx"
+      ]
+    },
+    {
+      "description": "Project state/documentation change indicating a shift of admin authentication away from Internet Identity to username/password for admin access.",
+      "reason": "This conflicts with the stated non-goal: \"Do not change customer authentication (Internet Identity) behavior.\" The BuildRequest only asks to reset the default admin password and update UI copy/docs accordingly.",
+      "evidence": [
+        "project_state.json"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/pages/admin/AdminLayoutPage.tsx",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
-    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

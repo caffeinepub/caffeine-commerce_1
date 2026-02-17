@@ -13,8 +13,6 @@ import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import MixinAuthorization "authorization/MixinAuthorization";
 
-
-
 actor {
   /**************
    * Types
@@ -426,10 +424,10 @@ actor {
     };
 
     let sessionId = await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
-    
+
     // Store the session ownership for later verification
     stripeSessions.add(sessionId, caller);
-    
+
     sessionId;
   };
 

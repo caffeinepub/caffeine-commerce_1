@@ -60,7 +60,7 @@ export type Filter = {
     searchText: string;
 } | {
     __kind__: "sortByPrice";
-    sortByPrice: bigint;
+    sortByPrice: Order;
 } | {
     __kind__: "category";
     category: CategoryId;
@@ -136,25 +136,17 @@ export enum UserRole {
 }
 export interface backendInterface {
     /**
-     * Admin authentication methods
-     */
-    adminLogin(username: string, password: string): Promise<string>;
-    adminLogout(token: string): Promise<void>;
-    _initializeAccessControlWithSecret(token: string): Promise<void>;
-    
-    /**
-     * Cart & Wishlist Management
+     * / ************
+     * /    * Cart & Wishlist Management (public functions required by frontend)
+     * /    *************
      */
     addToCart(productId: ProductId): Promise<void>;
-    
-    /**
-     * Authorization
-     */
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
-    
     /**
-     * Coupon Management
+     * / ************
+     * /    * Coupon Management (public functions required by frontend)
+     * /    *************
      */
     getAllCoupons(): Promise<Array<Coupon>>;
     getAllCustomerOrders(userId: UserId): Promise<Array<Order__1>>;
@@ -164,17 +156,19 @@ export interface backendInterface {
     getOrder(orderId: OrderId): Promise<Order__1>;
     getProducts(filters: Array<Filter>): Promise<Array<Product>>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
-    
     /**
-     * Referral & Order Management
+     * / ************
+     * /    * Referral & Order Management (public functions required by frontend)
+     * /    *************
      */
     getUserReferrals(userId: UserId): Promise<Array<UserId>>;
     getWishlist(): Promise<Wishlist>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
-    
     /**
-     * Migration
+     * / ************
+     * /    * Migration 3 Sample Products (needed only once)
+     * /    *************
      */
     migrateSampleProducts(): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;

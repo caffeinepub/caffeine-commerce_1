@@ -224,11 +224,6 @@ export interface backendInterface {
      * /    *************
      */
     addToCart(productId: ProductId): Promise<void>;
-    /**
-     * / ************
-     * /    * Types
-     * /    *************
-     */
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     /**
