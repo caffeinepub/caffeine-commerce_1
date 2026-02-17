@@ -1,111 +1,36 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Disable admin auth gating and enforce persistent BISAULI branding (frontend-only)",
+  "title": "Admin dashboard redeploy verification UX (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-63",
-      "summary": "Remove all admin route protection and session-token dependency so /admin and nested routes load directly without redirects.",
+      "id": "REQ-85",
+      "summary": "Ensure the admin UI supports unauthenticated access to /admin catalog CRUD after redeploy, with clear, retryable error states when the backend is unavailable.",
       "acceptanceCriteria": [
-        "Visiting /admin in a fresh browser session (no stored session params) loads the AdminLayoutPage + AdminDashboardPage without showing any login screen.",
-        "Visiting /admin/products, /admin/categories, /admin/orders, /admin/users, /admin/coupons, /admin/site-settings, and /admin/stripe-setup loads the respective admin pages without requiring any session token.",
-        "AdminLayoutPage no longer reads, verifies, stores, clears, or depends on the session parameter 'caffeineAdminToken'.",
-        "No automatic navigation to /admin/login occurs from any admin route due to missing/invalid token."
+        "In the redeployed build, a fresh browser session can open `/admin/categories`, create a category, edit it, and delete it without any login flow or \"Unauthorized\" errors.",
+        "In the redeployed build, a fresh browser session can open `/admin/products`, create a product, edit it, and delete it without any login flow or \"Unauthorized\" errors.",
+        "No admin-login route is required to perform the above actions."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "operation": "modify",
-          "description": "Remove all admin-token reads/verification and redirect-to-/admin/login logic (including any use of 'caffeineAdminToken' and verify token queries). Ensure AdminLayoutPage always renders the sidebar + <Outlet /> immediately, and adjust the existing logout button behavior to no longer clear/store tokens or navigate to /admin/login."
-        },
-        {
-          "path": "frontend/src/hooks/queries/useAuthz.ts",
-          "operation": "modify",
-          "description": "Decouple admin UI access from token verification by removing or isolating the verify-admin-token query so it is not required by any admin route. Ensure no admin-route rendering path depends on token presence/validity."
-        },
-        {
-          "path": "frontend/src/components/layout/Header.tsx",
-          "operation": "modify",
-          "description": "Ensure no navigation path in the header routes users to /admin/login (direct /admin access only). If an Admin link is shown, make it point to /admin without relying on token-based flows."
-        }
-      ]
-    },
-    {
-      "id": "REQ-64",
-      "summary": "Remove Admin Login page from routing and UI entry points so /admin/login is not used during this phase.",
-      "acceptanceCriteria": [
-        "The /admin/login route is removed from the router configuration in frontend/src/App.tsx (no route registration).",
-        "No admin page links or buttons navigate users to /admin/login.",
-        "If a user manually navigates to /admin/login, the app does not present a working login flow (either 404/not-found behavior from the router or a redirect to /admin).",
-        "All user-facing text related to admin username/password login is removed from the UI."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Remove the /admin/login route registration and the AdminLoginPage import from the router tree so it is no longer reachable as a first-class route."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
-          "operation": "delete",
-          "description": "Delete the AdminLoginPage implementation to remove the username/password login UI and eliminate any remaining entry points into an admin login flow."
+          "path": "frontend/src/hooks/queries/useAdminHealthCheck.ts",
+          "operation": "create",
+          "description": "Add an admin-scoped React Query hook that uses the anonymous admin actor to call `healthCheck()` and expose a retryable status for the admin area (success expects English text \"Running\")."
         },
         {
           "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
           "operation": "modify",
-          "description": "Remove any remaining navigation to /admin/login (including from logout handling or missing-token redirects) so no admin UI action sends users to /admin/login."
-        }
-      ]
-    },
-    {
-      "id": "REQ-66",
-      "summary": "Force BISAULI branding in shopper UI (header + document title) and remove any residual legacy shop name display, while still reading site settings.",
-      "acceptanceCriteria": [
-        "backend/main.mo returns site settings with shopName exactly \"BISAULI\" when getSiteSettings() is called after deployment.",
-        "After a canister upgrade/redeploy, the effective shop name still remains \"BISAULI\" (no reversion to \"Canfinity Store\").",
-        "The shopper UI header and document title continue to display \"BISAULI\" based on loaded site settings (AppLayout uses siteSettings.shopName).",
-        "No user-facing text shows \"Canfinity Store\" anywhere in the app after the change."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/queries/useSiteSettings.ts",
-          "operation": "modify",
-          "description": "Normalize the loaded site settings in the frontend so the effective shopName is always \"BISAULI\" (e.g., treat missing or legacy values like \"Canfinity Store\" as \"BISAULI\"), while continuing to read other site settings from the backend."
+          "description": "Wire the admin health-check hook into the admin shell UI to show a small, English status indicator (Running / Unavailable with Retry) so /admin routes never appear blank and failures remain retryable instead of crashing the route."
         },
         {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "path": "frontend/src/utils/backendAvailabilityErrors.ts",
           "operation": "modify",
-          "description": "Ensure document title is set from the normalized site settings such that the visible title remains \"BISAULI\" (including during loading/fallback states)."
+          "description": "Ensure backend-unavailability detection and userMessage formatting remain English and are suitable for reuse by admin health-check + admin CRUD pages (retryable, no route-level crash messaging)."
         },
-        {
-          "path": "frontend/src/components/layout/Header.tsx",
-          "operation": "modify",
-          "description": "Ensure the header branding (shopName text and logo alt text) uses the normalized shop name \"BISAULI\" and does not display any legacy shop name."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
-          "operation": "modify",
-          "description": "Adjust the admin site settings UI so shop name is effectively enforced as \"BISAULI\" (e.g., make the shop name field read-only/disabled and ensure any save operation uses \"BISAULI\"), while still allowing other site settings (like logo) to be edited."
-        },
-        {
-          "path": "frontend/src/components/layout/Footer.tsx",
-          "operation": "modify",
-          "description": "Update footer branding text to align with \"BISAULI\" and ensure no user-facing footer text implies a different store name."
-        }
-      ]
-    },
-    {
-      "id": "REQ-67",
-      "summary": "Prepare for redeploy by documenting where to obtain the deployed URLs for the main site and /admin (no-login).",
-      "acceptanceCriteria": [
-        "A working deployed URL is provided for the main site root route (/).",
-        "A working deployed URL is provided for the admin dashboard route (/admin) that loads without login."
-      ],
-      "file_operations": [
         {
           "path": "frontend/README.md",
           "operation": "modify",
-          "description": "Add a short 'Deployment verification' section describing the manual post-deploy checks and explicitly calling out the two URLs to provide: the main site (/) and /admin (must load without login)."
+          "description": "Update redeploy verification steps to explicitly confirm anonymous admin CRUD on `/admin/categories` and `/admin/products` in a fresh browser session, and to use the admin health indicator/healthCheck as the quick confirmation that the backend is running."
         }
       ]
     }

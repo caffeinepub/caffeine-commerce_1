@@ -278,6 +278,12 @@ export interface backendInterface {
      */
     getUserReferrals(userId: UserId): Promise<Array<UserId>>;
     getWishlist(): Promise<Wishlist>;
+    /**
+     * / ************
+     * /    * General Health Check
+     * /    *************
+     */
+    healthCheck(): Promise<string>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
     removeFromCart(productId: ProductId): Promise<void>;
@@ -668,6 +674,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getWishlist();
+            return result;
+        }
+    }
+    async healthCheck(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.healthCheck();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.healthCheck();
             return result;
         }
     }

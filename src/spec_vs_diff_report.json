@@ -1,65 +1,54 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T11:51:40.359Z",
-  "summary": "Diff implements parts of the frontend no-admin-login routing and BISAULI branding enforcement, and sets backend siteSettings.shopName default to \"BISAULI\". However, the diff does not provide clear evidence that backend admin authorization checks for admin-only mutations are disabled, does not demonstrate upgrade-persistent enforcement of the shop name, and does not include the requested redeploy URLs.",
+  "generatedAt": "2026-02-17T13:02:55.404Z",
+  "summary": "Diff adds an anonymous admin health-check hook and UI status indicator + backend-unavailability error detection utilities, and keeps backend healthCheck() returning \"Running\". However, the diff does not provide clear evidence that backend admin-only authorization checks were removed for category/product CRUD or that all remaining admin-area APIs no longer enforce #admin guards, and redeploy/verification is not evidenced.",
   "missing_requirements": [
     {
-      "id": "REQ-65",
-      "requirement": "Temporarily disable backend admin authorization checks for admin-only operations (product/category/coupon mutations, order status updates, stripe config updates, site settings updates) so admin UI works without authentication.",
-      "reason": "backend/main.mo is truncated and the shown portions still include AccessControl and authorization traps; there is no explicit evidence in the diff summary that the admin-only mutation methods no longer enforce admin checks or that \"Unauthorized: Only admins ...\" traps were removed for those methods.",
+      "id": "REQ-82",
+      "requirement": "Remove/disable all backend admin-only permission checks blocking Admin Dashboard CRUD flows for categories and products (add/update/delete) so anonymous callers do not get Unauthorized traps, and ensure the specific trap text \"Unauthorized: Only admins can add categories\" is no longer possible.",
+      "reason": "The backend diff excerpt shows the authorization system still present (AccessControl + MixinAuthorization) and still uses permission checks/traps for user profile APIs, but does not show any changes to addCategory/updateCategory/deleteCategory or addProduct/updateProduct/deleteProduct removing admin-only guards or eliminating the specified trap text. Because backend/main.mo is truncated, there is insufficient evidence these specific admin-only checks were removed.",
       "evidence": [
-        "backend/main.mo (truncated)"
+        "backend/main.mo (truncated excerpt only shows user-profile authz traps; no category/product CRUD changes visible)"
       ]
     },
     {
-      "id": "REQ-66",
-      "requirement": "Permanently enforce shopName as \"BISAULI\" such that it remains after canister upgrades/redeploys (no reversion to \"Canfinity Store\").",
-      "reason": "Diff shows `var siteSettings` initialized to \"BISAULI\", but there is no evidence it is stored in a stable variable or migrated on upgrade; without stable persistence/migration evidence, upgrade durability cannot be confirmed from the diff summary.",
+      "id": "REQ-83",
+      "requirement": "Ensure remaining admin-dashboard backend APIs used by /admin pages do not fail due to backend #admin permission checks during this phase, while keeping shopper/user-only authorization checks intact for cart/wishlist/profile/orders.",
+      "reason": "There is no visible evidence in the provided backend diff excerpt that admin-area APIs beyond catalog CRUD (e.g., coupons, site settings, Stripe setup, order management placeholders) had their #admin checks removed/disabled. The excerpt only demonstrates that shopper/user-only checks still exist (e.g., profile APIs), but does not demonstrate the required relaxation for admin-area APIs.",
       "evidence": [
-        "backend/main.mo (truncated)"
+        "backend/main.mo (truncated; only shows user-profile authorization checks, not admin-area API changes)"
       ]
     },
     {
-      "id": "REQ-67",
-      "requirement": "Redeploy the application and provide production/draft URLs for / and /admin.",
-      "reason": "No deployment output or URLs are included in the diff summary.",
+      "id": "REQ-84",
+      "requirement": "Resolve IC0508 \"Canister is stopped\" failure mode for admin catalog mutations by ensuring backend remains running/responsive during CRUD, and ensure admin UI shows an English retryable error state if backend unavailable.",
+      "reason": "Frontend adds detection and a retryable health indicator, but the diff does not show an actual backend/runtime change that would prevent the canister from stopping (IC0508) during mutations. Also, no evidence is shown that category/product CRUD pages are wired to use the new backend-unavailability detection to avoid route-level crashes (only AdminLayoutPage sidebar status is shown).",
       "evidence": [
-        "File diff summary (no deployment artifacts/URLs)"
+        "frontend/src/utils/backendAvailabilityErrors.ts",
+        "frontend/src/hooks/queries/useAdminHealthCheck.ts",
+        "frontend/src/pages/admin/AdminLayoutPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-85",
+      "requirement": "Redeploy and verify that /admin, /admin/categories, and /admin/products allow full anonymous CRUD access without authentication and without Unauthorized errors.",
+      "reason": "The diff contains code changes and README verification instructions, but does not provide evidence of an actual redeploy or that CRUD endpoints now succeed anonymously (backend CRUD changes are not evidenced in the provided excerpt).",
+      "evidence": [
+        "frontend/README.md",
+        "backend/main.mo (truncated; does not show CRUD auth removal)"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Added/updated footer attribution link to caffeine.ai with UTM tracking parameters.",
-      "reason": "BuildRequest focuses on disabling admin auth and enforcing BISAULI branding; caffeine.ai attribution/UTM tracking is not requested and appears to be an unrelated UI change.",
-      "evidence": [
-        "frontend/src/components/layout/Footer.tsx"
-      ]
-    },
-    {
-      "description": "Forced document title to \"BISAULI\" via useDocumentTitle('BISAULI') rather than deriving it from loaded site settings as specified.",
-      "reason": "REQ-66 AC states the header and document title should display \"BISAULI\" based on loaded site settings (AppLayout uses siteSettings.shopName). The diff hard-codes the title in AppLayout instead of showing it is driven by site settings.",
-      "evidence": [
-        "frontend/src/components/layout/AppLayout.tsx"
-      ]
-    }
-  ],
-  "confidence": 0.64,
+  "hallucinated_features": [],
+  "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
     "frontend-file-summaries.txt",
     "frontend/README.md",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/components/layout/Footer.tsx",
-    "frontend/src/components/layout/Header.tsx",
-    "frontend/src/hooks/queries/useAuthz.ts",
-    "frontend/src/hooks/queries/useSiteSettings.ts",
+    "frontend/src/hooks/queries/useAdminHealthCheck.ts",
     "frontend/src/pages/admin/AdminLayoutPage.tsx",
-    "frontend/src/pages/admin/AdminLoginPage.tsx",
-    "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
+    "frontend/src/utils/backendAvailabilityErrors.ts",
     "project_state.json"
   ]
 }

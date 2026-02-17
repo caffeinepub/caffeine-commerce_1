@@ -27,6 +27,7 @@ import AdminCouponsPage from './pages/admin/AdminCouponsPage';
 import AdminSiteSettingsPage from './pages/admin/AdminSiteSettingsPage';
 import StripePaymentSetup from './components/admin/StripePaymentSetup';
 
+// Root route for customer-facing pages with AppLayout (Header + Footer)
 const rootRoute = createRootRoute({
   component: AppLayout,
 });
@@ -115,6 +116,7 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
+// Admin routes with AdminLayoutPage (no Header/Footer, just sidebar)
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',

@@ -1,0 +1,149 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAdminActor } from '../useAdminActor';
+import { queryKeys } from './queryClientKeys';
+import type { Product, Category, Filter, ProductId, CategoryId } from '../../backend';
+
+// Admin query hooks using anonymous actor (no Internet Identity required)
+
+export function useAdminGetProducts(filters: Filter[] = []) {
+  const { actor, isFetching: actorFetching } = useAdminActor();
+
+  const query = useQuery<Product[]>({
+    queryKey: [...queryKeys.products, filters],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getProducts(filters);
+      } catch (error: any) {
+        console.error('Failed to fetch products:', error);
+        throw error;
+      }
+    },
+    enabled: !!actor && !actorFetching,
+    placeholderData: (previousData) => previousData,
+    retry: 1,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+  };
+}
+
+export function useAdminGetCategories() {
+  const { actor, isFetching: actorFetching } = useAdminActor();
+
+  const query = useQuery<Category[]>({
+    queryKey: queryKeys.categories,
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getCategories();
+      } catch (error: any) {
+        console.error('Failed to fetch categories:', error);
+        throw error;
+      }
+    },
+    enabled: !!actor && !actorFetching,
+    retry: 1,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+  };
+}
+
+// Admin mutation hooks
+
+export function useAdminAddProduct() {
+  const { actor } = useAdminActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (product: Omit<Product, 'id'>) => {
+      if (!actor) throw new Error('Actor not available');
+      const productWithId: Product = { ...product, id: 0n };
+      return actor.addProduct(productWithId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products });
+    },
+  });
+}
+
+export function useAdminUpdateProduct() {
+  const { actor } = useAdminActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ productId, product }: { productId: ProductId; product: Product }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.updateProduct(productId, product);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products });
+    },
+  });
+}
+
+export function useAdminDeleteProduct() {
+  const { actor } = useAdminActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (productId: ProductId) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.deleteProduct(productId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products });
+    },
+  });
+}
+
+export function useAdminAddCategory() {
+  const { actor } = useAdminActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (category: Omit<Category, 'id'>) => {
+      if (!actor) throw new Error('Actor not available');
+      const categoryWithId: Category = { ...category, id: 0n };
+      return actor.addCategory(categoryWithId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+    },
+  });
+}
+
+export function useAdminUpdateCategory() {
+  const { actor } = useAdminActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ categoryId, category }: { categoryId: CategoryId; category: Category }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.updateCategory(categoryId, category);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+    },
+  });
+}
+
+export function useAdminDeleteCategory() {
+  const { actor } = useAdminActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (categoryId: CategoryId) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.deleteCategory(categoryId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+    },
+  });
+}

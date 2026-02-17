@@ -1,11 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from '../useActor';
 import { useAdminActor } from '../useAdminActor';
 import { queryKeys } from './queryClientKeys';
 import type { SiteSettings } from '../../backend';
 
 export function useGetSiteSettings() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useAdminActor();
 
   return useQuery<SiteSettings>({
     queryKey: queryKeys.siteSettings,
@@ -19,7 +18,7 @@ export function useGetSiteSettings() {
       };
     },
     enabled: !!actor && !actorFetching,
-    retry: false,
+    retry: 1,
   });
 }
 
@@ -38,6 +37,9 @@ export function useUpdateSiteSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.siteSettings });
+    },
+    onError: (error: any) => {
+      throw new Error(error.message || 'Failed to update site settings');
     },
   });
 }

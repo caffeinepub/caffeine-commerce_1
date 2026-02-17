@@ -9,7 +9,7 @@ import { AlertCircle, CheckCircle2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminSiteSettingsPage() {
-  const { data: siteSettings, isLoading: isLoadingSettings } = useGetSiteSettings();
+  const { data: siteSettings, isLoading: isLoadingSettings, error: loadError } = useGetSiteSettings();
   const updateSettings = useUpdateSiteSettings();
 
   const [logoPreview, setLogoPreview] = useState('');
@@ -64,14 +64,33 @@ export default function AdminSiteSettingsPage() {
       toast.success('Site settings updated successfully');
     } catch (error: any) {
       console.error('Failed to update site settings:', error);
-      toast.error(error.message || 'Failed to update site settings');
+      const errorMessage = error.message || 'Failed to update site settings. Please try again.';
+      setValidationError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
   if (isLoadingSettings) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold tracking-tight">Site Settings</h1>
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold tracking-tight">Site Settings</h1>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Failed to load site settings. Please refresh the page and try again.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }

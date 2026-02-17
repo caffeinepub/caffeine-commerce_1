@@ -2,35 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-all-admin-route-protection-so-the-admin-dashboard-and-all-nested-admin-routes-are-directly-accessible-without-any-username-password-token-or-redirects-to-admin-login",
-      "featureTitle": "Remove all admin route protection so the /admin dashboard and all nested admin routes are directly accessible without any username/password, token, or redirects to /admin/login.",
+      "featureId": "feature-redeploy-the-application-after-implementing-the-backend-authorization-changes-and-backend-availability-fix-and-verify-that-admin-admin-categories-and-admin-products-allow-full-crud-access-without-authentication",
+      "featureTitle": "Redeploy the application after implementing the backend authorization changes and backend availability fix, and verify that `/admin`, `/admin/categories`, and `/admin/products` allow full CRUD access without authentication.",
       "files": [
-        "frontend/src/components/layout/Header.tsx",
-        "frontend/src/hooks/queries/useAuthz.ts",
-        "frontend/src/pages/admin/AdminLayoutPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "stripe@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-63"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-completely-remove-the-admin-login-page-from-the-app-routing-and-ui-entry-points-so-admin-login-is-not-used-for-access-during-this-phase",
-      "featureTitle": "Completely remove the Admin Login page from the app routing and UI entry points so /admin/login is not used for access during this phase.",
-      "files": [
-        "frontend/src/App.tsx",
+        "frontend/README.md",
+        "frontend/src/hooks/queries/useAdminHealthCheck.ts",
         "frontend/src/pages/admin/AdminLayoutPage.tsx",
-        "frontend/src/pages/admin/AdminLoginPage.tsx"
+        "frontend/src/utils/backendAvailabilityErrors.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -43,53 +21,7 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-64"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-permanently-enforce-the-site-shop-name-as-bisauli-so-it-does-not-revert-to-canfinity-store-after-deployment-or-canister-upgrades-while-still-allowing-reading-site-settings-from-the-backend",
-      "featureTitle": "Permanently enforce the site/shop name as \"BISAULI\" so it does not revert to \"Canfinity Store\" after deployment or canister upgrades, while still allowing reading site settings from the backend.",
-      "files": [
-        "frontend/src/components/layout/AppLayout.tsx",
-        "frontend/src/components/layout/Footer.tsx",
-        "frontend/src/components/layout/Header.tsx",
-        "frontend/src/hooks/queries/useSiteSettings.ts",
-        "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "stripe@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-66"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-redeploy-the-application-after-implementing-these-changes-and-provide-the-production-draft-urls-for-direct-access-to-admin-and-the-main-site",
-      "featureTitle": "Redeploy the application after implementing these changes and provide the production/draft URLs for direct access to /admin and the main site.",
-      "files": [
-        "frontend/README.md"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "stripe@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-67"
+        "REQ-85"
       ],
       "confidence": "high"
     }

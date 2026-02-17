@@ -150,6 +150,12 @@ export interface _SERVICE {
    */
   'getUserReferrals' : ActorMethod<[UserId], Array<UserId>>,
   'getWishlist' : ActorMethod<[], Wishlist>,
+  /**
+   * / ************
+   * /    * General Health Check
+   * /    *************
+   */
+  'healthCheck' : ActorMethod<[], string>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
   'removeFromCart' : ActorMethod<[ProductId], undefined>,

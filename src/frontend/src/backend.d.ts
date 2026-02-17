@@ -195,6 +195,12 @@ export interface backendInterface {
      */
     getUserReferrals(userId: UserId): Promise<Array<UserId>>;
     getWishlist(): Promise<Wishlist>;
+    /**
+     * / ************
+     * /    * General Health Check
+     * /    *************
+     */
+    healthCheck(): Promise<string>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
     removeFromCart(productId: ProductId): Promise<void>;

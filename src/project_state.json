@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 27,
-  "summary": "Temporarily remove/disable all admin authentication and route protection so /admin is directly accessible without login, and ensure site/shop name is permanently set to \"BISAULI\" (prevent reverting to \"Canfinity Store\").",
+  "projectStateVersion": 37,
+  "summary": "Admin panel branding is set to \"BISAULI\"; top priority is fixing admin dashboard functionality by disabling all backend admin-only authorization checks (since /admin login is removed) so anyone accessing /admin can add/delete categories and products, and resolving the backend outage where the backend canister is stopped (IC0508) causing CRUD (e.g., adding category \"cloths\") to fail; then redeploy and verify all admin dashboard pages load and CRUD works without unauthorized/rejection errors.",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
     "Backend to use Firebase or Supabase, including secure authentication, real-time database updates, and cloud image storage.",
@@ -21,7 +21,10 @@
     "Admin password is unknown/not set from the user's perspective; requires password reset and redeploy to restore admin access.",
     "Admin login page shows: \"Admin login is not yet configured on the backend\"; backend admin username/password login logic needs to be implemented/configured so credentials (admin / Admin@123) work.",
     "Branding/shop name reverted back to \"Canfinity Store\" after deployment; must be fixed so \"BISAULI\" persists permanently.",
-    "Admin login remains invalid after deployment; user requests temporarily removing admin login and all password protection."
+    "Admin login remains invalid after deployment; user requests temporarily removing admin login and all password protection.",
+    "Admin Products page shows \"Something went wrong!\" when opened; likely backend/actor/database connection failure preventing listing/CRUD so admin cannot add items.",
+    "Admin Categories page has the same backend/actor/database connection failure; needs fix so categories can be managed.",
+    "Admin \"Site Settings\" page is not working as expected (logo upload/change flow failing); needs fix so branding/logo can be updated."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -448,6 +451,110 @@
         "REQ-67"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-admin-products-page-so-it-loads-product-data-from-the-motoko-backend-without-showing-a-generic-route-error-e-g-something-went-wrong-when-accessed-at-admin-products-use-the-admin-anonymous-backend-actor-for-admin-pages-instead-of-the-internet-identity-bound-actor",
+      "title": "Fix the Admin Products page so it loads product data from the Motoko backend without showing a generic route error (e.g., \"Something went wrong!\") when accessed at `/admin/products`. Use the admin/anonymous backend actor for admin pages instead of the Internet Identity–bound actor.",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-admin-categories-page-so-it-loads-category-data-from-the-motoko-backend-without-showing-a-generic-route-error-when-accessed-at-admin-categories-use-the-admin-anonymous-backend-actor-for-admin-pages-instead-of-the-internet-identity-bound-actor",
+      "title": "Fix the Admin Categories page so it loads category data from the Motoko backend without showing a generic route error when accessed at `/admin/categories`. Use the admin/anonymous backend actor for admin pages instead of the Internet Identity–bound actor.",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-products-and-admin-categories-pages-support-adding-items-by-wiring-their-create-update-delete-actions-to-the-existing-backend-methods-addproduct-updateproduct-deleteproduct-addcategory-updatecategory-deletecategory-and-updating-the-ui-so-an-admin-can-create-at-least-a-basic-product-category-record-from-the-admin-pages",
+      "title": "Ensure the Admin Products and Admin Categories pages support adding items by wiring their create/update/delete actions to the existing backend methods (`addProduct`, `updateProduct`, `deleteProduct`, `addCategory`, `updateCategory`, `deleteCategory`) and updating the UI so an admin can create at least a basic product/category record from the admin pages.",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-admin-site-settings-page-fully-functional-so-a-logo-can-be-uploaded-and-saved-to-the-backend-and-the-saved-logo-is-visible-again-after-reload-ensure-site-settings-reading-and-updating-do-not-depend-on-an-internet-identity-session",
+      "title": "Make the Admin “Site Settings” page fully functional so a logo can be uploaded and saved to the backend, and the saved logo is visible again after reload. Ensure Site Settings reading and updating do not depend on an Internet Identity session.",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-admin-products-route-so-it-no-longer-renders-the-generic-route-error-screen-something-went-wrong-and-instead-reliably-loads-the-products-list-from-the-motoko-backend-using-the-admin-anonymous-actor-with-safe-non-crashing-filter-sort-construction",
+      "title": "Fix the `/admin/products` route so it no longer renders the generic route error screen (\"Something went wrong!\") and instead reliably loads the products list from the Motoko backend using the admin/anonymous actor with safe, non-crashing filter/sort construction.",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-add-product-action-on-admin-products-always-opens-a-visible-usable-add-product-form-dialog-producteditordialog-with-all-required-fields-rendered-and-it-remains-functional-even-when-categories-are-empty-or-fail-to-load-show-an-english-inline-message-in-the-dialog-rather-than-crashing",
+      "title": "Ensure the \"Add Product\" action on `/admin/products` always opens a visible, usable Add Product form dialog (ProductEditorDialog) with all required fields rendered, and it remains functional even when categories are empty or fail to load (show an English inline message in the dialog rather than crashing).",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-admin-categories-loads-categories-from-the-motoko-backend-using-the-admin-anonymous-actor-and-that-the-add-category-dialog-is-usable-so-the-admin-can-organize-the-shop-fix-any-remaining-route-level-error-issues-and-ensure-crud-actions-are-wired-and-do-not-crash-the-page",
+      "title": "Verify `/admin/categories` loads categories from the Motoko backend using the admin/anonymous actor and that the \"Add Category\" dialog is usable so the admin can organize the shop; fix any remaining route-level error issues and ensure CRUD actions are wired and do not crash the page.",
+      "reqIds": [
+        "REQ-74"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redeploy-the-application-after-implementing-the-fixes-and-verify-in-the-deployed-build-that-admin-products-and-admin-categories-work-as-expected-and-the-add-product-form-is-visible",
+      "title": "Redeploy the application after implementing the fixes and verify in the deployed build that `/admin/products` and `/admin/categories` work as expected and the \"Add Product\" form is visible.",
+      "reqIds": [
+        "REQ-75"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-admin-sidebar-navigation-so-all-sidebar-menu-items-are-clickable-and-route-correctly-to-their-pages-admin-categories-admin-orders-admin-site-settings-etc-including-when-the-global-shopper-header-is-present",
+      "title": "Fix the Admin sidebar navigation so all sidebar menu items are clickable and route correctly to their pages (/admin/categories, /admin/orders, /admin/site-settings, etc.), including when the global shopper Header is present.",
+      "reqIds": [
+        "REQ-76"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-dashboard-routes-render-without-route-level-errors-for-categories-orders-and-site-settings-and-that-they-display-stable-loading-empty-error-states-in-english",
+      "title": "Ensure the Admin dashboard routes render without route-level errors for Categories, Orders, and Site Settings, and that they display stable loading/empty/error states in English.",
+      "reqIds": [
+        "REQ-77"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-unblock-adding-products-by-improving-the-admin-products-no-categories-experience-when-no-categories-exist-show-a-clear-english-message-and-provide-an-in-ui-action-to-navigate-to-admin-categories-to-create-one-without-requiring-the-sidebar",
+      "title": "Unblock adding products by improving the Admin Products \"no categories\" experience: when no categories exist, show a clear English message and provide an in-UI action to navigate to /admin/categories to create one (without requiring the sidebar).",
+      "reqIds": [
+        "REQ-78"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-categories-and-products-crud-ui-flows-to-handle-backend-unavailability-errors-including-ic0508-canister-is-stopped-gracefully-show-a-clear-english-error-message-and-provide-a-retry-action-rather-than-rendering-a-generic-failure-or-leaving-the-ui-in-a-broken-loading-state",
+      "title": "Update the admin Categories and Products CRUD UI flows to handle backend unavailability errors (including IC0508 \"Canister is stopped\") gracefully: show a clear English error message and provide a retry action rather than rendering a generic failure or leaving the UI in a broken/loading state.",
+      "reqIds": [
+        "REQ-81"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redeploy-the-application-after-implementing-the-backend-authorization-changes-and-backend-availability-fix-and-verify-that-admin-admin-categories-and-admin-products-allow-full-crud-access-without-authentication",
+      "title": "Redeploy the application after implementing the backend authorization changes and backend availability fix, and verify that `/admin`, `/admin/categories`, and `/admin/products` allow full CRUD access without authentication.",
+      "reqIds": [
+        "REQ-85"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -640,6 +747,52 @@
       "summary": "Temporarily disable backend admin authorization checks for admin-only operations so the admin UI functions can be used without any authentication, including: product mutations, category mutations, coupon mutations, order status updates, stripe configuration updates, and site settings updates.",
       "reqIds": [
         "REQ-65"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-76",
+      "summary": "Fix Admin sidebar navigation so dashboard links (Categories, Orders, Settings) are clickable and route correctly; ensure these admin pages load and function so categories can be created and products can be added.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-77",
+      "summary": "Investigate and resolve the root cause of the backend canister becoming stopped (IC0508) during admin catalog mutations (e.g., adding a category named \"cloths\"), and implement the minimal backend changes required so the canister remains running and responsive during category and product CRUD operations.",
+      "reqIds": [
+        "REQ-79"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-78",
+      "summary": "Add a lightweight backend health/status query method that never traps and can be used to confirm the backend canister is running (returns an English status payload indicating the service is available).",
+      "reqIds": [
+        "REQ-80"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-79",
+      "summary": "Remove/disable all backend \"admin-only\" permission checks that block the Admin Dashboard CRUD flows, so any caller (including anonymous) can add, update, and delete categories and products without receiving \"Unauthorized\" errors.",
+      "reqIds": [
+        "REQ-82"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-80",
+      "summary": "Align remaining Admin Dashboard backend APIs to not require admin authorization checks during this phase (so /admin pages do not break due to hidden admin-only guards), while keeping existing user-only checks for shopper features (cart/wishlist/profile/orders) intact.",
+      "reqIds": [
+        "REQ-83"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-81",
+      "summary": "Resolve the \"Canister is stopped\" (IC0508) failure mode for admin catalog mutations by ensuring the backend canister remains running and responsive during category/product CRUD, and ensure the backend health check can be used to confirm service availability.",
+      "reqIds": [
+        "REQ-84"
       ],
       "status": "pending"
     }
