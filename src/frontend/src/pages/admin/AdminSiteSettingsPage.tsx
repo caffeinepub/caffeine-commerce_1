@@ -12,7 +12,6 @@ export default function AdminSiteSettingsPage() {
   const { data: siteSettings, isLoading: isLoadingSettings } = useGetSiteSettings();
   const updateSettings = useUpdateSiteSettings();
 
-  const [shopName, setShopName] = useState('');
   const [logoPreview, setLogoPreview] = useState('');
   const [logoDataUrl, setLogoDataUrl] = useState('');
   const [validationError, setValidationError] = useState('');
@@ -20,7 +19,6 @@ export default function AdminSiteSettingsPage() {
   // Initialize form with current settings
   useEffect(() => {
     if (siteSettings) {
-      setShopName(siteSettings.shopName || '');
       setLogoPreview(siteSettings.logo || '');
       setLogoDataUrl(siteSettings.logo || '');
     }
@@ -57,15 +55,9 @@ export default function AdminSiteSettingsPage() {
   const handleSave = async () => {
     setValidationError('');
 
-    // Validate shop name
-    if (!shopName.trim()) {
-      setValidationError('Shop Name is required');
-      return;
-    }
-
     try {
       await updateSettings.mutateAsync({
-        shopName: shopName.trim(),
+        shopName: 'BISAULI',
         logo: logoDataUrl,
       });
 
@@ -89,7 +81,7 @@ export default function AdminSiteSettingsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Site Settings</h1>
         <p className="text-muted-foreground">
-          Customize your shop name and logo
+          Customize your shop logo
         </p>
       </div>
 
@@ -97,7 +89,7 @@ export default function AdminSiteSettingsPage() {
         <CardHeader>
           <CardTitle>Branding</CardTitle>
           <CardDescription>
-            Update your shop's name and logo. Changes will be reflected across the entire site.
+            Update your shop's logo. The shop name is permanently set to BISAULI.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -116,18 +108,16 @@ export default function AdminSiteSettingsPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="shopName">Shop Name *</Label>
+            <Label htmlFor="shopName">Shop Name</Label>
             <Input
               id="shopName"
               type="text"
-              placeholder="Enter shop name"
-              value={shopName}
-              onChange={(e) => setShopName(e.target.value)}
-              disabled={updateSettings.isPending}
-              required
+              value="BISAULI"
+              disabled
+              className="bg-muted"
             />
             <p className="text-sm text-muted-foreground">
-              This name will appear in the header and throughout your site
+              Shop name is permanently set to BISAULI
             </p>
           </div>
 
@@ -167,7 +157,6 @@ export default function AdminSiteSettingsPage() {
               variant="outline"
               onClick={() => {
                 if (siteSettings) {
-                  setShopName(siteSettings.shopName || '');
                   setLogoPreview(siteSettings.logo || '');
                   setLogoDataUrl(siteSettings.logo || '');
                   setValidationError('');

@@ -29,18 +29,15 @@ export default function Header() {
   const { data: isAdmin } = useIsCallerAdmin();
   const { data: cart } = useGetCart();
   const { data: siteSettings } = useGetSiteSettings();
-
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAuthenticated = !!identity;
   const isLoggingIn = loginStatus === 'logging-in';
-
-  // Calculate total cart items count
   const cartItemCount = cart?.items.reduce((sum, item) => sum + Number(item.quantity), 0) || 0;
 
-  // Get shop branding from site settings or use defaults
-  const shopName = siteSettings?.shopName || 'ShopEase';
-  const shopLogo = siteSettings?.logo || '';
+  // Enforce BISAULI branding
+  const shopName = 'BISAULI';
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -62,11 +59,11 @@ export default function Header() {
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
-    const trimmedQuery = searchQuery.trim();
-    navigate({
-      to: '/catalog',
-      search: trimmedQuery ? { q: trimmedQuery } : {},
-    });
+    if (searchQuery.trim()) {
+      navigate({ to: '/catalog', search: { q: searchQuery.trim() } });
+      setSearchQuery('');
+      setMobileMenuOpen(false);
+    }
   };
 
   const navLinks = [
@@ -76,53 +73,39 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            {shopLogo ? (
-              <img
-                src={shopLogo}
-                alt={shopName}
-                className="h-8 w-auto object-contain"
-              />
-            ) : (
-              <>
-                <img
-                  src="/assets/generated/shopease-logo.dim_512x256.png"
-                  alt={shopName}
-                  className="h-8 dark:hidden"
-                />
-                <img
-                  src="/assets/generated/shopease-logo-dark.dim_512x256.png"
-                  alt={shopName}
-                  className="hidden h-8 dark:block"
-                />
-              </>
-            )}
-          </Link>
+      <div className="container flex h-16 items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          {siteSettings?.logo ? (
+            <img src={siteSettings.logo} alt={shopName} className="h-8 w-auto" />
+          ) : (
+            <span className="text-xl font-bold">{shopName}</span>
+          )}
+        </Link>
 
-          <nav className="hidden items-center gap-6 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="text-sm font-medium transition-colors hover:text-primary"
-                activeProps={{
-                  className: 'text-primary',
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-6 md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="text-sm font-medium transition-colors hover:text-primary"
+              activeProps={{
+                className: 'text-primary',
+              }}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
-        <form onSubmit={handleSearch} className="hidden flex-1 max-w-md md:flex">
-          <div className="relative w-full">
+        {/* Desktop Search */}
+        <form onSubmit={handleSearch} className="hidden flex-1 max-w-sm mx-6 md:block">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder={t('common.search')}
+              placeholder={t('search.placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -130,76 +113,82 @@ export default function Header() {
           </div>
         </form>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="hidden sm:inline-flex"
-          >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-
+        {/* Desktop Actions */}
+        <div className="hidden items-center gap-2 md:flex">
+          {/* Theme Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
-                <Globe className="h-5 w-5" />
-                <span className="sr-only">Change language</span>
+              <Button variant="ghost" size="icon">
+                {theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setLanguage('en')}>
-                English {language === 'en' && '✓'}
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                {t('theme.light')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage('hi')}>
-                हिंदी {language === 'hi' && '✓'}
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                {t('theme.dark')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
+                {t('theme.system')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {isAuthenticated && (
-            <>
-              <Button variant="ghost" size="icon" asChild className="relative">
-                <Link to="/cart">
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartItemCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -right-1 -top-1 h-5 min-w-5 rounded-full px-1 text-xs"
-                    >
-                      {cartItemCount}
-                    </Badge>
-                  )}
-                  <span className="sr-only">{t('nav.cart')}</span>
-                </Link>
+          {/* Language Toggle */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Globe className="h-5 w-5" />
               </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setLanguage('en')}>
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('hi')}>
+                हिन्दी
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/wishlist">
-                  <Heart className="h-5 w-5" />
-                  <span className="sr-only">{t('nav.wishlist')}</span>
-                </Link>
-              </Button>
-            </>
-          )}
+          {/* Wishlist */}
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/wishlist">
+              <Heart className="h-5 w-5" />
+            </Link>
+          </Button>
 
+          {/* Cart */}
+          <Button variant="ghost" size="icon" className="relative" asChild>
+            <Link to="/cart">
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+                >
+                  {cartItemCount}
+                </Badge>
+              )}
+            </Link>
+          </Button>
+
+          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
                 <User className="h-5 w-5" />
-                <span className="sr-only">User menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-48">
               {isAuthenticated ? (
                 <>
                   <DropdownMenuItem asChild>
                     <Link to="/profile">{t('nav.profile')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/orders">{t('orders.title')}</Link>
+                    <Link to="/orders">{t('nav.orders')}</Link>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <>
@@ -210,48 +199,166 @@ export default function Header() {
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleAuth}>
-                    {t('nav.logout')}
+                  <DropdownMenuItem onClick={handleAuth} disabled={isLoggingIn}>
+                    {t('auth.logout')}
                   </DropdownMenuItem>
                 </>
               ) : (
                 <DropdownMenuItem onClick={handleAuth} disabled={isLoggingIn}>
-                  {isLoggingIn ? t('common.loading') : t('nav.login')}
+                  {isLoggingIn ? t('auth.loggingIn') : t('auth.login')}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
 
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <nav className="flex flex-col gap-4">
+        {/* Mobile Menu */}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-80">
+            <div className="flex flex-col gap-6 py-6">
+              {/* Mobile Search */}
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder={t('search.placeholder')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </form>
+
+              {/* Mobile Navigation */}
+              <nav className="flex flex-col gap-2">
                 {navLinks.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className="text-lg font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
                   >
                     {link.label}
                   </Link>
                 ))}
-                <form onSubmit={handleSearch} className="mt-4">
-                  <Input
-                    type="search"
-                    placeholder={t('common.search')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </form>
+                <Link
+                  to="/wishlist"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                >
+                  {t('nav.wishlist')}
+                </Link>
+                <Link
+                  to="/cart"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent flex items-center justify-between"
+                >
+                  {t('nav.cart')}
+                  {cartItemCount > 0 && (
+                    <Badge variant="destructive">{cartItemCount}</Badge>
+                  )}
+                </Link>
               </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
+
+              {/* Mobile User Actions */}
+              <div className="border-t pt-4">
+                {isAuthenticated ? (
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                    >
+                      {t('nav.profile')}
+                    </Link>
+                    <Link
+                      to="/orders"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                    >
+                      {t('nav.orders')}
+                    </Link>
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                      >
+                        {t('nav.admin')}
+                      </Link>
+                    )}
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleAuth();
+                        setMobileMenuOpen(false);
+                      }}
+                      disabled={isLoggingIn}
+                      className="justify-start"
+                    >
+                      {t('auth.logout')}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      handleAuth();
+                      setMobileMenuOpen(false);
+                    }}
+                    disabled={isLoggingIn}
+                    className="w-full"
+                  >
+                    {isLoggingIn ? t('auth.loggingIn') : t('auth.login')}
+                  </Button>
+                )}
+              </div>
+
+              {/* Mobile Theme & Language */}
+              <div className="border-t pt-4 flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="flex-1">
+                      {theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setTheme('light')}>
+                      {t('theme.light')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('dark')}>
+                      {t('theme.dark')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('system')}>
+                      {t('theme.system')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="flex-1">
+                      <Globe className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setLanguage('en')}>
+                      English
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLanguage('hi')}>
+                      हिन्दी
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );

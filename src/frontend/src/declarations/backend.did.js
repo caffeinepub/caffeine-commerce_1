@@ -8,8 +8,25 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const CategoryId = IDL.Nat;
+export const Category = IDL.Record({ 'id' : CategoryId, 'name' : IDL.Text });
+export const CouponCode = IDL.Text;
+export const Time = IDL.Int;
+export const Coupon = IDL.Record({
+  'code' : CouponCode,
+  'discountPercentage' : IDL.Nat,
+  'validUntil' : Time,
+});
 export const ProductId = IDL.Nat;
-export const AdminToken = IDL.Text;
+export const Product = IDL.Record({
+  'id' : ProductId,
+  'categoryId' : CategoryId,
+  'name' : IDL.Text,
+  'description' : IDL.Text,
+  'stock' : IDL.Nat,
+  'imageUrl' : IDL.Text,
+  'price' : IDL.Nat,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -22,13 +39,7 @@ export const ShoppingItem = IDL.Record({
   'priceInCents' : IDL.Nat,
   'productDescription' : IDL.Text,
 });
-export const CouponCode = IDL.Text;
-export const Time = IDL.Int;
-export const Coupon = IDL.Record({
-  'code' : CouponCode,
-  'discountPercentage' : IDL.Nat,
-  'validUntil' : Time,
-});
+export const ReferralCode = IDL.Text;
 export const UserId = IDL.Principal;
 export const OrderId = IDL.Nat;
 export const OrderStatus = IDL.Variant({
@@ -54,8 +65,6 @@ export const UserProfile = IDL.Record({
   'address' : IDL.Text,
 });
 export const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
-export const CategoryId = IDL.Nat;
-export const Category = IDL.Record({ 'id' : CategoryId, 'name' : IDL.Text });
 export const Order = IDL.Variant({
   'less' : IDL.Null,
   'equal' : IDL.Null,
@@ -71,15 +80,6 @@ export const Filter = IDL.Variant({
   'sortByPrice' : Order,
   'category' : CategoryId,
   'minPrice' : IDL.Nat,
-});
-export const Product = IDL.Record({
-  'id' : ProductId,
-  'categoryId' : CategoryId,
-  'name' : IDL.Text,
-  'description' : IDL.Text,
-  'stock' : IDL.Nat,
-  'imageUrl' : IDL.Text,
-  'price' : IDL.Nat,
 });
 export const SiteSettings = IDL.Record({
   'logo' : IDL.Text,
@@ -118,16 +118,25 @@ export const TransformationOutput = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addCategory' : IDL.Func([Category], [CategoryId], []),
+  'addCoupon' : IDL.Func([Coupon], [], []),
+  'addProduct' : IDL.Func([Product], [ProductId], []),
   'addToCart' : IDL.Func([ProductId], [], []),
-  'adminAuthenticate' : IDL.Func([IDL.Text, IDL.Text], [AdminToken], []),
+  'addToWishlist' : IDL.Func([ProductId], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'clearCart' : IDL.Func([], [], []),
   'createCheckoutSession' : IDL.Func(
       [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
       [IDL.Text],
       [],
     ),
+  'createReferral' : IDL.Func([ReferralCode], [], []),
+  'deleteCategory' : IDL.Func([CategoryId], [], []),
+  'deleteCoupon' : IDL.Func([CouponCode], [], []),
+  'deleteProduct' : IDL.Func([ProductId], [], []),
   'getAllCoupons' : IDL.Func([], [IDL.Vec(Coupon)], ['query']),
   'getAllCustomerOrders' : IDL.Func([UserId], [IDL.Vec(Order__1)], ['query']),
+  'getAllOrders' : IDL.Func([], [IDL.Vec(Order__1)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCart' : IDL.Func([], [Cart], ['query']),
@@ -145,7 +154,8 @@ export const idlService = IDL.Service({
   'getWishlist' : IDL.Func([], [Wishlist], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
-  'migrateSampleProducts' : IDL.Func([], [], []),
+  'removeFromCart' : IDL.Func([ProductId], [], []),
+  'removeFromWishlist' : IDL.Func([ProductId], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'transform' : IDL.Func(
@@ -153,15 +163,34 @@ export const idlService = IDL.Service({
       [TransformationOutput],
       ['query'],
     ),
+  'updateCategory' : IDL.Func([CategoryId, Category], [], []),
+  'updateOrderStatus' : IDL.Func([OrderId, OrderStatus], [], []),
+  'updateProduct' : IDL.Func([ProductId, Product], [], []),
   'updateSiteSettings' : IDL.Func([SiteSettings], [], []),
-  'verifyAdminToken' : IDL.Func([AdminToken], [IDL.Bool], ['query']),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const CategoryId = IDL.Nat;
+  const Category = IDL.Record({ 'id' : CategoryId, 'name' : IDL.Text });
+  const CouponCode = IDL.Text;
+  const Time = IDL.Int;
+  const Coupon = IDL.Record({
+    'code' : CouponCode,
+    'discountPercentage' : IDL.Nat,
+    'validUntil' : Time,
+  });
   const ProductId = IDL.Nat;
-  const AdminToken = IDL.Text;
+  const Product = IDL.Record({
+    'id' : ProductId,
+    'categoryId' : CategoryId,
+    'name' : IDL.Text,
+    'description' : IDL.Text,
+    'stock' : IDL.Nat,
+    'imageUrl' : IDL.Text,
+    'price' : IDL.Nat,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -174,13 +203,7 @@ export const idlFactory = ({ IDL }) => {
     'priceInCents' : IDL.Nat,
     'productDescription' : IDL.Text,
   });
-  const CouponCode = IDL.Text;
-  const Time = IDL.Int;
-  const Coupon = IDL.Record({
-    'code' : CouponCode,
-    'discountPercentage' : IDL.Nat,
-    'validUntil' : Time,
-  });
+  const ReferralCode = IDL.Text;
   const UserId = IDL.Principal;
   const OrderId = IDL.Nat;
   const OrderStatus = IDL.Variant({
@@ -203,8 +226,6 @@ export const idlFactory = ({ IDL }) => {
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text, 'address' : IDL.Text });
   const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
-  const CategoryId = IDL.Nat;
-  const Category = IDL.Record({ 'id' : CategoryId, 'name' : IDL.Text });
   const Order = IDL.Variant({
     'less' : IDL.Null,
     'equal' : IDL.Null,
@@ -220,15 +241,6 @@ export const idlFactory = ({ IDL }) => {
     'sortByPrice' : Order,
     'category' : CategoryId,
     'minPrice' : IDL.Nat,
-  });
-  const Product = IDL.Record({
-    'id' : ProductId,
-    'categoryId' : CategoryId,
-    'name' : IDL.Text,
-    'description' : IDL.Text,
-    'stock' : IDL.Nat,
-    'imageUrl' : IDL.Text,
-    'price' : IDL.Nat,
   });
   const SiteSettings = IDL.Record({ 'logo' : IDL.Text, 'shopName' : IDL.Text });
   const StripeSessionStatus = IDL.Variant({
@@ -261,16 +273,25 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addCategory' : IDL.Func([Category], [CategoryId], []),
+    'addCoupon' : IDL.Func([Coupon], [], []),
+    'addProduct' : IDL.Func([Product], [ProductId], []),
     'addToCart' : IDL.Func([ProductId], [], []),
-    'adminAuthenticate' : IDL.Func([IDL.Text, IDL.Text], [AdminToken], []),
+    'addToWishlist' : IDL.Func([ProductId], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'clearCart' : IDL.Func([], [], []),
     'createCheckoutSession' : IDL.Func(
         [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
         [IDL.Text],
         [],
       ),
+    'createReferral' : IDL.Func([ReferralCode], [], []),
+    'deleteCategory' : IDL.Func([CategoryId], [], []),
+    'deleteCoupon' : IDL.Func([CouponCode], [], []),
+    'deleteProduct' : IDL.Func([ProductId], [], []),
     'getAllCoupons' : IDL.Func([], [IDL.Vec(Coupon)], ['query']),
     'getAllCustomerOrders' : IDL.Func([UserId], [IDL.Vec(Order__1)], ['query']),
+    'getAllOrders' : IDL.Func([], [IDL.Vec(Order__1)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCart' : IDL.Func([], [Cart], ['query']),
@@ -288,7 +309,8 @@ export const idlFactory = ({ IDL }) => {
     'getWishlist' : IDL.Func([], [Wishlist], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
-    'migrateSampleProducts' : IDL.Func([], [], []),
+    'removeFromCart' : IDL.Func([ProductId], [], []),
+    'removeFromWishlist' : IDL.Func([ProductId], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'transform' : IDL.Func(
@@ -296,8 +318,10 @@ export const idlFactory = ({ IDL }) => {
         [TransformationOutput],
         ['query'],
       ),
+    'updateCategory' : IDL.Func([CategoryId, Category], [], []),
+    'updateOrderStatus' : IDL.Func([OrderId, OrderStatus], [], []),
+    'updateProduct' : IDL.Func([ProductId, Product], [], []),
     'updateSiteSettings' : IDL.Func([SiteSettings], [], []),
-    'verifyAdminToken' : IDL.Func([AdminToken], [IDL.Bool], ['query']),
   });
 };
 

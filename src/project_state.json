@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 23,
-  "summary": "Shift admin authentication from Internet Identity to a simple username/password login for the admin panel (remove Internet Identity usage for admin access).",
+  "projectStateVersion": 27,
+  "summary": "Temporarily remove/disable all admin authentication and route protection so /admin is directly accessible without login, and ensure site/shop name is permanently set to \"BISAULI\" (prevent reverting to \"Canfinity Store\").",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
     "Backend to use Firebase or Supabase, including secure authentication, real-time database updates, and cloud image storage.",
@@ -10,14 +10,18 @@
     "Seed the app with 3 sample products (including image URLs or bundled placeholder assets) to demonstrate add-to-cart flow and cart badge count in header.",
     "Admin panel authentication must use a simple username/password login (no Internet Identity) with secure credential storage and session/token-based access control for admin routes/APIs.",
     "Admin credentials need a defined reset/default-password process for deployment; user requested resetting the admin password and redeploying to restore access.",
-    "Admin dashboard should include a 'Site Settings' section for branding (shop name + logo upload/change)."
+    "Admin dashboard should include a 'Site Settings' section for branding (shop name + logo upload/change).",
+    "Branding/shop name must be set to \"BISAULI\" and reflected both in the shopper header UI and in SEO title metadata (document title / meta tags).",
+    "Temporarily disable admin authentication and route gating: remove /admin/login requirement and allow direct access to /admin (no username/password) until re-enabled later."
   ],
   "known_issues": [
     "Automated build for the smart search feature failed with: “AI couldn't process your request successfully. Try simplifying or rewording it.”",
     "Admin panel deployment/build failed (deployment encountered an error); needs fix and redeploy so draft is accessible.",
     "On the Access Denied page, the “Back to login” button/link is broken and does not navigate to the admin login form; needs link/route fix.",
     "Admin password is unknown/not set from the user's perspective; requires password reset and redeploy to restore admin access.",
-    "Admin login page shows: \"Admin login is not yet configured on the backend\"; backend admin username/password login logic needs to be implemented/configured so credentials (admin / Admin@123) work."
+    "Admin login page shows: \"Admin login is not yet configured on the backend\"; backend admin username/password login logic needs to be implemented/configured so credentials (admin / Admin@123) work.",
+    "Branding/shop name reverted back to \"Canfinity Store\" after deployment; must be fixed so \"BISAULI\" persists permanently.",
+    "Admin login remains invalid after deployment; user requests temporarily removing admin login and all password protection."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -372,6 +376,78 @@
         "REQ-56"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-set-the-site-shop-name-to-bisauli-replacing-any-existing-default-such-as-aurora-so-that-the-shopper-header-displays-bisauli-as-the-brand-name-via-site-settings",
+      "title": "Set the site/shop name to \"BISAULI\" (replacing any existing default such as \"Aurora\") so that the shopper header displays \"BISAULI\" as the brand name via Site Settings.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-seo-visible-page-title-to-use-bisauli-by-1-updating-the-base-html-document-title-and-2-ensuring-the-runtime-document-title-reflects-the-configured-shop-name-when-site-settings-are-loaded",
+      "title": "Update SEO-visible page title to use \"BISAULI\" by (1) updating the base HTML document <title> and (2) ensuring the runtime document title reflects the configured shop name when Site Settings are loaded.",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-failing-build-by-identifying-and-resolving-all-current-typescript-and-motoko-compile-errors-regressions-introduced-by-recent-changes-with-the-goal-of-producing-a-clean-production-build-that-includes-the-admin-routes",
+      "title": "Fix the failing build by identifying and resolving all current TypeScript and Motoko compile errors/regressions introduced by recent changes, with the goal of producing a clean production build that includes the /admin routes.",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-fresh-basic-admin-login-page-at-route-admin-login-that-authenticates-using-username-admin-and-password-admin-123-with-only-essential-ui-and-english-user-facing-text",
+      "title": "Provide a fresh, basic admin login page at route `/admin/login` that authenticates using username `admin` and password `Admin@123`, with only essential UI and English user-facing text.",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-deliver-a-deploy-ready-version-after-implementing-the-above-changes-ensure-the-application-can-be-deployed-and-the-production-deployment-includes-the-updated-bisauli-branding-and-a-working-admin-login",
+      "title": "Deliver a deploy-ready version: after implementing the above changes, ensure the application can be deployed and the production deployment includes the updated \"BISAULI\" branding and a working admin login.",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-all-admin-route-protection-so-the-admin-dashboard-and-all-nested-admin-routes-are-directly-accessible-without-any-username-password-token-or-redirects-to-admin-login",
+      "title": "Remove all admin route protection so the /admin dashboard and all nested admin routes are directly accessible without any username/password, token, or redirects to /admin/login.",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-completely-remove-the-admin-login-page-from-the-app-routing-and-ui-entry-points-so-admin-login-is-not-used-for-access-during-this-phase",
+      "title": "Completely remove the Admin Login page from the app routing and UI entry points so /admin/login is not used for access during this phase.",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-permanently-enforce-the-site-shop-name-as-bisauli-so-it-does-not-revert-to-canfinity-store-after-deployment-or-canister-upgrades-while-still-allowing-reading-site-settings-from-the-backend",
+      "title": "Permanently enforce the site/shop name as \"BISAULI\" so it does not revert to \"Canfinity Store\" after deployment or canister upgrades, while still allowing reading site settings from the backend.",
+      "reqIds": [
+        "REQ-66"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redeploy-the-application-after-implementing-these-changes-and-provide-the-production-draft-urls-for-direct-access-to-admin-and-the-main-site",
+      "title": "Redeploy the application after implementing these changes and provide the production/draft URLs for direct access to /admin and the main site.",
+      "reqIds": [
+        "REQ-67"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -534,74 +610,6 @@
       "status": "pending"
     },
     {
-      "id": "AR-43",
-      "summary": "Remove Internet Identity for admin access and implement simple admin username/password authentication (login UI + backend validation + session/token handling) for the admin panel",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-45",
-      "summary": "Implement backend admin credential validation and token issuance for the admin panel (username/password -> admin token), and use that token to authorize admin-only backend operations.",
-      "reqIds": [
-        "REQ-35"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-46",
-      "summary": "Reset admin password to 'Admin@123' and redeploy so admin can log in immediately",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-47",
-      "summary": "Reset the default admin credentials so that the admin username remains `admin` and the admin password is set to `Admin@123`, ensuring that the admin username/password login flow accepts these credentials immediately after deployment.",
-      "reqIds": [
-        "REQ-41"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-49",
-      "summary": "Update the frontend documentation to explicitly state the admin login URL and the current default admin credentials (username `admin`, password `Admin@123`) in English.",
-      "reqIds": [
-        "REQ-43"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-50",
-      "summary": "Implement the backend admin login API expected by the Admin Login UI by adding a public method `adminLogin(username : Text, password : Text) : async Text` in `backend/main.mo` that authenticates the admin user and returns an admin token string on success.",
-      "reqIds": [
-        "REQ-44"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-51",
-      "summary": "Configure the backend to accept the default admin credentials username `admin` and password `Admin@123` immediately after deployment, so the existing `frontend/src/pages/admin/AdminLoginPage.tsx` login form can successfully authenticate.",
-      "reqIds": [
-        "REQ-45"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-52",
-      "summary": "Ensure the admin token returned by `adminLogin` integrates with the existing backend access-control initialization path used by the frontend (`actor._initializeAccessControlWithSecret(adminToken)`), so that after a successful admin login, admin-only operations (e.g., methods guarded by `AccessControl.isAdmin(...)`) are authorized when the token is provided.",
-      "reqIds": [
-        "REQ-46"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-56",
-      "summary": "Implement backend admin authentication that does not depend on the caller being non-anonymous, and issue/track an admin token that can be used to authorize admin-only operations without requiring Internet Identity.",
-      "reqIds": [
-        "REQ-50"
-      ],
-      "status": "pending"
-    },
-    {
       "id": "AR-57",
       "summary": "Add a 'Site Settings' tab in the admin dashboard to update the Shop Name and upload/change the site Logo (branding settings)",
       "reqIds": [],
@@ -612,6 +620,26 @@
       "summary": "Add backend support for site-wide branding settings by introducing a persisted Site Settings record that stores (1) Shop Name (Text) and (2) Logo (Text, stored as a data URL string or a plain URL string). Provide backend methods to read and update these settings, where updates are admin-only.",
       "reqIds": [
         "REQ-52"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Update SEO metadata so the site/shop name (set to \"BISAULI\") appears in the browser/Google SEO title (document title and relevant meta tags) in addition to the header branding",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-65",
+      "summary": "Remove the admin login page and disable all admin password protection temporarily; allow direct access to /admin dashboard without username/password",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-68",
+      "summary": "Temporarily disable backend admin authorization checks for admin-only operations so the admin UI functions can be used without any authentication, including: product mutations, category mutations, coupon mutations, order status updates, stripe configuration updates, and site settings updates.",
+      "reqIds": [
+        "REQ-65"
       ],
       "status": "pending"
     }

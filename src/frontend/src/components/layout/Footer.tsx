@@ -4,14 +4,14 @@ import { useTranslation } from '../../i18n';
 export default function Footer() {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
-  const appIdentifier = encodeURIComponent(window.location.hostname || 'shopease');
+  const appIdentifier = encodeURIComponent(window.location.hostname || 'bisauli-store');
 
   return (
     <footer className="border-t bg-muted/30">
       <div className="container py-8">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} ShopEase. All rights reserved.
+            © {currentYear} BISAULI. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             Built with <Heart className="h-4 w-4 text-red-500 fill-red-500" /> using{' '}

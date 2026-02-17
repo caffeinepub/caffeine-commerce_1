@@ -1,105 +1,111 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "ShopEase: Admin Site Settings + Admin Login Verification + Shopper Branding",
+  "title": "Disable admin auth gating and enforce persistent BISAULI branding (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-53",
-      "summary": "Ensure admin login works with admin/Admin@123 using token-based auth (no Internet Identity) and keeps admin session gated by caffeineAdminToken.",
+      "id": "REQ-63",
+      "summary": "Remove all admin route protection and session-token dependency so /admin and nested routes load directly without redirects.",
       "acceptanceCriteria": [
-        "From `/admin/login`, submitting username `admin` and password `Admin@123` successfully returns a token from `adminAuthenticate` and navigates to `/admin`.",
-        "Admin routes under `/admin/*` remain accessible for the session after login due to token storage under the session key `caffeineAdminToken` and successful `verifyAdminToken` checks in `frontend/src/pages/admin/AdminLayoutPage.tsx`.",
-        "If invalid credentials are entered, the UI shows the existing English error message behavior (e.g., \"Invalid username or password\")."
+        "Visiting /admin in a fresh browser session (no stored session params) loads the AdminLayoutPage + AdminDashboardPage without showing any login screen.",
+        "Visiting /admin/products, /admin/categories, /admin/orders, /admin/users, /admin/coupons, /admin/site-settings, and /admin/stripe-setup loads the respective admin pages without requiring any session token.",
+        "AdminLayoutPage no longer reads, verifies, stores, clears, or depends on the session parameter 'caffeineAdminToken'.",
+        "No automatic navigation to /admin/login occurs from any admin route due to missing/invalid token."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
-          "operation": "modify",
-          "description": "Harden the existing admin login submit flow to reliably authenticate via the existing anonymous admin actor (useAdminActor) with trimmed username/password, store the returned token under `caffeineAdminToken`, preserve existing English error message behavior for invalid credentials, and navigate to `/admin` on success."
-        },
         {
           "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
           "operation": "modify",
-          "description": "Verify that admin-route gating continues to rely on `caffeineAdminToken` + `useVerifyAdminToken` and that invalid/expired tokens clear the session key and redirect to `/admin/login` without breaking nested admin navigation."
-        }
-      ]
-    },
-    {
-      "id": "REQ-54",
-      "summary": "Add an Admin \"Site Settings\" page and wire it into admin routing and sidebar navigation under AdminLayoutPage.",
-      "acceptanceCriteria": [
-        "Admin sidebar includes a new navigation item labeled \"Site Settings\" (English) and it routes to a new admin nested route (e.g., `/admin/site-settings`).",
-        "The new route renders a dedicated Site Settings page component under the admin layout (`AdminLayoutPage`).",
-        "The Site Settings page is protected by the same admin-token gating already used for other admin pages (i.e., cannot be accessed without a valid `caffeineAdminToken`)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
-          "operation": "create",
-          "description": "Create the dedicated Admin Site Settings page component rendered within AdminLayoutPage’s outlet; it will host the Shop Name + Logo edit UI and use the site-settings hooks to load/save settings."
+          "description": "Remove all admin-token reads/verification and redirect-to-/admin/login logic (including any use of 'caffeineAdminToken' and verify token queries). Ensure AdminLayoutPage always renders the sidebar + <Outlet /> immediately, and adjust the existing logout button behavior to no longer clear/store tokens or navigate to /admin/login."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/hooks/queries/useAuthz.ts",
           "operation": "modify",
-          "description": "Register a new nested admin route for `/admin/site-settings` under the existing `/admin` route and wire it to the new `AdminSiteSettingsPage` so it is navigable and not orphaned."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "operation": "modify",
-          "description": "Add a new sidebar navigation item labeled \"Site Settings\" (English) pointing to `/admin/site-settings`, keeping it under the existing admin-token gating already implemented in this layout."
-        },
-        {
-          "path": "frontend/src/i18n/index.tsx",
-          "operation": "modify",
-          "description": "Add a new translation key for the admin sidebar label (e.g., `admin.siteSettings`) with an English value of \"Site Settings\" (and a Hindi value for completeness) and use it from AdminLayoutPage."
-        }
-      ]
-    },
-    {
-      "id": "REQ-55",
-      "summary": "Implement Admin Site Settings UI to edit Shop Name, upload/preview Logo, validate inputs, and save to backend with clear English feedback.",
-      "acceptanceCriteria": [
-        "Site Settings page displays a \"Shop Name\" text input and a \"Logo\" file input (accepting common image formats).",
-        "When an image file is selected, a visible preview is shown on the page before saving.",
-        "Clicking \"Save\" updates the backend Site Settings and shows a clear success confirmation in English; subsequent reload of the page shows the updated Shop Name and Logo preview.",
-        "If Shop Name is empty when saving, the page shows an English validation error and does not call the backend update method."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/queries/queryClientKeys.ts",
-          "operation": "modify",
-          "description": "Add React Query cache keys for Site Settings (e.g., `siteSettings`) to standardize fetching/invalidation across shopper header and admin settings page."
-        },
-        {
-          "path": "frontend/src/hooks/queries/useSiteSettings.ts",
-          "operation": "create",
-          "description": "Create Site Settings React Query hooks to (1) fetch current settings via `getSiteSettings` using an anonymous actor and (2) update settings via `updateSiteSettings`, then invalidate the Site Settings query on success so reloads and other UI (Header) reflect changes."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
-          "operation": "modify",
-          "description": "Build the Site Settings form UI: Shop Name text input, Logo file input accepting common image types, client-side file-to-data-URL conversion for preview (and backend storage as text), required validation for non-empty Shop Name, Save action calling the update hook, and English success/error messaging (e.g., toast or inline alert) consistent with existing admin patterns."
-        }
-      ]
-    },
-    {
-      "id": "REQ-56",
-      "summary": "Render configured Shop Name and Logo in the shopper Header, falling back to existing generated ShopEase logo assets when settings are not configured.",
-      "acceptanceCriteria": [
-        "When Site Settings has a logo value, the Header renders that logo instead of the static `/assets/generated/shopease-logo...` images.",
-        "When Site Settings has a shop name value, the Header uses it as the logo alt text and/or visible shop title (English).",
-        "If Site Settings is not configured yet, the existing generated ShopEase logo behavior remains as a fallback."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/queries/useSiteSettings.ts",
-          "operation": "modify",
-          "description": "Ensure the Site Settings fetch hook is usable from public shopper UI (Header) without requiring Internet Identity, and returns safe defaults/handling when settings are not yet configured."
+          "description": "Decouple admin UI access from token verification by removing or isolating the verify-admin-token query so it is not required by any admin route. Ensure no admin-route rendering path depends on token presence/validity."
         },
         {
           "path": "frontend/src/components/layout/Header.tsx",
           "operation": "modify",
-          "description": "Replace the hard-coded ShopEase logo rendering with conditional branding: fetch Site Settings, render the saved logo (data URL or URL) and use the saved shop name for alt text/label when present; otherwise keep the existing fallback behavior using `frontend/public/assets/generated/shopease-logo.dim_512x256.png` and `frontend/public/assets/generated/shopease-logo-dark.dim_512x256.png`."
+          "description": "Ensure no navigation path in the header routes users to /admin/login (direct /admin access only). If an Admin link is shown, make it point to /admin without relying on token-based flows."
+        }
+      ]
+    },
+    {
+      "id": "REQ-64",
+      "summary": "Remove Admin Login page from routing and UI entry points so /admin/login is not used during this phase.",
+      "acceptanceCriteria": [
+        "The /admin/login route is removed from the router configuration in frontend/src/App.tsx (no route registration).",
+        "No admin page links or buttons navigate users to /admin/login.",
+        "If a user manually navigates to /admin/login, the app does not present a working login flow (either 404/not-found behavior from the router or a redirect to /admin).",
+        "All user-facing text related to admin username/password login is removed from the UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Remove the /admin/login route registration and the AdminLoginPage import from the router tree so it is no longer reachable as a first-class route."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "operation": "delete",
+          "description": "Delete the AdminLoginPage implementation to remove the username/password login UI and eliminate any remaining entry points into an admin login flow."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "operation": "modify",
+          "description": "Remove any remaining navigation to /admin/login (including from logout handling or missing-token redirects) so no admin UI action sends users to /admin/login."
+        }
+      ]
+    },
+    {
+      "id": "REQ-66",
+      "summary": "Force BISAULI branding in shopper UI (header + document title) and remove any residual legacy shop name display, while still reading site settings.",
+      "acceptanceCriteria": [
+        "backend/main.mo returns site settings with shopName exactly \"BISAULI\" when getSiteSettings() is called after deployment.",
+        "After a canister upgrade/redeploy, the effective shop name still remains \"BISAULI\" (no reversion to \"Canfinity Store\").",
+        "The shopper UI header and document title continue to display \"BISAULI\" based on loaded site settings (AppLayout uses siteSettings.shopName).",
+        "No user-facing text shows \"Canfinity Store\" anywhere in the app after the change."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/queries/useSiteSettings.ts",
+          "operation": "modify",
+          "description": "Normalize the loaded site settings in the frontend so the effective shopName is always \"BISAULI\" (e.g., treat missing or legacy values like \"Canfinity Store\" as \"BISAULI\"), while continuing to read other site settings from the backend."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Ensure document title is set from the normalized site settings such that the visible title remains \"BISAULI\" (including during loading/fallback states)."
+        },
+        {
+          "path": "frontend/src/components/layout/Header.tsx",
+          "operation": "modify",
+          "description": "Ensure the header branding (shopName text and logo alt text) uses the normalized shop name \"BISAULI\" and does not display any legacy shop name."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
+          "operation": "modify",
+          "description": "Adjust the admin site settings UI so shop name is effectively enforced as \"BISAULI\" (e.g., make the shop name field read-only/disabled and ensure any save operation uses \"BISAULI\"), while still allowing other site settings (like logo) to be edited."
+        },
+        {
+          "path": "frontend/src/components/layout/Footer.tsx",
+          "operation": "modify",
+          "description": "Update footer branding text to align with \"BISAULI\" and ensure no user-facing footer text implies a different store name."
+        }
+      ]
+    },
+    {
+      "id": "REQ-67",
+      "summary": "Prepare for redeploy by documenting where to obtain the deployed URLs for the main site and /admin (no-login).",
+      "acceptanceCriteria": [
+        "A working deployed URL is provided for the main site root route (/).",
+        "A working deployed URL is provided for the admin dashboard route (/admin) that loads without login."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/README.md",
+          "operation": "modify",
+          "description": "Add a short 'Deployment verification' section describing the manual post-deploy checks and explicitly calling out the two URLs to provide: the main site (/) and /admin (must load without login)."
         }
       ]
     }

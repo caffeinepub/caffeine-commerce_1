@@ -1,48 +1,62 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T11:07:58.860Z",
-  "summary": "Most requested functionality appears implemented: backend now has persisted SiteSettings with get/update methods; frontend has a new Admin Site Settings page, routing and sidebar nav item, React Query hooks, and shopper Header now reflects saved branding with fallback. One key requirement cannot be confirmed from the provided diff summary: backend admin credential support for username \"admin\" and password \"Admin@123\" (REQ-53).",
+  "generatedAt": "2026-02-17T11:51:40.359Z",
+  "summary": "Diff implements parts of the frontend no-admin-login routing and BISAULI branding enforcement, and sets backend siteSettings.shopName default to \"BISAULI\". However, the diff does not provide clear evidence that backend admin authorization checks for admin-only mutations are disabled, does not demonstrate upgrade-persistent enforcement of the shop name, and does not include the requested redeploy URLs.",
   "missing_requirements": [
     {
-      "id": "REQ-53",
-      "requirement": "Ensure the admin login flow succeeds with username \"admin\" and password \"Admin@123\" using backend adminAuthenticate(username, password), returning a token and enabling subsequent verifyAdminToken checks.",
-      "reason": "The diff summary shows frontend calling adminAuthenticate and storing the token, and AdminLayoutPage verifying a token, but does not show any backend change confirming that adminAuthenticate accepts the required credentials or that verifyAdminToken logic matches the frontend token storage. backend/main.mo is truncated before any admin authentication implementation, and the modified useAuthz.ts is only referenced in a file summary without code evidence.",
+      "id": "REQ-65",
+      "requirement": "Temporarily disable backend admin authorization checks for admin-only operations (product/category/coupon mutations, order status updates, stripe config updates, site settings updates) so admin UI works without authentication.",
+      "reason": "backend/main.mo is truncated and the shown portions still include AccessControl and authorization traps; there is no explicit evidence in the diff summary that the admin-only mutation methods no longer enforce admin checks or that \"Unauthorized: Only admins ...\" traps were removed for those methods.",
       "evidence": [
-        "frontend/src/pages/admin/AdminLoginPage.tsx",
-        "frontend/src/pages/admin/AdminLayoutPage.tsx",
-        "backend/main.mo (truncated)",
-        "frontend-file-summaries.txt (mentions frontend/src/hooks/queries/useAuthz.ts but no code shown)"
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-66",
+      "requirement": "Permanently enforce shopName as \"BISAULI\" such that it remains after canister upgrades/redeploys (no reversion to \"Canfinity Store\").",
+      "reason": "Diff shows `var siteSettings` initialized to \"BISAULI\", but there is no evidence it is stored in a stable variable or migrated on upgrade; without stable persistence/migration evidence, upgrade durability cannot be confirmed from the diff summary.",
+      "evidence": [
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-67",
+      "requirement": "Redeploy the application and provide production/draft URLs for / and /admin.",
+      "reason": "No deployment output or URLs are included in the diff summary.",
+      "evidence": [
+        "File diff summary (no deployment artifacts/URLs)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added client-side logo file size validation (max 2MB) in the Admin Site Settings page.",
-      "reason": "REQ-55 requires a logo file input, preview, and save; it does not request a specific file size limit.",
+      "description": "Added/updated footer attribution link to caffeine.ai with UTM tracking parameters.",
+      "reason": "BuildRequest focuses on disabling admin auth and enforcing BISAULI branding; caffeine.ai attribution/UTM tracking is not requested and appears to be an unrelated UI change.",
       "evidence": [
-        "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
+        "frontend/src/components/layout/Footer.tsx"
       ]
     },
     {
-      "description": "Introduced a default shop name \"Canfinity Store\" during migration/initial state.",
-      "reason": "REQ-52 requires persisted settings but does not specify default initial values.",
+      "description": "Forced document title to \"BISAULI\" via useDocumentTitle('BISAULI') rather than deriving it from loaded site settings as specified.",
+      "reason": "REQ-66 AC states the header and document title should display \"BISAULI\" based on loaded site settings (AppLayout uses siteSettings.shopName). The diff hard-codes the title in AppLayout instead of showing it is driven by site settings.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo (siteSettings initialization)"
+        "frontend/src/components/layout/AppLayout.tsx"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.64,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/README.md",
+    "frontend/index.html",
     "frontend/src/App.tsx",
+    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/components/layout/Footer.tsx",
     "frontend/src/components/layout/Header.tsx",
-    "frontend/src/hooks/queries/queryClientKeys.ts",
+    "frontend/src/hooks/queries/useAuthz.ts",
     "frontend/src/hooks/queries/useSiteSettings.ts",
-    "frontend/src/i18n/index.tsx",
     "frontend/src/pages/admin/AdminLayoutPage.tsx",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
     "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",

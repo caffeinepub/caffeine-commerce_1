@@ -17,7 +17,6 @@ import OrderDetailsPage from './pages/orders/OrderDetailsPage';
 import ProfileLayoutPage from './pages/profile/ProfileLayoutPage';
 import AddressesPage from './pages/profile/AddressesPage';
 import SettingsPage from './pages/profile/SettingsPage';
-import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminLayoutPage from './pages/admin/AdminLayoutPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
@@ -116,12 +115,6 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
-const adminLoginRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/admin/login',
-  component: AdminLoginPage,
-});
-
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
@@ -191,7 +184,6 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   addressesRoute,
   settingsRoute,
-  adminLoginRoute,
   adminRoute.addChildren([
     adminDashboardRoute,
     adminProductsRoute,

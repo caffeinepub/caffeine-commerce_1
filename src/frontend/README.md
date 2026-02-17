@@ -1,4 +1,4 @@
-# ShopEase Frontend
+# BISAULI Store Frontend
 
 A modern e-commerce web application built with React, TypeScript, and the Internet Computer.
 
@@ -12,7 +12,7 @@ A modern e-commerce web application built with React, TypeScript, and the Intern
 - 🎨 Dark mode support
 - 🌐 Multi-language support (English & Hindi)
 - 🔐 Internet Identity authentication for customers
-- 👨‍💼 Admin panel with username/password authentication
+- 👨‍💼 Admin panel (no authentication required)
 
 ## Local Development
 

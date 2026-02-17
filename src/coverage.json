@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T11:07:58.864Z",
+  "generatedAt": "2026-02-17T11:51:40.364Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,88 +11,92 @@
     "implemented": 4,
     "items": [
       {
-        "id": "REQ-52",
-        "summary": "Add backend support for site-wide branding settings by introducing a persisted Site Settings record that stores (1) Shop Name (Text) and (2) Logo (Text, stored as a data URL string or a plain URL string). Provide backend methods to read and update these settings, where updates are admin-only.",
+        "id": "REQ-63",
+        "summary": "Remove all admin route protection so the /admin dashboard and all nested admin routes are directly accessible without any username/password, token, or redirects to /admin/login.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "frontend/src/hooks/queries/useAuthz.ts",
+          "frontend/src/components/layout/Header.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "frontend/src/hooks/queries/useAuthz.ts",
+          "frontend/src/components/layout/Header.tsx"
+        ]
+      },
+      {
+        "id": "REQ-64",
+        "summary": "Completely remove the Admin Login page from the app routing and UI entry points so /admin/login is not used for access during this phase.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "frontend/src/pages/admin/AdminLayoutPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/pages/admin/AdminLoginPage.tsx",
+          "frontend/src/pages/admin/AdminLayoutPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-65",
+        "summary": "Temporarily disable backend admin authorization checks for admin-only operations so the admin UI functions can be used without any authentication, including: product mutations, category mutations, coupon mutations, order status updates, stripe configuration updates, and site settings updates.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-53",
-        "summary": "Ensure the admin login flow succeeds with username \"admin\" and password \"Admin@123\" using the existing Admin Login UI (`frontend/src/pages/admin/AdminLoginPage.tsx`) and the backend `adminAuthenticate(username, password)` method, without requiring Internet Identity for admin access.",
+        "id": "REQ-66",
+        "summary": "Permanently enforce the site/shop name as \"BISAULI\" so it does not revert to \"Canfinity Store\" after deployment or canister upgrades, while still allowing reading site settings from the backend.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx",
-          "frontend/src/pages/admin/AdminLayoutPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/admin/AdminLoginPage.tsx",
-          "frontend/src/pages/admin/AdminLayoutPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-54",
-        "summary": "Add a new Admin page for \"Site Settings\" and add it as a new navigation item (tab/link) in the Admin sidebar (`frontend/src/pages/admin/AdminLayoutPage.tsx`) so admins can open it from the admin dashboard area.",
-        "status": "implemented",
-        "plannedFiles": [
+          "frontend/src/hooks/queries/useSiteSettings.ts",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/components/layout/Header.tsx",
           "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/i18n/index.tsx"
+          "frontend/src/components/layout/Footer.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/hooks/queries/useSiteSettings.ts",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/components/layout/Header.tsx",
           "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/i18n/index.tsx"
+          "frontend/src/components/layout/Footer.tsx"
         ]
       },
       {
-        "id": "REQ-55",
-        "summary": "Implement the Admin \"Site Settings\" page UI to (1) edit Shop Name, (2) upload/select a new Logo image file, (3) preview the chosen logo before saving, and (4) save changes to the backend. Use English for all labels, helper text, and validation messages.",
+        "id": "REQ-67",
+        "summary": "Redeploy the application after implementing these changes and provide the production/draft URLs for direct access to /admin and the main site.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/queries/queryClientKeys.ts",
-          "frontend/src/hooks/queries/useSiteSettings.ts",
-          "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
+          "frontend/README.md"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/queries/queryClientKeys.ts",
-          "frontend/src/hooks/queries/useSiteSettings.ts",
-          "frontend/src/pages/admin/AdminSiteSettingsPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-56",
-        "summary": "Reflect the configured branding on the shopper UI by rendering the saved Shop Name and Logo in the main shopper header (`frontend/src/components/layout/Header.tsx`) in place of the hard-coded ShopEase logo assets when Site Settings are present.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/queries/useSiteSettings.ts",
-          "frontend/src/components/layout/Header.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/queries/useSiteSettings.ts",
-          "frontend/src/components/layout/Header.tsx"
+          "frontend/README.md"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/README.md",
+    "frontend/index.html",
     "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/components/layout/Footer.tsx",
     "frontend/src/components/layout/Header.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/queries/queryClientKeys.ts",
+    "frontend/src/hooks/queries/useAuthz.ts",
     "frontend/src/hooks/queries/useSiteSettings.ts",
-    "frontend/src/i18n/index.tsx",
     "frontend/src/pages/admin/AdminLayoutPage.tsx",
     "frontend/src/pages/admin/AdminLoginPage.tsx",
     "frontend/src/pages/admin/AdminSiteSettingsPage.tsx",

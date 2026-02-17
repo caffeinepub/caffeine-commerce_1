@@ -10,7 +10,6 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export type AdminToken = string;
 export interface Cart { 'items' : Array<CartItem> }
 export interface CartItem { 'productId' : ProductId, 'quantity' : bigint }
 export interface Category { 'id' : CategoryId, 'name' : string }
@@ -56,6 +55,7 @@ export interface Product {
   'price' : bigint,
 }
 export type ProductId = bigint;
+export type ReferralCode = string;
 export interface ShoppingItem {
   'productName' : string,
   'currency' : string,
@@ -96,23 +96,26 @@ export interface http_request_result {
 }
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addCategory' : ActorMethod<[Category], CategoryId>,
+  'addCoupon' : ActorMethod<[Coupon], undefined>,
+  'addProduct' : ActorMethod<[Product], ProductId>,
   /**
    * / ************
    * /    * Cart & Wishlist Management
    * /    *************
    */
   'addToCart' : ActorMethod<[ProductId], undefined>,
-  /**
-   * / ************
-   * /    * Admin Authentication
-   * /    *************
-   */
-  'adminAuthenticate' : ActorMethod<[string, string], AdminToken>,
+  'addToWishlist' : ActorMethod<[ProductId], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'clearCart' : ActorMethod<[], undefined>,
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
     string
   >,
+  'createReferral' : ActorMethod<[ReferralCode], undefined>,
+  'deleteCategory' : ActorMethod<[CategoryId], undefined>,
+  'deleteCoupon' : ActorMethod<[CouponCode], undefined>,
+  'deleteProduct' : ActorMethod<[ProductId], undefined>,
   /**
    * / ************
    * /    * Coupon Management
@@ -120,6 +123,7 @@ export interface _SERVICE {
    */
   'getAllCoupons' : ActorMethod<[], Array<Coupon>>,
   'getAllCustomerOrders' : ActorMethod<[UserId], Array<Order__1>>,
+  'getAllOrders' : ActorMethod<[], Array<Order__1>>,
   /**
    * / ************
    * /    * User Profile Management
@@ -148,17 +152,15 @@ export interface _SERVICE {
   'getWishlist' : ActorMethod<[], Wishlist>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
-  /**
-   * / ************
-   * /    * Migration Sample Products (needed only once)
-   * /    *************
-   */
-  'migrateSampleProducts' : ActorMethod<[], undefined>,
+  'removeFromCart' : ActorMethod<[ProductId], undefined>,
+  'removeFromWishlist' : ActorMethod<[ProductId], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
+  'updateCategory' : ActorMethod<[CategoryId, Category], undefined>,
+  'updateOrderStatus' : ActorMethod<[OrderId, OrderStatus], undefined>,
+  'updateProduct' : ActorMethod<[ProductId, Product], undefined>,
   'updateSiteSettings' : ActorMethod<[SiteSettings], undefined>,
-  'verifyAdminToken' : ActorMethod<[AdminToken], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

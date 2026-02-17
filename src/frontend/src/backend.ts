@@ -94,7 +94,10 @@ export interface Category {
     id: CategoryId;
     name: string;
 }
-export type AdminToken = string;
+export interface CartItem {
+    productId: ProductId;
+    quantity: bigint;
+}
 export interface TransformationOutput {
     status: bigint;
     body: Uint8Array;
@@ -192,11 +195,8 @@ export interface StripeConfiguration {
     allowedCountries: Array<string>;
     secretKey: string;
 }
+export type ReferralCode = string;
 export type ProductId = bigint;
-export interface CartItem {
-    productId: ProductId;
-    quantity: bigint;
-}
 export interface UserProfile {
     name: string;
     address: string;
@@ -227,20 +227,23 @@ export enum UserRole {
 }
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    addCategory(category: Category): Promise<CategoryId>;
+    addCoupon(coupon: Coupon): Promise<void>;
+    addProduct(product: Product): Promise<ProductId>;
     /**
      * / ************
      * /    * Cart & Wishlist Management
      * /    *************
      */
     addToCart(productId: ProductId): Promise<void>;
-    /**
-     * / ************
-     * /    * Admin Authentication
-     * /    *************
-     */
-    adminAuthenticate(username: string, password: string): Promise<AdminToken>;
+    addToWishlist(productId: ProductId): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    clearCart(): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
+    createReferral(code: ReferralCode): Promise<void>;
+    deleteCategory(categoryId: CategoryId): Promise<void>;
+    deleteCoupon(code: CouponCode): Promise<void>;
+    deleteProduct(productId: ProductId): Promise<void>;
     /**
      * / ************
      * /    * Coupon Management
@@ -248,6 +251,7 @@ export interface backendInterface {
      */
     getAllCoupons(): Promise<Array<Coupon>>;
     getAllCustomerOrders(userId: UserId): Promise<Array<Order__1>>;
+    getAllOrders(): Promise<Array<Order__1>>;
     /**
      * / ************
      * /    * User Profile Management
@@ -276,17 +280,15 @@ export interface backendInterface {
     getWishlist(): Promise<Wishlist>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
-    /**
-     * / ************
-     * /    * Migration Sample Products (needed only once)
-     * /    *************
-     */
-    migrateSampleProducts(): Promise<void>;
+    removeFromCart(productId: ProductId): Promise<void>;
+    removeFromWishlist(productId: ProductId): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
+    updateCategory(categoryId: CategoryId, category: Category): Promise<void>;
+    updateOrderStatus(orderId: OrderId, newStatus: OrderStatus): Promise<void>;
+    updateProduct(productId: ProductId, product: Product): Promise<void>;
     updateSiteSettings(newSettings: SiteSettings): Promise<void>;
-    verifyAdminToken(adminToken: AdminToken): Promise<boolean>;
 }
 import type { CartItem as _CartItem, CategoryId as _CategoryId, Filter as _Filter, Order as _Order, OrderId as _OrderId, OrderStatus as _OrderStatus, Order__1 as _Order__1, StripeSessionStatus as _StripeSessionStatus, Time as _Time, UserId as _UserId, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -305,6 +307,48 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async addCategory(arg0: Category): Promise<CategoryId> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addCategory(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addCategory(arg0);
+            return result;
+        }
+    }
+    async addCoupon(arg0: Coupon): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addCoupon(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addCoupon(arg0);
+            return result;
+        }
+    }
+    async addProduct(arg0: Product): Promise<ProductId> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addProduct(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addProduct(arg0);
+            return result;
+        }
+    }
     async addToCart(arg0: ProductId): Promise<void> {
         if (this.processError) {
             try {
@@ -319,17 +363,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async adminAuthenticate(arg0: string, arg1: string): Promise<AdminToken> {
+    async addToWishlist(arg0: ProductId): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.adminAuthenticate(arg0, arg1);
+                const result = await this.actor.addToWishlist(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.adminAuthenticate(arg0, arg1);
+            const result = await this.actor.addToWishlist(arg0);
             return result;
         }
     }
@@ -347,6 +391,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async clearCart(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.clearCart();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.clearCart();
+            return result;
+        }
+    }
     async createCheckoutSession(arg0: Array<ShoppingItem>, arg1: string, arg2: string): Promise<string> {
         if (this.processError) {
             try {
@@ -358,6 +416,62 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.createCheckoutSession(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async createReferral(arg0: ReferralCode): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createReferral(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createReferral(arg0);
+            return result;
+        }
+    }
+    async deleteCategory(arg0: CategoryId): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteCategory(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteCategory(arg0);
+            return result;
+        }
+    }
+    async deleteCoupon(arg0: CouponCode): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteCoupon(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteCoupon(arg0);
+            return result;
+        }
+    }
+    async deleteProduct(arg0: ProductId): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteProduct(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteProduct(arg0);
             return result;
         }
     }
@@ -386,6 +500,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getAllCustomerOrders(arg0);
+            return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllOrders(): Promise<Array<Order__1>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllOrders();
+                return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllOrders();
             return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
         }
     }
@@ -571,17 +699,31 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async migrateSampleProducts(): Promise<void> {
+    async removeFromCart(arg0: ProductId): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.migrateSampleProducts();
+                const result = await this.actor.removeFromCart(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.migrateSampleProducts();
+            const result = await this.actor.removeFromCart(arg0);
+            return result;
+        }
+    }
+    async removeFromWishlist(arg0: ProductId): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.removeFromWishlist(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.removeFromWishlist(arg0);
             return result;
         }
     }
@@ -627,6 +769,48 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async updateCategory(arg0: CategoryId, arg1: Category): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateCategory(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateCategory(arg0, arg1);
+            return result;
+        }
+    }
+    async updateOrderStatus(arg0: OrderId, arg1: OrderStatus): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateOrderStatus(arg0, to_candid_OrderStatus_n21(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateOrderStatus(arg0, to_candid_OrderStatus_n21(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async updateProduct(arg0: ProductId, arg1: Product): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateProduct(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateProduct(arg0, arg1);
+            return result;
+        }
+    }
     async updateSiteSettings(arg0: SiteSettings): Promise<void> {
         if (this.processError) {
             try {
@@ -638,20 +822,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateSiteSettings(arg0);
-            return result;
-        }
-    }
-    async verifyAdminToken(arg0: AdminToken): Promise<boolean> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.verifyAdminToken(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.verifyAdminToken(arg0);
             return result;
         }
     }
@@ -769,6 +939,9 @@ function from_candid_vec_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function to_candid_Filter_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Filter): _Filter {
     return to_candid_variant_n14(_uploadFile, _downloadFile, value);
 }
+function to_candid_OrderStatus_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: OrderStatus): _OrderStatus {
+    return to_candid_variant_n22(_uploadFile, _downloadFile, value);
+}
 function to_candid_Order_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Order): _Order {
     return to_candid_variant_n16(_uploadFile, _downloadFile, value);
 }
@@ -869,6 +1042,21 @@ function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         user: null
     } : value == UserRole.guest ? {
         guest: null
+    } : value;
+}
+function to_candid_variant_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: OrderStatus): {
+    cancelled: null;
+} | {
+    pending: null;
+} | {
+    completed: null;
+} {
+    return value == OrderStatus.cancelled ? {
+        cancelled: null
+    } : value == OrderStatus.pending ? {
+        pending: null
+    } : value == OrderStatus.completed ? {
+        completed: null
     } : value;
 }
 function to_candid_vec_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<Filter>): Array<_Filter> {

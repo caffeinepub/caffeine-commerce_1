@@ -12,7 +12,10 @@ export interface Category {
     id: CategoryId;
     name: string;
 }
-export type AdminToken = string;
+export interface CartItem {
+    productId: ProductId;
+    quantity: bigint;
+}
 export interface TransformationOutput {
     status: bigint;
     body: Uint8Array;
@@ -110,11 +113,8 @@ export interface StripeConfiguration {
     allowedCountries: Array<string>;
     secretKey: string;
 }
+export type ReferralCode = string;
 export type ProductId = bigint;
-export interface CartItem {
-    productId: ProductId;
-    quantity: bigint;
-}
 export interface UserProfile {
     name: string;
     address: string;
@@ -144,20 +144,23 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    addCategory(category: Category): Promise<CategoryId>;
+    addCoupon(coupon: Coupon): Promise<void>;
+    addProduct(product: Product): Promise<ProductId>;
     /**
      * / ************
      * /    * Cart & Wishlist Management
      * /    *************
      */
     addToCart(productId: ProductId): Promise<void>;
-    /**
-     * / ************
-     * /    * Admin Authentication
-     * /    *************
-     */
-    adminAuthenticate(username: string, password: string): Promise<AdminToken>;
+    addToWishlist(productId: ProductId): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    clearCart(): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
+    createReferral(code: ReferralCode): Promise<void>;
+    deleteCategory(categoryId: CategoryId): Promise<void>;
+    deleteCoupon(code: CouponCode): Promise<void>;
+    deleteProduct(productId: ProductId): Promise<void>;
     /**
      * / ************
      * /    * Coupon Management
@@ -165,6 +168,7 @@ export interface backendInterface {
      */
     getAllCoupons(): Promise<Array<Coupon>>;
     getAllCustomerOrders(userId: UserId): Promise<Array<Order__1>>;
+    getAllOrders(): Promise<Array<Order__1>>;
     /**
      * / ************
      * /    * User Profile Management
@@ -193,15 +197,13 @@ export interface backendInterface {
     getWishlist(): Promise<Wishlist>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
-    /**
-     * / ************
-     * /    * Migration Sample Products (needed only once)
-     * /    *************
-     */
-    migrateSampleProducts(): Promise<void>;
+    removeFromCart(productId: ProductId): Promise<void>;
+    removeFromWishlist(productId: ProductId): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
+    updateCategory(categoryId: CategoryId, category: Category): Promise<void>;
+    updateOrderStatus(orderId: OrderId, newStatus: OrderStatus): Promise<void>;
+    updateProduct(productId: ProductId, product: Product): Promise<void>;
     updateSiteSettings(newSettings: SiteSettings): Promise<void>;
-    verifyAdminToken(adminToken: AdminToken): Promise<boolean>;
 }
