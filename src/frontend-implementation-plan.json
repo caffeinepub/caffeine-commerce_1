@@ -1,59 +1,83 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "BISAULI Shop: Stock-aware shopper UX, admin stock editing, and post-order product refresh",
+  "title": "Category image upload in Admin + modern category image cards on Home",
   "requirements": [
     {
-      "id": "REQ-125",
-      "summary": "Show out-of-stock state in shopper product card grid and product details by replacing Add to Cart with an English \"Out of Stock\" label when stock is 0.",
+      "id": "REQ-146",
+      "summary": "Add category image upload (Data URL) with preview + remove action to the Admin Category create/edit dialog and persist via existing save mutations.",
       "acceptanceCriteria": [
-        "Products with `stock === 0` still render in catalog/home/product listings and on the product details page.",
-        "On `ProductCard`, when `stock === 0`, the primary action area shows an English \"Out of Stock\" label instead of the \"Add to Cart\" button.",
-        "On `ProductDetailsPage`, when `stock === 0`, the Add to Cart button is not actionable and an English \"Out of Stock\" label is shown in place of the Add to Cart action text.",
-        "No shopper UI displays a clickable Add to Cart action for `stock === 0`."
+        "`frontend/src/components/admin/CategoryEditorDialog.tsx` includes an image file input (accepting images) for both Add and Edit flows.",
+        "When an admin selects an image file, the dialog shows an inline preview before saving.",
+        "The selected image is converted to a Data URL string and sent in the category payload when saving.",
+        "If a non-image file is selected, show a clear English validation error and do not set the image.",
+        "Provide a clear/remove action to unset a selected image before saving.",
+        "All user-facing labels, helper text, and validation errors in this dialog are in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/product/ProductCard.tsx",
+          "path": "frontend/src/components/admin/CategoryEditorDialog.tsx",
           "operation": "modify",
-          "description": "Update the primary action area so that when `product.stock === 0n`, the \"Add to Cart\" button is not rendered and is replaced with a non-clickable English \"Out of Stock\" label (keep the product card visible)."
+          "description": "Extend dialog form state to include `imageUrl`, add an image-only file input with validation (reject non-images with an English error), convert the selected file to a Data URL via FileReader, render an inline preview, and add a clear/remove action; include `imageUrl` in the category payload for both add and update saves."
         },
         {
-          "path": "frontend/src/pages/ProductDetailsPage.tsx",
+          "path": "frontend/src/backend.d.ts",
           "operation": "modify",
-          "description": "Adjust the Add to Cart action so that when `product.stock === 0n`, it is not actionable and the button text is replaced with an English \"Out of Stock\" label (while keeping the product visible and details accessible)."
+          "description": "Update the frontend-generated `Category` type to use the new `imageUrl: string` field (and adjust/remove any old image field) so CategoryEditorDialog can submit the image consistently with the backend interface."
+        },
+        {
+          "path": "frontend/src/hooks/queries/useAdminCatalog.ts",
+          "operation": "modify",
+          "description": "Align admin category mutation hook typings and payload construction with the updated `Category` type that includes `imageUrl`, ensuring add/update calls accept and send the image field without breaking existing flows."
         }
       ]
     },
     {
-      "id": "REQ-126",
-      "summary": "Ensure the Admin product create/edit dialog includes an explicit editable Stock field with non-negative numeric validation and persists the value on save.",
+      "id": "REQ-147",
+      "summary": "Render shopper Home category cards using uploaded category images and update styling to a modern, responsive card layout with proper fallbacks.",
       "acceptanceCriteria": [
-        "Admin product create/edit form shows an editable Stock field with an English label (e.g., \"Stock Quantity\").",
-        "Stock input only accepts non-negative numeric values and shows a clear English validation error when invalid.",
-        "Saving a product updates the backend `Product.stock` to match the value entered in the admin form.",
-        "After saving a stock change, the Admin products list reflects the updated stock without requiring a hard refresh (via existing React Query invalidation behavior)."
+        "`frontend/src/components/home/CategoriesGrid.tsx` renders category cards using the category’s `imageUrl` when present.",
+        "Category cards have a modern/professional look (e.g., image at top or as a background with readable overlay text), with hover/focus styling preserved.",
+        "If a category has no image, render a clean fallback (do not show a broken image).",
+        "Category card click behavior remains unchanged (navigates to `/catalog` with the category filter).",
+        "The category grid remains responsive across mobile and desktop."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/admin/ProductEditorDialog.tsx",
+          "path": "frontend/src/components/category/CategoryImage.tsx",
+          "operation": "create",
+          "description": "Create a reusable CategoryImage renderer that accepts `imageUrl` and `alt`, uses a clean fallback when empty, and handles image load failures without showing broken images (e.g., fallback to `frontend/public/assets/generated/product-placeholder.dim_800x800.png`)."
+        },
+        {
+          "path": "frontend/src/components/home/CategoriesGrid.tsx",
           "operation": "modify",
-          "description": "Harden Stock field validation to accept only non-negative numeric values (including allowing 0), display a clear English validation error when invalid (e.g., empty, NaN, negative, non-integer), and ensure the saved `Product` continues to include `stock` derived from the validated input."
+          "description": "Replace the placeholder icon box with modern category cards that display the category image via the new `CategoryImage` component, using `category.imageUrl` when available; keep click navigation to `/catalog` with category filter unchanged and maintain responsive grid + hover/focus styling."
+        },
+        {
+          "path": "frontend/src/hooks/queries/useCatalog.ts",
+          "operation": "modify",
+          "description": "Ensure the shopper categories query typing aligns with the updated `Category` type (including `imageUrl`) so the Home categories grid can safely render images."
         }
       ]
     },
     {
-      "id": "REQ-127",
-      "summary": "Invalidate the products query after successful order placement so shopper UI reflects updated stock without manual reload.",
+      "id": "REQ-148",
+      "summary": "Show category image thumbnails in the Admin Categories list with a stable layout and robust fallbacks.",
       "acceptanceCriteria": [
-        "On successful `placeOrder`, the frontend invalidates `queryKeys.products` in addition to existing cart/orders invalidations.",
-        "After placing an order that reduces stock to 0, the relevant product(s) show out-of-stock UX on subsequent navigation without a hard reload."
+        "`frontend/src/pages/admin/AdminCategoriesPage.tsx` shows a thumbnail column (or equivalent) for each category when `imageUrl` is present.",
+        "If `imageUrl` is empty, show an English fallback indicator (e.g., 'No image') without breaking the table layout.",
+        "The page remains stable with loading/empty/error states and does not crash when images fail to load."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/mutations/usePlaceOrder.ts",
+          "path": "frontend/src/pages/admin/AdminCategoriesPage.tsx",
           "operation": "modify",
-          "description": "On successful `placeOrder`, also invalidate `queryKeys.products` (in addition to existing cart/orders/dashboard invalidations) so product stock changes are refetched and reflected across catalog/product pages."
+          "description": "Add a thumbnail column to the categories table that renders a small preview using the shared `CategoryImage` component when `imageUrl` is present; otherwise show an English 'No image' indicator, and ensure failed image loads fall back without breaking layout or crashing."
+        },
+        {
+          "path": "frontend/src/components/category/CategoryImage.tsx",
+          "operation": "modify",
+          "description": "Extend the component (if needed) to support a small thumbnail mode via className/size props so it can be reused safely in the admin list without layout shifts."
         }
       ]
     }

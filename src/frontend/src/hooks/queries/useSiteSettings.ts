@@ -18,7 +18,10 @@ export function useGetSiteSettings() {
       };
     },
     enabled: !!actor && !actorFetching,
-    retry: 1,
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes to reduce flicker
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnMount: 'always', // Always refetch on mount to ensure fresh data
   });
 }
 

@@ -10,10 +10,13 @@ export function useGetAllOrders() {
     queryKey: queryKeys.adminOrders,
     queryFn: async () => {
       if (!actor) throw new Error('Backend service is not available');
-      return actor.getAllOrders();
+      const orders = await actor.getAllOrders();
+      return orders;
     },
     enabled: !!actor && !actorFetching,
     retry: 2,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: 'always', // Always refetch on mount
   });
 }
 

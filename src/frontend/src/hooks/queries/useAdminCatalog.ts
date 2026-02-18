@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAdminActor } from '../useAdminActor';
 import { queryKeys } from './queryClientKeys';
-import type { Product, Category, Filter, ProductId, CategoryId } from '../../backend';
+import type { Product, Category, Filter, ProductId, CategoryId, ProductInput } from '../../backend';
 
 // Admin query hooks using anonymous actor (no Internet Identity required)
 
@@ -51,10 +51,9 @@ export function useAdminAddProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (product: Omit<Product, 'id'>) => {
+    mutationFn: async (productInput: ProductInput) => {
       if (!actor) throw new Error('Actor not available');
-      const productWithId: Product = { ...product, id: 0n };
-      return actor.addProduct(productWithId);
+      return actor.addProduct(productInput);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products });
@@ -67,7 +66,7 @@ export function useAdminUpdateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ productId, product }: { productId: ProductId; product: Product }) => {
+    mutationFn: async ({ productId, product }: { productId: ProductId; product: ProductInput }) => {
       if (!actor) throw new Error('Actor not available');
       await actor.updateProduct(productId, product);
     },

@@ -1,72 +1,87 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T04:20:12.644Z",
+  "generatedAt": "2026-02-18T06:13:33.541Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 5,
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-124",
-        "summary": "Update the backend order placement flow so that when `placeOrder(shippingAddress)` succeeds, the stock for each ordered product is decreased by the ordered quantity (and never becomes negative). If any product does not exist or does not have enough stock to fulfill the requested quantity, the backend must fail the order placement with a clear English error message and must not modify any product stock nor clear the cart.",
+        "id": "REQ-144",
+        "summary": "Extend the backend Category model to store an uploaded category image as a Text field (Data URL or URL string) and return it from category queries.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-125",
-        "summary": "Update shopper-facing product UI so that when a product’s stock is 0, the product remains visible but the Add to Cart action is disabled and replaced with an \"Out of Stock\" label (English). Apply this behavior consistently at least on the product card grid (`frontend/src/components/product/ProductCard.tsx`) and on the product details page (`frontend/src/pages/ProductDetailsPage.tsx`).",
+        "id": "REQ-145",
+        "summary": "Update backend category CRUD methods to accept and persist the Category image field when creating and editing categories.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-146",
+        "summary": "Add a Category Image file upload control with preview to the Admin Category create/edit dialog, storing the selected image in form state as a Data URL string and saving it via the existing category create/update mutations.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/product/ProductCard.tsx",
-          "frontend/src/pages/ProductDetailsPage.tsx"
+          "frontend/src/components/admin/CategoryEditorDialog.tsx",
+          "frontend/src/backend.d.ts",
+          "frontend/src/hooks/queries/useAdminCatalog.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/product/ProductCard.tsx",
-          "frontend/src/pages/ProductDetailsPage.tsx"
+          "frontend/src/components/admin/CategoryEditorDialog.tsx",
+          "frontend/src/backend.d.ts"
         ]
       },
       {
-        "id": "REQ-126",
-        "summary": "Ensure the Admin product create/edit UI includes an explicit editable Stock field (English label) and that saving a product persists the entered stock value to the backend product record. This must be supported in the existing Admin product editor dialog (`frontend/src/components/admin/ProductEditorDialog.tsx`).",
+        "id": "REQ-147",
+        "summary": "Display the uploaded category image on the shopper Home page category grid instead of the current placeholder icon box, and style category cards to look modern and professional.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/admin/ProductEditorDialog.tsx"
+          "frontend/src/components/category/CategoryImage.tsx",
+          "frontend/src/components/home/CategoriesGrid.tsx",
+          "frontend/src/hooks/queries/useCatalog.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/admin/ProductEditorDialog.tsx"
+          "frontend/src/components/category/CategoryImage.tsx",
+          "frontend/src/components/home/CategoriesGrid.tsx"
         ]
       },
       {
-        "id": "REQ-127",
-        "summary": "After a successful order placement, refresh product data in the shopper UI by invalidating the products query cache so that stock changes (including reaching 0) are reflected without a manual reload.",
+        "id": "REQ-148",
+        "summary": "Show a small image thumbnail in the Admin Categories list so admins can verify which image is attached to each category.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/mutations/usePlaceOrder.ts"
+          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+          "frontend/src/components/category/CategoryImage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/mutations/usePlaceOrder.ts"
+          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+          "frontend/src/components/category/CategoryImage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/admin/ProductEditorDialog.tsx",
-    "frontend/src/components/product/ProductCard.tsx",
+    "frontend/src/components/admin/CategoryEditorDialog.tsx",
+    "frontend/src/components/category/CategoryImage.tsx",
+    "frontend/src/components/home/CategoriesGrid.tsx",
     "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/hooks/mutations/usePlaceOrder.ts",
-    "frontend/src/pages/ProductDetailsPage.tsx",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/pages/admin/AdminCategoriesPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

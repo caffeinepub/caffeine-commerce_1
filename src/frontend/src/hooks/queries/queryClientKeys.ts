@@ -14,4 +14,5 @@ export const queryKeys = {
   referrals: (userId: string) => ['referrals', userId] as const,
   stripeConfigured: ['stripeConfigured'] as const,
   siteSettings: ['siteSettings'] as const,
+  vendorProducts: ['vendorProducts'] as const,
 };

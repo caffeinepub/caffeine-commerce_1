@@ -28,7 +28,7 @@ export default function Header() {
   const { language, setLanguage, t } = useTranslation();
   const { data: isAdmin } = useIsCallerAdmin();
   const { data: cart } = useGetCart();
-  const { data: siteSettings } = useGetSiteSettings();
+  const { data: siteSettings, isLoading: siteSettingsLoading } = useGetSiteSettings();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -38,6 +38,7 @@ export default function Header() {
 
   // Enforce BISAULI branding
   const shopName = 'BISAULI';
+  const logoUrl = siteSettings?.logo || '';
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -78,11 +79,27 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between gap-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            {siteSettings?.logo ? (
-              <img src={siteSettings.logo} alt={shopName} className="h-8 w-auto" />
-            ) : (
-              <span className="text-xl font-bold">{shopName}</span>
-            )}
+            {!siteSettingsLoading && logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={shopName} 
+                className="h-8 w-auto object-contain"
+                onError={(e) => {
+                  // Fallback to text if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  const textFallback = e.currentTarget.nextElementSibling;
+                  if (textFallback) {
+                    (textFallback as HTMLElement).style.display = 'inline';
+                  }
+                }}
+              />
+            ) : null}
+            <span 
+              className="text-xl font-bold" 
+              style={{ display: logoUrl && !siteSettingsLoading ? 'none' : 'inline' }}
+            >
+              {shopName}
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -252,72 +269,63 @@ export default function Header() {
                         {link.label}
                       </Link>
                     ))}
-                    <Link
-                      to="/wishlist"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                    >
-                      {t('nav.wishlist')}
-                    </Link>
-                    <Link
-                      to="/cart"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent flex items-center justify-between"
-                    >
-                      {t('nav.cart')}
-                      {cartItemCount > 0 && (
-                        <Badge variant="destructive">{cartItemCount}</Badge>
-                      )}
-                    </Link>
                   </nav>
 
                   {/* Mobile User Actions */}
-                  <div className="border-t pt-4">
+                  <div className="space-y-2 border-t pt-4">
                     {isAuthenticated ? (
-                      <div className="flex flex-col gap-2">
+                      <>
                         <Link
                           to="/profile"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                          className="block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
                         >
                           {t('nav.profile')}
                         </Link>
                         <Link
                           to="/orders"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                          className="block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
                         >
                           {t('nav.orders')}
+                        </Link>
+                        <Link
+                          to="/wishlist"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                        >
+                          {t('nav.wishlist')}
                         </Link>
                         {isAdmin && (
                           <Link
                             to="/admin"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                            className="block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
                           >
                             {t('nav.admin')}
                           </Link>
                         )}
                         <Button
                           variant="outline"
+                          className="w-full justify-start"
                           onClick={() => {
                             handleAuth();
                             setMobileMenuOpen(false);
                           }}
                           disabled={isLoggingIn}
-                          className="justify-start"
                         >
                           {t('auth.logout')}
                         </Button>
-                      </div>
+                      </>
                     ) : (
                       <Button
+                        variant="default"
+                        className="w-full"
                         onClick={() => {
                           handleAuth();
                           setMobileMenuOpen(false);
                         }}
                         disabled={isLoggingIn}
-                        className="w-full"
                       >
                         {isLoggingIn ? t('auth.loggingIn') : t('auth.login')}
                       </Button>
@@ -325,41 +333,49 @@ export default function Header() {
                   </div>
 
                   {/* Mobile Theme & Language */}
-                  <div className="border-t pt-4 flex gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="flex-1">
-                          {theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => setTheme('light')}>
-                          {t('theme.light')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTheme('dark')}>
-                          {t('theme.dark')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTheme('system')}>
-                          {t('theme.system')}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="flex-1">
-                          <Globe className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => setLanguage('en')}>
-                          English
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setLanguage('hi')}>
-                          हिन्दी
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <div className="space-y-2 border-t pt-4">
+                    <div className="px-3 text-sm font-medium text-muted-foreground">
+                      {t('theme.title')}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant={theme === 'light' ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => setTheme('light')}
+                      >
+                        {t('theme.light')}
+                      </Button>
+                      <Button
+                        variant={theme === 'dark' ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => setTheme('dark')}
+                      >
+                        {t('theme.dark')}
+                      </Button>
+                    </div>
+                    <div className="px-3 pt-2 text-sm font-medium text-muted-foreground">
+                      Language
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant={language === 'en' ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => setLanguage('en')}
+                      >
+                        English
+                      </Button>
+                      <Button
+                        variant={language === 'hi' ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => setLanguage('hi')}
+                      >
+                        हिन्दी
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </SheetContent>
@@ -367,9 +383,9 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Search Bar - Always visible below main header on small screens */}
-        <div className="pb-3 md:hidden">
-          <form onSubmit={handleSearch}>
+        {/* Mobile Search - below main header on small screens */}
+        <div className="flex pb-3 lg:hidden">
+          <form onSubmit={handleSearch} className="w-full">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -377,23 +393,7 @@ export default function Header() {
                 placeholder={t('search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-full focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-          </form>
-        </div>
-
-        {/* Tablet Search Bar - visible on md but hidden on lg+ */}
-        <div className="hidden md:block lg:hidden pb-3">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder={t('search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-full focus-visible:ring-2 focus-visible:ring-ring"
+                className="pl-9 w-full"
               />
             </div>
           </form>

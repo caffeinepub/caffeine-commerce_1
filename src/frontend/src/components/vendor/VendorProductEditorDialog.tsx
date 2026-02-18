@@ -7,22 +7,23 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, ArrowRight, Upload, X, RefreshCw } from 'lucide-react';
-import { useAdminAddProduct, useAdminUpdateProduct, useAdminGetCategories } from '../../hooks/queries/useAdminCatalog';
+import { useVendorAddProduct, useVendorUpdateProduct } from '../../hooks/queries/useVendorProducts';
+import { useAdminGetCategories } from '../../hooks/queries/useAdminCatalog';
 import type { Product, ProductInput } from '../../backend';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
 import { detectBackendUnavailability } from '../../utils/backendAvailabilityErrors';
 
-interface ProductEditorDialogProps {
+interface VendorProductEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product?: Product | null;
 }
 
-export function ProductEditorDialog({ open, onOpenChange, product }: ProductEditorDialogProps) {
+export function VendorProductEditorDialog({ open, onOpenChange, product }: VendorProductEditorDialogProps) {
   const isEditing = !!product;
-  const addProduct = useAdminAddProduct();
-  const updateProduct = useAdminUpdateProduct();
+  const addProduct = useVendorAddProduct();
+  const updateProduct = useVendorUpdateProduct();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useAdminGetCategories();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,7 +66,6 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
     setStockError('');
     setLastFailedData(null);
     
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -77,7 +77,6 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
 
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       setImageError('Please select a valid image file (PNG, JPEG, etc.)');
       if (fileInputRef.current) {
@@ -86,7 +85,6 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
       return;
     }
 
-    // Additional validation for common image formats
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       setImageError('Please select a PNG, JPEG, GIF, or WebP image file');
@@ -96,7 +94,6 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
       return;
     }
 
-    // Convert to Data URL
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
@@ -123,7 +120,6 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
     setStockError('');
     setFormData({ ...formData, stock: value });
     
-    // Validate stock in real-time
     if (value.trim() === '') {
       setStockError('Stock quantity is required');
       return;
@@ -151,7 +147,6 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
     setErrorMessage('');
     setStockError('');
 
-    // Validation
     if (!formData.name.trim()) {
       setErrorMessage('Product name is required');
       return;
@@ -165,7 +160,6 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
       return;
     }
     
-    // Stock validation
     if (!formData.stock || formData.stock.trim() === '') {
       setStockError('Stock quantity is required');
       return;
@@ -203,7 +197,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
 
     try {
       if (isEditing && product) {
-        await updateProduct.mutateAsync({ productId: product.id, product: productInput });
+        await updateProduct.mutateAsync({ productId: product.id, input: productInput });
         toast.success('Product updated successfully');
       } else {
         await addProduct.mutateAsync(productInput);
@@ -227,7 +221,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
     
     try {
       if (isEditing && product) {
-        await updateProduct.mutateAsync({ productId: product.id, product: lastFailedData });
+        await updateProduct.mutateAsync({ productId: product.id, input: lastFailedData });
         toast.success('Product updated successfully');
       } else {
         await addProduct.mutateAsync(lastFailedData);
@@ -251,15 +245,10 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
   const isPending = addProduct.isPending || updateProduct.isPending;
   const categoryList = categories || [];
   
-  // Detect backend unavailability for categories
   const categoriesErrorInfo = categoriesError ? detectBackendUnavailability(categoriesError) : null;
   const isCategoriesBackendUnavailable = categoriesErrorInfo?.isBackendUnavailable || false;
   const hasCategoriesError = !!categoriesError;
   const hasNoCategories = !categoriesLoading && categoryList.length === 0;
-  
-  // Detect backend unavailability for product save
-  const saveErrorInfo = errorMessage ? detectBackendUnavailability({ message: errorMessage }) : null;
-  const isSaveBackendUnavailable = saveErrorInfo?.isBackendUnavailable || false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -318,16 +307,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">
-                <span>No categories available. Please create a category first.</span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNavigateToCategories}
-                >
-                  Go to Categories
-                  <ArrowRight className="ml-2 h-3 w-3" />
-                </Button>
+                <span>No categories available. Please ask the admin to create categories first.</span>
               </AlertDescription>
             </Alert>
           )}

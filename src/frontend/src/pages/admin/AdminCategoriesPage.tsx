@@ -10,6 +10,7 @@ import type { Category } from '../../backend';
 import { CategoryEditorDialog } from '../../components/admin/CategoryEditorDialog';
 import { toast } from 'sonner';
 import { detectBackendUnavailability } from '../../utils/backendAvailabilityErrors';
+import CategoryImage from '../../components/category/CategoryImage';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -153,6 +154,7 @@ export default function AdminCategoriesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Image</TableHead>
                       <TableHead>ID</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -161,6 +163,19 @@ export default function AdminCategoriesPage() {
                   <TableBody>
                     {categoryList.map((category) => (
                       <TableRow key={Number(category.id)}>
+                        <TableCell>
+                          {category.image ? (
+                            <CategoryImage
+                              imageUrl={category.image}
+                              alt={category.name}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 flex items-center justify-center bg-muted rounded text-xs text-muted-foreground">
+                              No image
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">{Number(category.id)}</TableCell>
                         <TableCell>{category.name}</TableCell>
                         <TableCell className="text-right">

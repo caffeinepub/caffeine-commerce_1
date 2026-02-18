@@ -71,23 +71,23 @@ export function detectBackendUnavailability(error: any): BackendErrorInfo {
     };
   }
 
-  // For any other error (including authorization-like messages from backend),
-  // return a neutral operational message
-  const originalMessage = error.message || 'An error occurred';
-  
-  // Sanitize authorization-related messages to be neutral
+  // For authorization-related errors during open admin phase, sanitize to neutral operational message
   if (errorString.includes('unauthorized') || 
       errorString.includes('permission') || 
       errorString.includes('access denied') ||
-      errorString.includes('only admins can')) {
+      errorString.includes('only admins can') ||
+      errorString.includes('no permission') ||
+      errorString.includes('only users can') ||
+      errorString.includes('admin') && errorString.includes('action')) {
     return {
       isBackendUnavailable: false,
-      userMessage: 'Unable to complete the operation. Please try again.',
+      userMessage: 'Unable to complete the operation. Please refresh the page and try again.',
       originalError: error,
     };
   }
 
   // Generic error - return the original message
+  const originalMessage = error.message || String(error) || 'An error occurred';
   return {
     isBackendUnavailable: false,
     userMessage: originalMessage,

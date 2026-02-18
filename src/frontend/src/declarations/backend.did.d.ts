@@ -12,7 +12,11 @@ import type { Principal } from '@icp-sdk/core/principal';
 
 export interface Cart { 'items' : Array<CartItem> }
 export interface CartItem { 'productId' : ProductId, 'quantity' : bigint }
-export interface Category { 'id' : CategoryId, 'name' : string }
+export interface Category {
+  'id' : CategoryId,
+  'name' : string,
+  'image' : string,
+}
 export type CategoryId = bigint;
 export interface Coupon {
   'code' : CouponCode,
@@ -53,6 +57,7 @@ export interface Order__1 {
 export interface Product {
   'id' : ProductId,
   'categoryId' : CategoryId,
+  'owner' : UserId,
   'name' : string,
   'description' : string,
   'stock' : bigint,
@@ -60,6 +65,14 @@ export interface Product {
   'price' : bigint,
 }
 export type ProductId = bigint;
+export interface ProductInput {
+  'categoryId' : CategoryId,
+  'name' : string,
+  'description' : string,
+  'stock' : bigint,
+  'imageUrl' : string,
+  'price' : bigint,
+}
 export type ReferralCode = string;
 export interface ShippingAddress {
   'name' : string,
@@ -99,6 +112,17 @@ export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
 export interface Wishlist { 'productIds' : Array<ProductId> }
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface http_header { 'value' : string, 'name' : string }
 export interface http_request_result {
   'status' : bigint,
@@ -106,15 +130,25 @@ export interface http_request_result {
   'headers' : Array<http_header>,
 }
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addCategory' : ActorMethod<[Category], CategoryId>,
   'addCoupon' : ActorMethod<[Coupon], undefined>,
-  'addProduct' : ActorMethod<[Product], ProductId>,
-  /**
-   * / ************
-   * /    * Cart & Wishlist
-   * /    *************
-   */
+  'addProduct' : ActorMethod<[ProductInput], ProductId>,
   'addToCart' : ActorMethod<[ProductId], undefined>,
   'addToWishlist' : ActorMethod<[ProductId], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
@@ -127,58 +161,25 @@ export interface _SERVICE {
   'deleteCategory' : ActorMethod<[CategoryId], undefined>,
   'deleteCoupon' : ActorMethod<[CouponCode], undefined>,
   'deleteProduct' : ActorMethod<[ProductId], undefined>,
-  /**
-   * / ************
-   * /    * Coupons
-   * /    *************
-   */
   'getAllCoupons' : ActorMethod<[], Array<Coupon>>,
   'getAllCustomerOrders' : ActorMethod<[UserId], Array<Order__1>>,
   'getAllOrders' : ActorMethod<[], Array<Order__1>>,
-  /**
-   * / ************
-   * /    * User Profile
-   * /    *************
-   */
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCart' : ActorMethod<[], Cart>,
   'getCategories' : ActorMethod<[], Array<Category>>,
   'getOrder' : ActorMethod<[OrderId], Order__1>,
-  /**
-   * / ************
-   * /    * Products & Categories
-   * /    *************
-   */
+  'getOwnerProducts' : ActorMethod<[], Array<Product>>,
+  'getProductOwner' : ActorMethod<[ProductId], Principal>,
   'getProducts' : ActorMethod<[Array<Filter>], Array<Product>>,
-  /**
-   * / ************
-   * /    * Site Settings
-   * /    *************
-   */
   'getSiteSettings' : ActorMethod<[], SiteSettings>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  /**
-   * / ************
-   * /    * Referrals & Orders
-   * /    *************
-   */
   'getUserReferrals' : ActorMethod<[UserId], Array<UserId>>,
   'getWishlist' : ActorMethod<[], Wishlist>,
-  /**
-   * / ************
-   * /    * General
-   * /    *************
-   */
   'healthCheck' : ActorMethod<[], string>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
-  /**
-   * / ************
-   * /    * Place Order
-   * /    *************
-   */
   'placeOrder' : ActorMethod<[ShippingAddress], OrderId>,
   'removeFromCart' : ActorMethod<[ProductId], undefined>,
   'removeFromWishlist' : ActorMethod<[ProductId], undefined>,
@@ -187,7 +188,7 @@ export interface _SERVICE {
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'updateCategory' : ActorMethod<[CategoryId, Category], undefined>,
   'updateOrderStatus' : ActorMethod<[OrderId, OrderStatus], undefined>,
-  'updateProduct' : ActorMethod<[ProductId, Product], undefined>,
+  'updateProduct' : ActorMethod<[ProductId, ProductInput], undefined>,
   'updateSiteSettings' : ActorMethod<[SiteSettings], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

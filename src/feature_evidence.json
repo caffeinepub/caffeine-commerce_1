@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-shopper-facing-product-ui-so-that-when-a-product-s-stock-is-0-the-product-remains-visible-but-the-add-to-cart-action-is-disabled-and-replaced-with-an-out-of-stock-label-english-apply-this-behavior-consistently-at-least-on-the-product-card-grid-frontend-src-components-product-productcard-tsx-and-on-the-product-details-page-frontend-src-pages-productdetailspage-tsx",
-      "featureTitle": "Update shopper-facing product UI so that when a product’s stock is 0, the product remains visible but the Add to Cart action is disabled and replaced with an \"Out of Stock\" label (English). Apply this behavior consistently at least on the product card grid (`frontend/src/components/product/ProductCard.tsx`) and on the product details page (`frontend/src/pages/ProductDetailsPage.tsx`).",
+      "featureId": "feature-add-a-category-image-file-upload-control-with-preview-to-the-admin-category-create-edit-dialog-storing-the-selected-image-in-form-state-as-a-data-url-string-and-saving-it-via-the-existing-category-create-update-mutations",
+      "featureTitle": "Add a Category Image file upload control with preview to the Admin Category create/edit dialog, storing the selected image in form state as a Data URL string and saving it via the existing category create/update mutations.",
       "files": [
-        "frontend/src/components/product/ProductCard.tsx",
-        "frontend/src/pages/ProductDetailsPage.tsx"
+        "frontend/src/components/admin/CategoryEditorDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,18 +15,20 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-125"
+        "REQ-146"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-admin-product-create-edit-ui-includes-an-explicit-editable-stock-field-english-label-and-that-saving-a-product-persists-the-entered-stock-value-to-the-backend-product-record-this-must-be-supported-in-the-existing-admin-product-editor-dialog-frontend-src-components-admin-producteditordialog-tsx",
-      "featureTitle": "Ensure the Admin product create/edit UI includes an explicit editable Stock field (English label) and that saving a product persists the entered stock value to the backend product record. This must be supported in the existing Admin product editor dialog (`frontend/src/components/admin/ProductEditorDialog.tsx`).",
+      "featureId": "feature-display-the-uploaded-category-image-on-the-shopper-home-page-category-grid-instead-of-the-current-placeholder-icon-box-and-style-category-cards-to-look-modern-and-professional",
+      "featureTitle": "Display the uploaded category image on the shopper Home page category grid instead of the current placeholder icon box, and style category cards to look modern and professional.",
       "files": [
-        "frontend/src/components/admin/ProductEditorDialog.tsx"
+        "frontend/src/components/category/CategoryImage.tsx",
+        "frontend/src/components/home/CategoriesGrid.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -37,18 +38,20 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-126"
+        "REQ-147"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-after-a-successful-order-placement-refresh-product-data-in-the-shopper-ui-by-invalidating-the-products-query-cache-so-that-stock-changes-including-reaching-0-are-reflected-without-a-manual-reload",
-      "featureTitle": "After a successful order placement, refresh product data in the shopper UI by invalidating the products query cache so that stock changes (including reaching 0) are reflected without a manual reload.",
+      "featureId": "feature-show-a-small-image-thumbnail-in-the-admin-categories-list-so-admins-can-verify-which-image-is-attached-to-each-category",
+      "featureTitle": "Show a small image thumbnail in the Admin Categories list so admins can verify which image is attached to each category.",
       "files": [
-        "frontend/src/hooks/mutations/usePlaceOrder.ts"
+        "frontend/src/components/category/CategoryImage.tsx",
+        "frontend/src/pages/admin/AdminCategoriesPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -58,10 +61,11 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-127"
+        "REQ-148"
       ],
       "confidence": "high"
     }

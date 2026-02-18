@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 57,
-  "summary": "Immediate priority: remove/disable all permission checks across the entire Admin area (frontend admin folder and any remaining backend guards) so Orders, Categories, and Products are fully accessible without any 'Unauthorized'/'No Permission' errors; admin access must be completely open during this phase.",
+  "projectStateVersion": 67,
+  "summary": "Immediate priority: fix deployment reliability by clearing build/deploy cache (resolve prior deployment error), then implement a simplified Vendor/Shopkeeper system starting with a basic Shopkeeper Panel at /vendor where shopkeepers can register/login and add/manage their own products (including stock). Admin approval/blocking and product go-live approvals are deferred to a later phase.",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
     "Backend to use Firebase or Supabase, including secure authentication, real-time database updates, and cloud image storage.",
@@ -819,6 +819,110 @@
         "REQ-127"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-dashboard-total-orders-statistic-is-derived-from-the-same-persisted-orders-data-source-that-is-written-during-checkout-the-same-orders-collection-map-used-in-placeorder-so-the-dashboard-does-not-show-0-when-orders-exist-and-stock-has-been-deducted",
+      "title": "Ensure the Admin Dashboard 'Total Orders' statistic is derived from the same persisted Orders data source that is written during checkout (the same orders collection/map used in `placeOrder`), so the dashboard does not show 0 when orders exist and stock has been deducted.",
+      "reqIds": [
+        "REQ-130"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-admin-actor-initialization-flow-so-admin-pages-can-reliably-call-backend-admin-methods-in-the-open-admin-phase-without-requiring-a-secret-token-url-parameter-the-admin-actor-must-initialize-successfully-and-allow-calling-getallorders-even-when-no-caffeineadmintoken-url-parameter-is-present",
+      "title": "Fix the Admin actor initialization flow so Admin pages can reliably call backend admin methods in the open-admin phase without requiring a secret token URL parameter. The admin actor must initialize successfully and allow calling `getAllOrders()` even when no `caffeineAdminToken` URL parameter is present.",
+      "reqIds": [
+        "REQ-131"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-generic-admin-operational-failure-messaging-for-order-fetch-failures-with-a-clearer-english-error-that-distinguishes-backend-unavailable-errors-vs-other-failures-and-ensure-the-ui-shows-the-actual-formatted-error-instead-of-a-generic-unable-to-complete-the-operation-please-try-again-message-for-admin-orders-and-admin-dashboard-stats-loading",
+      "title": "Replace the generic admin operational failure messaging for order fetch failures with a clearer English error that distinguishes backend-unavailable errors vs other failures, and ensure the UI shows the actual formatted error instead of a generic 'Unable to complete the operation. Please try again' message for Admin Orders and Admin Dashboard stats loading.",
+      "reqIds": [
+        "REQ-132"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-shopper-site-header-displays-the-persisted-logo-from-site-settings-across-the-site-not-just-immediately-after-save-including-after-reload",
+      "title": "Ensure the shopper site header displays the persisted logo from Site Settings across the site (not just immediately after save), including after reload.",
+      "reqIds": [
+        "REQ-135"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-orders-frontend-experience-does-not-apply-any-admin-role-gating-that-could-surface-unauthorized-errors-for-admin-orders-and-instead-surfaces-operational-errors-in-clear-english-e-g-backend-unavailable-not-found-validation-without-redirects-to-any-login-access-denied-flow",
+      "title": "Ensure the Admin Orders frontend experience does not apply any admin/role gating that could surface \"Unauthorized\" errors for `/admin/orders`, and instead surfaces operational errors in clear English (e.g., backend unavailable, not found, validation) without redirects to any login/access-denied flow.",
+      "reqIds": [
+        "REQ-137"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-perform-a-clean-build-verification-to-ensure-no-stale-admin-permission-code-remains-blocking-site-settings-or-orders-functionality-and-the-production-build-passes-typescript-motoko",
+      "title": "Perform a clean build verification to ensure no stale admin-permission code remains blocking Site Settings or Orders functionality, and the production build passes (TypeScript + Motoko).",
+      "reqIds": [
+        "REQ-138"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-vendor-route-in-frontend-src-app-tsx-that-provides-a-basic-shopkeeper-panel-ui-with-1-register-2-login-and-3-a-shopkeeper-dashboard-where-a-logged-in-shopkeeper-can-add-and-manage-their-own-products-with-fields-name-price-category-stock-and-image-upload-with-preview-use-english-for-all-user-facing-text",
+      "title": "Add a new `/vendor` route in `frontend/src/App.tsx` that provides a basic Shopkeeper Panel UI with (1) Register, (2) Login, and (3) a Shopkeeper Dashboard where a logged-in shopkeeper can add and manage their own products with fields: Name, Price, Category, Stock, and Image upload (with preview). Use English for all user-facing text.",
+      "reqIds": [
+        "REQ-140"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-dedicated-react-query-hooks-for-vendor-authentication-state-and-vendor-product-crud-that-call-the-new-backend-vendor-methods-and-keep-the-ui-in-sync-including-cache-invalidation-so-newly-added-edited-vendor-products-appear-immediately-in-the-vendor-dashboard-and-in-shopper-facing-product-lists",
+      "title": "Create dedicated React Query hooks for vendor authentication state and vendor product CRUD that call the new backend vendor methods and keep the UI in sync (including cache invalidation so newly added/edited vendor products appear immediately in the Vendor Dashboard and in shopper-facing product lists).",
+      "reqIds": [
+        "REQ-141"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-document-and-surface-the-direct-url-path-for-the-shopkeeper-vendor-dashboard-as-vendor-i-e-the-full-link-is-the-deployed-app-base-url-vendor-so-the-user-can-test-the-shopkeeper-panel-easily",
+      "title": "Document and surface the direct URL path for the Shopkeeper/Vendor dashboard as `/vendor` (i.e., the full link is the deployed app base URL + `/vendor`) so the user can test the Shopkeeper Panel easily.",
+      "reqIds": [
+        "REQ-142"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-small-unobtrusive-vendor-login-link-to-the-main-site-footer-frontend-src-components-layout-footer-tsx-that-navigates-to-vendor-so-shopkeepers-can-find-the-vendor-portal",
+      "title": "Add a small, unobtrusive \"Vendor Login\" link to the main site footer (`frontend/src/components/layout/Footer.tsx`) that navigates to `/vendor` so shopkeepers can find the Vendor Portal.",
+      "reqIds": [
+        "REQ-143"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-category-image-file-upload-control-with-preview-to-the-admin-category-create-edit-dialog-storing-the-selected-image-in-form-state-as-a-data-url-string-and-saving-it-via-the-existing-category-create-update-mutations",
+      "title": "Add a Category Image file upload control with preview to the Admin Category create/edit dialog, storing the selected image in form state as a Data URL string and saving it via the existing category create/update mutations.",
+      "reqIds": [
+        "REQ-146"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-uploaded-category-image-on-the-shopper-home-page-category-grid-instead-of-the-current-placeholder-icon-box-and-style-category-cards-to-look-modern-and-professional",
+      "title": "Display the uploaded category image on the shopper Home page category grid instead of the current placeholder icon box, and style category cards to look modern and professional.",
+      "reqIds": [
+        "REQ-147"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-show-a-small-image-thumbnail-in-the-admin-categories-list-so-admins-can-verify-which-image-is-attached-to-each-category",
+      "title": "Show a small image thumbnail in the Admin Categories list so admins can verify which image is attached to each category.",
+      "reqIds": [
+        "REQ-148"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1189,6 +1293,94 @@
       "summary": "Update the backend order placement flow so that when `placeOrder(shippingAddress)` succeeds, the stock for each ordered product is decreased by the ordered quantity (and never becomes negative). If any product does not exist or does not have enough stock to fulfill the requested quantity, the backend must fail the order placement with a clear English error message and must not modify any product stock nor clear the cart.",
       "reqIds": [
         "REQ-124"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-108",
+      "summary": "Completely disable any frontend Identity/Auth guarding for the entire Admin area so that `/admin` and all nested routes (`/admin/products`, `/admin/categories`, `/admin/orders`, `/admin/site-settings`, `/admin/coupons`, `/admin/stripe-setup`, `/admin/users`) are directly accessible without Internet Identity, login, or session token, and without redirects to any login/access-denied screen.",
+      "reqIds": [
+        "REQ-128"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-109",
+      "summary": "Remove backend admin-permission checks that currently block Admin order reads/updates so the Admin Dashboard and Admin Orders page can fetch and manage orders without any permission mismatch. Specifically, make the backend methods used by the admin UI for orders callable by anonymous callers (at minimum: `getAllOrders()` and `updateOrderStatus(orderId, newStatus)`), and ensure they do not trap with 'Unauthorized' or similar messages during this open-admin phase.",
+      "reqIds": [
+        "REQ-129"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-110",
+      "summary": "Remove backend admin-only authorization enforcement from the Site Settings update flow so updating the logo from `/admin/site-settings` does not trap with \"Unauthorized: Only admins can perform this action\" when called by an anonymous (no-Internet-Identity) admin actor.",
+      "reqIds": [
+        "REQ-133"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-111",
+      "summary": "Persist the uploaded logo permanently in backend canister state so the saved logo remains available after a hard reload and after canister upgrades, and is returned by `getSiteSettings()` consistently.",
+      "reqIds": [
+        "REQ-134"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-113",
+      "summary": "Remove backend admin-only authorization enforcement from the Admin Orders section so `/admin/orders` can load orders and update order status without \"Unauthorized\" permission errors during the open-admin phase.",
+      "reqIds": [
+        "REQ-136"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-114",
+      "summary": "Implement a basic Shopkeeper/Vendor panel at route /vendor with simple shopkeeper auth (register/login) and a dashboard to add/manage vendor products including stock (Name, Price, Category, Stock, Image). Defer admin approval/blocking and product-approval workflow to a later phase.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-115",
+      "summary": "Before building/deploying the new Vendor system changes, clear the build/deployment cache to prevent the earlier recurring deployment error and ensure the latest changes are pushed live.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-116",
+      "summary": "Implement a minimal Shopkeeper (Vendor) account system in `backend/main.mo` that supports shopkeepers registering and logging in, and supports authenticated shopkeepers creating, updating, deleting, and listing only their own products (including Stock and Image). Vendor products must be persisted in canister state and must become visible on the shopper-facing catalog immediately after creation (no admin approval workflow in this phase).",
+      "reqIds": [
+        "REQ-139"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-121",
+      "summary": "Add a small 'Vendor Login' link in the main website footer that navigates to the Shopkeeper/Vendor dashboard (/vendor) so dukandaars can find it easily.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-122",
+      "summary": "Add Category Image support: allow image upload (file + preview) when creating/editing categories in Admin, persist image (e.g., imageUrl/data URL) in backend, and render modern category cards on the main shop page using the uploaded category image instead of a placeholder box.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-123",
+      "summary": "Extend the backend Category model to store an uploaded category image as a Text field (Data URL or URL string) and return it from category queries.",
+      "reqIds": [
+        "REQ-144"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-124",
+      "summary": "Update backend category CRUD methods to accept and persist the Category image field when creating and editing categories.",
+      "reqIds": [
+        "REQ-145"
       ],
       "status": "pending"
     }

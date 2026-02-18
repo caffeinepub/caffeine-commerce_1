@@ -8,8 +8,23 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
 export const CategoryId = IDL.Nat;
-export const Category = IDL.Record({ 'id' : CategoryId, 'name' : IDL.Text });
+export const Category = IDL.Record({
+  'id' : CategoryId,
+  'name' : IDL.Text,
+  'image' : IDL.Text,
+});
 export const CouponCode = IDL.Text;
 export const Time = IDL.Int;
 export const Coupon = IDL.Record({
@@ -17,9 +32,7 @@ export const Coupon = IDL.Record({
   'discountPercentage' : IDL.Nat,
   'validUntil' : Time,
 });
-export const ProductId = IDL.Nat;
-export const Product = IDL.Record({
-  'id' : ProductId,
+export const ProductInput = IDL.Record({
   'categoryId' : CategoryId,
   'name' : IDL.Text,
   'description' : IDL.Text,
@@ -27,6 +40,7 @@ export const Product = IDL.Record({
   'imageUrl' : IDL.Text,
   'price' : IDL.Nat,
 });
+export const ProductId = IDL.Nat;
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -76,6 +90,16 @@ export const UserProfile = IDL.Record({
   'address' : IDL.Text,
 });
 export const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
+export const Product = IDL.Record({
+  'id' : ProductId,
+  'categoryId' : CategoryId,
+  'owner' : UserId,
+  'name' : IDL.Text,
+  'description' : IDL.Text,
+  'stock' : IDL.Nat,
+  'imageUrl' : IDL.Text,
+  'price' : IDL.Nat,
+});
 export const Order = IDL.Variant({
   'less' : IDL.Null,
   'equal' : IDL.Null,
@@ -128,10 +152,36 @@ export const TransformationOutput = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addCategory' : IDL.Func([Category], [CategoryId], []),
   'addCoupon' : IDL.Func([Coupon], [], []),
-  'addProduct' : IDL.Func([Product], [ProductId], []),
+  'addProduct' : IDL.Func([ProductInput], [ProductId], []),
   'addToCart' : IDL.Func([ProductId], [], []),
   'addToWishlist' : IDL.Func([ProductId], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
@@ -153,6 +203,8 @@ export const idlService = IDL.Service({
   'getCart' : IDL.Func([], [Cart], ['query']),
   'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
   'getOrder' : IDL.Func([OrderId], [Order__1], ['query']),
+  'getOwnerProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getProductOwner' : IDL.Func([ProductId], [IDL.Principal], ['query']),
   'getProducts' : IDL.Func([IDL.Vec(Filter)], [IDL.Vec(Product)], ['query']),
   'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
@@ -178,15 +230,30 @@ export const idlService = IDL.Service({
     ),
   'updateCategory' : IDL.Func([CategoryId, Category], [], []),
   'updateOrderStatus' : IDL.Func([OrderId, OrderStatus], [], []),
-  'updateProduct' : IDL.Func([ProductId, Product], [], []),
+  'updateProduct' : IDL.Func([ProductId, ProductInput], [], []),
   'updateSiteSettings' : IDL.Func([SiteSettings], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
   const CategoryId = IDL.Nat;
-  const Category = IDL.Record({ 'id' : CategoryId, 'name' : IDL.Text });
+  const Category = IDL.Record({
+    'id' : CategoryId,
+    'name' : IDL.Text,
+    'image' : IDL.Text,
+  });
   const CouponCode = IDL.Text;
   const Time = IDL.Int;
   const Coupon = IDL.Record({
@@ -194,9 +261,7 @@ export const idlFactory = ({ IDL }) => {
     'discountPercentage' : IDL.Nat,
     'validUntil' : Time,
   });
-  const ProductId = IDL.Nat;
-  const Product = IDL.Record({
-    'id' : ProductId,
+  const ProductInput = IDL.Record({
     'categoryId' : CategoryId,
     'name' : IDL.Text,
     'description' : IDL.Text,
@@ -204,6 +269,7 @@ export const idlFactory = ({ IDL }) => {
     'imageUrl' : IDL.Text,
     'price' : IDL.Nat,
   });
+  const ProductId = IDL.Nat;
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -250,6 +316,16 @@ export const idlFactory = ({ IDL }) => {
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text, 'address' : IDL.Text });
   const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
+  const Product = IDL.Record({
+    'id' : ProductId,
+    'categoryId' : CategoryId,
+    'owner' : UserId,
+    'name' : IDL.Text,
+    'description' : IDL.Text,
+    'stock' : IDL.Nat,
+    'imageUrl' : IDL.Text,
+    'price' : IDL.Nat,
+  });
   const Order = IDL.Variant({
     'less' : IDL.Null,
     'equal' : IDL.Null,
@@ -296,10 +372,36 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addCategory' : IDL.Func([Category], [CategoryId], []),
     'addCoupon' : IDL.Func([Coupon], [], []),
-    'addProduct' : IDL.Func([Product], [ProductId], []),
+    'addProduct' : IDL.Func([ProductInput], [ProductId], []),
     'addToCart' : IDL.Func([ProductId], [], []),
     'addToWishlist' : IDL.Func([ProductId], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
@@ -321,6 +423,8 @@ export const idlFactory = ({ IDL }) => {
     'getCart' : IDL.Func([], [Cart], ['query']),
     'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
     'getOrder' : IDL.Func([OrderId], [Order__1], ['query']),
+    'getOwnerProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getProductOwner' : IDL.Func([ProductId], [IDL.Principal], ['query']),
     'getProducts' : IDL.Func([IDL.Vec(Filter)], [IDL.Vec(Product)], ['query']),
     'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
@@ -346,7 +450,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'updateCategory' : IDL.Func([CategoryId, Category], [], []),
     'updateOrderStatus' : IDL.Func([OrderId, OrderStatus], [], []),
-    'updateProduct' : IDL.Func([ProductId, Product], [], []),
+    'updateProduct' : IDL.Func([ProductId, ProductInput], [], []),
     'updateSiteSettings' : IDL.Func([SiteSettings], [], []),
   });
 };

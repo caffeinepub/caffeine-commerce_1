@@ -30,5 +30,6 @@ export function useDashboardStats() {
     },
     enabled: !!actor && !actorFetching,
     retry: 2,
+    staleTime: 0, // Always fetch fresh data
   });
 }

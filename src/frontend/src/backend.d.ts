@@ -7,14 +7,9 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export interface Product {
-    id: ProductId;
-    categoryId: CategoryId;
+export interface UserProfile {
     name: string;
-    description: string;
-    stock: bigint;
-    imageUrl: string;
-    price: bigint;
+    address: string;
 }
 export interface TransformationOutput {
     status: bigint;
@@ -80,6 +75,15 @@ export interface StripeConfiguration {
 export interface Category {
     id: CategoryId;
     name: string;
+    image: string;
+}
+export interface ProductInput {
+    categoryId: CategoryId;
+    name: string;
+    description: string;
+    stock: bigint;
+    imageUrl: string;
+    price: bigint;
 }
 export interface ShippingAddress {
     name: string;
@@ -124,17 +128,23 @@ export interface ShoppingItem {
     productDescription: string;
 }
 export type CategoryId = bigint;
+export type ProductId = bigint;
+export type ReferralCode = string;
 export interface CartItem {
     productId: ProductId;
     quantity: bigint;
 }
-export type ReferralCode = string;
-export type ProductId = bigint;
-export type OrderId = bigint;
-export interface UserProfile {
+export interface Product {
+    id: ProductId;
+    categoryId: CategoryId;
+    owner: UserId;
     name: string;
-    address: string;
+    description: string;
+    stock: bigint;
+    imageUrl: string;
+    price: bigint;
 }
+export type OrderId = bigint;
 export enum Order {
     less = "less",
     equal = "equal",
@@ -157,12 +167,7 @@ export enum UserRole {
 export interface backendInterface {
     addCategory(category: Category): Promise<CategoryId>;
     addCoupon(coupon: Coupon): Promise<void>;
-    addProduct(product: Product): Promise<ProductId>;
-    /**
-     * / ************
-     * /    * Cart & Wishlist
-     * /    *************
-     */
+    addProduct(input: ProductInput): Promise<ProductId>;
     addToCart(productId: ProductId): Promise<void>;
     addToWishlist(productId: ProductId): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
@@ -172,58 +177,25 @@ export interface backendInterface {
     deleteCategory(categoryId: CategoryId): Promise<void>;
     deleteCoupon(code: CouponCode): Promise<void>;
     deleteProduct(productId: ProductId): Promise<void>;
-    /**
-     * / ************
-     * /    * Coupons
-     * /    *************
-     */
     getAllCoupons(): Promise<Array<Coupon>>;
     getAllCustomerOrders(userId: UserId): Promise<Array<Order__1>>;
     getAllOrders(): Promise<Array<Order__1>>;
-    /**
-     * / ************
-     * /    * User Profile
-     * /    *************
-     */
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCart(): Promise<Cart>;
     getCategories(): Promise<Array<Category>>;
     getOrder(orderId: OrderId): Promise<Order__1>;
-    /**
-     * / ************
-     * /    * Products & Categories
-     * /    *************
-     */
+    getOwnerProducts(): Promise<Array<Product>>;
+    getProductOwner(productId: ProductId): Promise<Principal>;
     getProducts(filters: Array<Filter>): Promise<Array<Product>>;
-    /**
-     * / ************
-     * /    * Site Settings
-     * /    *************
-     */
     getSiteSettings(): Promise<SiteSettings>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    /**
-     * / ************
-     * /    * Referrals & Orders
-     * /    *************
-     */
     getUserReferrals(userId: UserId): Promise<Array<UserId>>;
     getWishlist(): Promise<Wishlist>;
-    /**
-     * / ************
-     * /    * General
-     * /    *************
-     */
     healthCheck(): Promise<string>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
-    /**
-     * / ************
-     * /    * Place Order
-     * /    *************
-     */
     placeOrder(shippingAddress: ShippingAddress): Promise<OrderId>;
     removeFromCart(productId: ProductId): Promise<void>;
     removeFromWishlist(productId: ProductId): Promise<void>;
@@ -232,6 +204,6 @@ export interface backendInterface {
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updateCategory(categoryId: CategoryId, category: Category): Promise<void>;
     updateOrderStatus(orderId: OrderId, newStatus: OrderStatus): Promise<void>;
-    updateProduct(productId: ProductId, product: Product): Promise<void>;
+    updateProduct(productId: ProductId, input: ProductInput): Promise<void>;
     updateSiteSettings(newSettings: SiteSettings): Promise<void>;
 }

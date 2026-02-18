@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Add basic inventory management so stock decrements on successful order placement, shoppers see clear out-of-stock UI, and admins can edit product stock.
+**Goal:** Let admins upload an image per Category and use it to render modern, professional category cards on the shopper Home page.
 
 **Planned changes:**
-- Backend: update `placeOrder(shippingAddress)` to decrement `Product.stock` by ordered quantities on success, prevent underflow/negative stock, and fail the order (without changing stock or clearing cart) when products are missing or have insufficient stock.
-- Frontend (shopper): show products even when stock is 0, but replace/disable Add to Cart with an English “Out of Stock” label on `ProductCard` and `ProductDetailsPage`.
-- Frontend (admin): add an editable Stock field (English label) to `ProductEditorDialog`, validate non-negative numeric input, and persist the value to the backend on save (with list reflecting updates via existing query invalidation).
-- Frontend: after successful order placement, invalidate the products query cache so updated stock (including reaching 0) is reflected without manual reload.
+- Extend the backend `Category` model to include an `imageUrl : Text` field (Data URL or URL string), persist it in category storage, and return it from `getCategories()`.
+- Update backend category create/update methods to accept and persist `imageUrl` while keeping existing admin flows working with updated types.
+- Add an image file upload control (image-only) with inline preview to the Admin Category create/edit dialog; store the selected image as a Data URL in form state, allow removing it before save, and show clear English validation for non-image files.
+- Update the Home page categories grid to render category cards using `imageUrl` when present, with a modern card design and a clean fallback when missing, while keeping navigation and responsiveness unchanged.
+- Add a thumbnail indicator/column in the Admin Categories list to show each category’s image (or an English “No image” fallback), handling image load failures gracefully.
 
-**User-visible outcome:** Customers cannot add out-of-stock products to the cart and will see an “Out of Stock” label, while admins can edit product stock; placing an order correctly reduces stock and updates the UI automatically.
+**User-visible outcome:** Admins can upload and manage category images, see thumbnails in the admin category list, and shoppers see modern category cards on the Home page that display the uploaded category images (with a clean fallback when none is set).

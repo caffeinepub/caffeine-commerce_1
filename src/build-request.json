@@ -1,107 +1,121 @@
 {
   "kind": "build_request",
-  "title": "Inventory management: decrement stock on order, out-of-stock UX, and admin stock editing",
+  "title": "Add image upload for Categories and render modern category cards on Home",
   "projectName": "BISAULI Shop",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-124",
-      "text": "Update the backend order placement flow so that when `placeOrder(shippingAddress)` succeeds, the stock for each ordered product is decreased by the ordered quantity (and never becomes negative). If any product does not exist or does not have enough stock to fulfill the requested quantity, the backend must fail the order placement with a clear English error message and must not modify any product stock nor clear the cart.",
+      "id": "REQ-144",
+      "text": "Extend the backend Category model to store an uploaded category image as a Text field (Data URL or URL string) and return it from category queries.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "When an order is placed, automatically decrease the product stock quantity by the amount ordered."
+          "In the Admin Panel, when I create or edit a category, let me upload a Category Image.",
+          "On the main shop page, instead of just a box, show the uploaded image for each category"
         ]
       },
       "acceptanceCriteria": [
-        "Placing an order decreases each ordered product’s `Product.stock` by the corresponding `CartItem.quantity`.",
-        "If `Product.stock` is less than the requested quantity for any cart item, `placeOrder` traps with a clear English message (e.g., \"Insufficient stock for <product name>\") and no product stocks are changed.",
-        "If order placement fails for any reason, the caller’s cart is not cleared.",
-        "Product stock values never underflow and never become negative."
+        "`backend/main.mo` `Category` type includes a new `imageUrl : Text` field.",
+        "`getCategories()` returns categories including `imageUrl`.",
+        "Category image data is persisted in the existing categories storage so that after creating/updating a category image, reloading the app still shows the same image.",
+        "If `imageUrl` is empty, the backend still returns the category successfully (no traps due to missing image)."
       ]
     },
     {
-      "id": "REQ-125",
-      "text": "Update shopper-facing product UI so that when a product’s stock is 0, the product remains visible but the Add to Cart action is disabled and replaced with an \"Out of Stock\" label (English). Apply this behavior consistently at least on the product card grid (`frontend/src/components/product/ProductCard.tsx`) and on the product details page (`frontend/src/pages/ProductDetailsPage.tsx`).",
+      "id": "REQ-145",
+      "text": "Update backend category CRUD methods to accept and persist the Category image field when creating and editing categories.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "In the Admin Panel, when I create or edit a category, let me upload a Category Image."
+        ]
+      },
+      "acceptanceCriteria": [
+        "`addCategory` persists the provided `imageUrl` (if any) for the created category.",
+        "`updateCategory` persists the provided `imageUrl` changes for the specified category.",
+        "Existing UI flows that call `addCategory` / `updateCategory` continue to work after the interface change (types align between backend Candid and frontend generated types)."
+      ]
+    },
+    {
+      "id": "REQ-146",
+      "text": "Add a Category Image file upload control with preview to the Admin Category create/edit dialog, storing the selected image in form state as a Data URL string and saving it via the existing category create/update mutations.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "If the stock reaches O, the product should still be visible to customers, but the 'Add to Cart' button should be disabled and replaced with an 'Out of Stock' label."
+          "In the Admin Panel, when I create or edit a category, let me upload a Category Image."
         ]
       },
       "acceptanceCriteria": [
-        "Products with `stock === 0` still render in catalog/home/product listings and on the product details page.",
-        "On `ProductCard`, when `stock === 0`, the primary action area shows an English \"Out of Stock\" label instead of the \"Add to Cart\" button.",
-        "On `ProductDetailsPage`, when `stock === 0`, the Add to Cart button is not actionable and an English \"Out of Stock\" label is shown in place of the Add to Cart action text.",
-        "No shopper UI displays a clickable Add to Cart action for `stock === 0`."
+        "`frontend/src/components/admin/CategoryEditorDialog.tsx` includes an image file input (accepting images) for both Add and Edit flows.",
+        "When an admin selects an image file, the dialog shows an inline preview before saving.",
+        "The selected image is converted to a Data URL string and sent in the category payload when saving.",
+        "If a non-image file is selected, show a clear English validation error and do not set the image.",
+        "Provide a clear/remove action to unset a selected image before saving.",
+        "All user-facing labels, helper text, and validation errors in this dialog are in English."
       ]
     },
     {
-      "id": "REQ-126",
-      "text": "Ensure the Admin product create/edit UI includes an explicit editable Stock field (English label) and that saving a product persists the entered stock value to the backend product record. This must be supported in the existing Admin product editor dialog (`frontend/src/components/admin/ProductEditorDialog.tsx`).",
+      "id": "REQ-147",
+      "text": "Display the uploaded category image on the shopper Home page category grid instead of the current placeholder icon box, and style category cards to look modern and professional.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "Add a 'Stock' field in the Admin Product Edit section so I can manually update quantities whenever I get new items."
+          "On the main shop page, instead of just a box, show the uploaded image for each category (like a picture of a shirt for 'Cloths').",
+          "Make the category cards look modern and professional with the image in the background or top."
         ]
       },
       "acceptanceCriteria": [
-        "Admin product create/edit form shows an editable Stock field with an English label (e.g., \"Stock Quantity\").",
-        "Stock input only accepts non-negative numeric values and shows a clear English validation error when invalid.",
-        "Saving a product updates the backend `Product.stock` to match the value entered in the admin form.",
-        "After saving a stock change, the Admin products list reflects the updated stock without requiring a hard refresh (via existing React Query invalidation behavior)."
+        "`frontend/src/components/home/CategoriesGrid.tsx` renders category cards using the category’s `imageUrl` when present.",
+        "Category cards have a modern/professional look (e.g., image at top or as a background with readable overlay text), with hover/focus styling preserved.",
+        "If a category has no image, render a clean fallback (do not show a broken image).",
+        "Category card click behavior remains unchanged (navigates to `/catalog` with the category filter).",
+        "The category grid remains responsive across mobile and desktop."
       ]
     },
     {
-      "id": "REQ-127",
-      "text": "After a successful order placement, refresh product data in the shopper UI by invalidating the products query cache so that stock changes (including reaching 0) are reflected without a manual reload.",
+      "id": "REQ-148",
+      "text": "Show a small image thumbnail in the Admin Categories list so admins can verify which image is attached to each category.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "When an order is placed, automatically decrease the product stock quantity by the amount ordered."
+          "I want to add an image upload option for each Category."
         ]
       },
       "acceptanceCriteria": [
-        "On successful `placeOrder`, the frontend invalidates `queryKeys.products` in addition to existing cart/orders invalidations.",
-        "After placing an order that reduces stock to 0, the relevant product(s) show out-of-stock UX on subsequent navigation without a hard reload."
+        "`frontend/src/pages/admin/AdminCategoriesPage.tsx` shows a thumbnail column (or equivalent) for each category when `imageUrl` is present.",
+        "If `imageUrl` is empty, show an English fallback indicator (e.g., 'No image') without breaking the table layout.",
+        "The page remains stable with loading/empty/error states and does not crash when images fail to load."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo` (no new canisters/services).",
-    "Do not edit files under `frontend/src/components/ui` or any other immutable frontend paths listed in SYSTEM_CONTEXT.",
-    "Use English for all new/updated user-facing text involved in these changes.",
-    "Keep products visible even when stock is 0 (do not filter them out in queries)."
+    "Backend must remain a single Motoko actor in `backend/main.mo` (no additional backend services).",
+    "Do not edit files under `frontend/src/components/ui` or any other immutable paths listed in SYSTEM_CONTEXT.",
+    "Do not add backend image storage; store category images as a Text string (Data URL or URL) in the Category record, consistent with existing product/site-logo image patterns.",
+    "Use English for all user-facing text added or changed as part of this request."
   ],
   "nonGoals": [
-    "Implementing stock reservations/holds during checkout (only decrement stock upon successful order placement).",
-    "Adding new database/storage layers or external inventory integrations.",
-    "Adding new authentication/permission gating for admin inventory changes (admin is currently open-access)."
+    "Implementing image resizing/compression pipelines or external image hosting.",
+    "Changing shopper Catalog filtering behavior beyond using the category cards as navigation.",
+    "Adding new authentication/authorization flows for admin beyond what already exists."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

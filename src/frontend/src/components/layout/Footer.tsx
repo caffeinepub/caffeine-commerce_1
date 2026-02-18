@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 import { useTranslation } from '../../i18n';
 
 export default function Footer() {
@@ -13,17 +14,26 @@ export default function Footer() {
           <p className="text-sm text-muted-foreground">
             © {currentYear} BISAULI. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            Built with <Heart className="h-4 w-4 text-red-500 fill-red-500" /> using{' '}
-            <a
-              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appIdentifier}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium hover:underline"
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <Link
+              to="/vendor"
+              className="hover:underline hover:text-foreground transition-colors"
             >
-              caffeine.ai
-            </a>
-          </p>
+              Vendor Login
+            </Link>
+            <span className="text-muted-foreground/50">|</span>
+            <p className="flex items-center gap-1">
+              Built with <Heart className="h-4 w-4 text-red-500 fill-red-500" /> using{' '}
+              <a
+                href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appIdentifier}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium hover:underline"
+              >
+                caffeine.ai
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
