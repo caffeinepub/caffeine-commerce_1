@@ -1,83 +1,55 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T06:13:33.535Z",
-  "summary": "Core functionality for category images appears implemented end-to-end, but the backend/DTO field name diverges from the BuildRequest: the diff adds a `Category.image : Text` field (and frontend uses `category.image`) rather than the required `imageUrl : Text`. Additionally, the admin categories list thumbnail requirement is not verifiable from the truncated diff. The diff also includes several unrelated changes (vendor portal routing, authz hook changes, polling changes, etc.) that were not requested.",
+  "generatedAt": "2026-02-18T07:12:39.048Z",
+  "summary": "Most PWA requirements are implemented: manifest linked in index.html, service worker added and registered without touching immutable paths, offline UI (banner + offline.html) added, and an A2HS prompt (including iOS instructions + dismiss) added. However, the diff does not show the required PWA icon PNG assets being added, and there are unrelated feature additions (vendor portal/routes, admin/auth changes, tracking links) that were not requested.",
   "missing_requirements": [
     {
-      "id": "REQ-144",
-      "requirement": "Extend the backend Category model to store an uploaded category image as a Text field named `imageUrl` and return it from category queries.",
-      "reason": "The backend `Category` type in the diff adds `image : Text` rather than the required `imageUrl : Text`. This indicates the required field name (and likely the returned property name from `getCategories()`) does not match the spec.",
+      "id": "REQ-156",
+      "requirement": "Use the existing BISAULI logo as the PWA app icon set (including standard and maskable icons), and ensure the icons are referenced correctly by the manifest.",
+      "reason": "The manifest references icon files under /assets/generated/, but the diff does not show the required PNG icon assets being added to the repo/public assets, so the icon set’s presence cannot be verified from the changes provided.",
       "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo"
-      ]
-    },
-    {
-      "id": "REQ-145",
-      "requirement": "Update backend category CRUD methods to accept and persist the Category image field as `imageUrl` when creating/editing categories, keeping frontend/backend Candid types aligned.",
-      "reason": "The frontend and backend appear to use `image` (e.g., `category.image`) rather than `imageUrl`. This does not satisfy the requirement to accept/persist `imageUrl` specifically, and suggests the interface change does not match the requested contract.",
-      "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/admin/CategoryEditorDialog.tsx",
-        "frontend/src/components/home/CategoriesGrid.tsx",
-        "backend/migration.mo"
-      ]
-    },
-    {
-      "id": "REQ-148",
-      "requirement": "Show a small image thumbnail in the Admin Categories list, with an English fallback like 'No image', and stable behavior on image load failure.",
-      "reason": "Although `AdminCategoriesPage.tsx` imports `CategoryImage`, the provided diff snippet is truncated before showing any table column/cell rendering for a thumbnail or a 'No image' fallback indicator. This requirement cannot be confirmed from the available evidence.",
-      "evidence": [
-        "frontend/src/pages/admin/AdminCategoriesPage.tsx"
+        "frontend/public/manifest.webmanifest (references /assets/generated/pwa-icon*.png)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added a Vendor/Shopkeeper portal route (/vendor) and related query keys/cache separation for vendor products.",
-      "reason": "Not requested by the BuildRequest (which focuses only on category image upload/display).",
+      "description": "Vendor portal route and vendor-related navigation/features (e.g., /vendor, vendorProducts query key)",
+      "reason": "Not requested by the PWA BuildRequest; appears as unrelated application functionality changes.",
       "evidence": [
-        "frontend-file-summaries.txt",
-        "project_state.json",
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/queries/queryClientKeys.ts"
+        "frontend-file-summaries.txt (mentions new /vendor route, Vendor / Shopkeeper Panel, vendorProducts key)",
+        "frontend/README.md (mentions Vendor / Shopkeeper Panel and /vendor route)"
       ]
     },
     {
-      "description": "Removed an admin token verification hook and changed authorization-related hooks.",
-      "reason": "No requirement requested changes to admin auth flows; BuildRequest explicitly lists 'Adding new authentication/authorization flows...' as a non-goal and does not request auth refactors.",
+      "description": "Admin/authentication behavior changes (e.g., admin panel accessible without auth, removed admin token verification hook)",
+      "reason": "Not requested for PWA enablement; BuildRequest explicitly focuses on PWA (manifest, SW, A2HS, offline) and states backend architecture unchanged.",
       "evidence": [
-        "frontend-file-summaries.txt",
-        "frontend/src/hooks/queries/useAuthz.ts"
+        "frontend-file-summaries.txt (mentions admin routes nesting, removed admin token verification hook)",
+        "frontend/README.md (states admin panel accessible without authentication)"
       ]
     },
     {
-      "description": "Changed customer order queries to poll periodically (15s/10s).",
-      "reason": "Not requested; unrelated to category image upload/display work.",
+      "description": "Added attribution link with UTM tracking in the footer",
+      "reason": "Not requested; BuildRequest non-goals include adding third-party analytics/monitoring, and UTM tracking is unrelated to PWA requirements.",
       "evidence": [
-        "frontend-file-summaries.txt",
-        "frontend/src/hooks/queries/useOrders.ts"
-      ]
-    },
-    {
-      "description": "Added/changed footer content including a 'Vendor Login' link and attribution link with UTM tracking.",
-      "reason": "Not requested by the BuildRequest.",
-      "evidence": [
-        "frontend-file-summaries.txt",
-        "frontend/src/components/layout/Footer.tsx"
+        "frontend-file-summaries.txt (Footer includes caffeine.ai attribution link with UTM tracking)"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.66,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/admin/CategoryEditorDialog.tsx",
-    "frontend/src/components/category/CategoryImage.tsx",
-    "frontend/src/components/home/CategoriesGrid.tsx",
-    "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+    "frontend/README.md",
+    "frontend/index.html",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/offline.html",
+    "frontend/public/sw.js",
+    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
+    "frontend/src/components/pwa/OfflineBanner.tsx",
+    "frontend/src/hooks/useA2HS.ts",
     "project_state.json"
   ]
 }

@@ -26,6 +26,7 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
   const [imagePreview, setImagePreview] = useState('');
   const [imageError, setImageError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isBackendUnavailable, setIsBackendUnavailable] = useState(false);
   const [lastFailedData, setLastFailedData] = useState<Category | null>(null);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
     }
     setErrorMessage('');
     setImageError('');
+    setIsBackendUnavailable(false);
     setLastFailedData(null);
   }, [category, open]);
 
@@ -84,6 +86,7 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+    setIsBackendUnavailable(false);
 
     // Validation
     if (!name.trim()) {
@@ -112,6 +115,7 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
       console.error('Failed to save category:', error);
       const errorInfo = detectBackendUnavailability(error);
       setErrorMessage(errorInfo.userMessage);
+      setIsBackendUnavailable(errorInfo.isBackendUnavailable);
       setLastFailedData(categoryData);
     }
   };
@@ -120,6 +124,7 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
     if (!lastFailedData) return;
     
     setErrorMessage('');
+    setIsBackendUnavailable(false);
     
     try {
       if (isEditing && category) {
@@ -136,6 +141,7 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
       console.error('Retry failed:', error);
       const errorInfo = detectBackendUnavailability(error);
       setErrorMessage(errorInfo.userMessage);
+      setIsBackendUnavailable(errorInfo.isBackendUnavailable);
     }
   };
 

@@ -1,87 +1,125 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T06:13:33.541Z",
+  "generatedAt": "2026-02-18T07:12:39.056Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 3,
+    "total": 6,
+    "implemented": 6,
     "items": [
       {
-        "id": "REQ-144",
-        "summary": "Extend the backend Category model to store an uploaded category image as a Text field (Data URL or URL string) and return it from category queries.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-145",
-        "summary": "Update backend category CRUD methods to accept and persist the Category image field when creating and editing categories.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-146",
-        "summary": "Add a Category Image file upload control with preview to the Admin Category create/edit dialog, storing the selected image in form state as a Data URL string and saving it via the existing category create/update mutations.",
+        "id": "REQ-153",
+        "summary": "Add a Web App Manifest for the BISAULI Store and wire it into the app so browsers recognize the site as installable.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/admin/CategoryEditorDialog.tsx",
-          "frontend/src/backend.d.ts",
-          "frontend/src/hooks/queries/useAdminCatalog.ts"
+          "frontend/public/manifest.webmanifest",
+          "frontend/index.html"
         ],
         "matchedFiles": [
-          "frontend/src/components/admin/CategoryEditorDialog.tsx",
-          "frontend/src/backend.d.ts"
+          "frontend/public/manifest.webmanifest",
+          "frontend/index.html"
         ]
       },
       {
-        "id": "REQ-147",
-        "summary": "Display the uploaded category image on the shopper Home page category grid instead of the current placeholder icon box, and style category cards to look modern and professional.",
+        "id": "REQ-154",
+        "summary": "Add a Service Worker that enables offline support (app shell caching) and faster repeat loads, and ensure it is registered by the app at runtime.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/category/CategoryImage.tsx",
-          "frontend/src/components/home/CategoriesGrid.tsx",
-          "frontend/src/hooks/queries/useCatalog.ts"
+          "frontend/public/sw.js",
+          "frontend/index.html",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/components/pwa/OfflineBanner.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/category/CategoryImage.tsx",
-          "frontend/src/components/home/CategoriesGrid.tsx"
+          "frontend/public/sw.js",
+          "frontend/index.html",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/components/pwa/OfflineBanner.tsx"
         ]
       },
       {
-        "id": "REQ-148",
-        "summary": "Show a small image thumbnail in the Admin Categories list so admins can verify which image is attached to each category.",
+        "id": "REQ-155",
+        "summary": "Implement an Add-to-Home-Screen (A2HS) install prompt experience for mobile users that shows a user-friendly English popup/banner when installation is available.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
-          "frontend/src/components/category/CategoryImage.tsx"
+          "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
+          "frontend/src/hooks/useA2HS.ts",
+          "frontend/src/components/layout/AppLayout.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
-          "frontend/src/components/category/CategoryImage.tsx"
+          "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
+          "frontend/src/hooks/useA2HS.ts",
+          "frontend/src/components/layout/AppLayout.tsx"
+        ]
+      },
+      {
+        "id": "REQ-156",
+        "summary": "Use the existing BISAULI logo as the PWA app icon set (including standard and maskable icons), and ensure the icons are referenced correctly by the manifest.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+          "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
+          "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
+          "frontend/public/manifest.webmanifest"
+        ],
+        "matchedFiles": [
+          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+          "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
+          "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
+          "frontend/public/manifest.webmanifest"
+        ]
+      },
+      {
+        "id": "REQ-157",
+        "summary": "Ensure the PWA offline/fast-loading behavior is reliable and does not break core navigation: implement a clear caching strategy and include an offline fallback for navigation when the network is unavailable.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/offline.html",
+          "frontend/public/sw.js",
+          "frontend/src/components/pwa/OfflineBanner.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/public/offline.html",
+          "frontend/public/sw.js",
+          "frontend/src/components/pwa/OfflineBanner.tsx"
+        ]
+      },
+      {
+        "id": "REQ-158",
+        "summary": "Update project documentation to include basic PWA testing steps (manifest, service worker, offline test, install prompt test) using English instructions.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/README.md"
+        ],
+        "matchedFiles": [
+          "frontend/README.md"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/admin/CategoryEditorDialog.tsx",
-    "frontend/src/components/category/CategoryImage.tsx",
-    "frontend/src/components/home/CategoriesGrid.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+    "frontend/README.md",
+    "frontend/index.html",
+    "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
+    "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
+    "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+    "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/offline.html",
+    "frontend/public/sw.js",
+    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
+    "frontend/src/components/pwa/OfflineBanner.tsx",
+    "frontend/src/hooks/useA2HS.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

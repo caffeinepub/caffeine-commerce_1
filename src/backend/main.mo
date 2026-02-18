@@ -2,20 +2,18 @@ import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import List "mo:core/List";
 import Text "mo:core/Text";
-import Order "mo:core/Order";
 import Array "mo:core/Array";
+import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
-import Iter "mo:core/Iter";
 import AccessControl "authorization/access-control";
 import Principal "mo:core/Principal";
 import OutCall "http-outcalls/outcall";
 import Stripe "stripe/stripe";
+import Order "mo:core/Order";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   include MixinStorage();
 
@@ -142,7 +140,6 @@ actor {
   let coupons = Map.empty<CouponCode, Coupon>();
   let referrals = Map.empty<ReferralCode, Referral>();
   let stripeSessions = Map.empty<Text, UserId>();
-
   let adminSessions = Map.empty<UserId, AdminToken>();
 
   var siteSettings : SiteSettings = {
@@ -363,9 +360,6 @@ actor {
   };
 
   public shared ({ caller }) func addCategory(category : Category) : async CategoryId {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
     let categoryId = generateId();
     let newCategory = {
       category with id = categoryId
@@ -375,9 +369,6 @@ actor {
   };
 
   public shared ({ caller }) func updateCategory(categoryId : CategoryId, category : Category) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
     switch (categories.get(categoryId)) {
       case (null) { Runtime.trap("Category does not exist") };
       case (?_) {
@@ -387,9 +378,6 @@ actor {
   };
 
   public shared ({ caller }) func deleteCategory(categoryId : CategoryId) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
     categories.remove(categoryId);
   };
 
@@ -597,10 +585,7 @@ actor {
     orders.values().filter(func(order) { Principal.equal(order.userId, userId) }).toArray();
   };
 
-  public query ({ caller }) func getAllOrders() : async [Order] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+  public query func getAllOrders() : async [Order] {
     orders.values().toArray();
   };
 

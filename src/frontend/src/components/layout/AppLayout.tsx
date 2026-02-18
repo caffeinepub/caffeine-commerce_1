@@ -3,6 +3,8 @@ import Header from './Header';
 import Footer from './Footer';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import OfflineBanner from '../pwa/OfflineBanner';
+import A2HSInstallPrompt from '../pwa/A2HSInstallPrompt';
 
 export default function AppLayout() {
   const { isInitializing } = useInternetIdentity();
@@ -23,11 +25,13 @@ export default function AppLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <OfflineBanner />
       <Header />
       <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
+      <A2HSInstallPrompt />
     </div>
   );
 }

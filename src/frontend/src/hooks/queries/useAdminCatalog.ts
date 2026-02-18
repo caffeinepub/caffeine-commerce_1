@@ -11,7 +11,7 @@ export function useAdminGetProducts(filters: Filter[] = []) {
   const query = useQuery<Product[]>({
     queryKey: [...queryKeys.products, filters],
     queryFn: async () => {
-      if (!actor) return [];
+      if (!actor) throw new Error('Backend service is not available');
       return await actor.getProducts(filters);
     },
     enabled: !!actor && !actorFetching,
@@ -31,7 +31,7 @@ export function useAdminGetCategories() {
   const query = useQuery<Category[]>({
     queryKey: queryKeys.categories,
     queryFn: async () => {
-      if (!actor) return [];
+      if (!actor) throw new Error('Backend service is not available');
       return await actor.getCategories();
     },
     enabled: !!actor && !actorFetching,
@@ -52,7 +52,7 @@ export function useAdminAddProduct() {
 
   return useMutation({
     mutationFn: async (productInput: ProductInput) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error('Backend service is not available');
       return actor.addProduct(productInput);
     },
     onSuccess: () => {
@@ -67,7 +67,7 @@ export function useAdminUpdateProduct() {
 
   return useMutation({
     mutationFn: async ({ productId, product }: { productId: ProductId; product: ProductInput }) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error('Backend service is not available');
       await actor.updateProduct(productId, product);
     },
     onSuccess: () => {
@@ -82,7 +82,7 @@ export function useAdminDeleteProduct() {
 
   return useMutation({
     mutationFn: async (productId: ProductId) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error('Backend service is not available');
       await actor.deleteProduct(productId);
     },
     onSuccess: () => {
@@ -97,7 +97,7 @@ export function useAdminAddCategory() {
 
   return useMutation({
     mutationFn: async (category: Omit<Category, 'id'>) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error('Backend service is not available');
       const categoryWithId: Category = { ...category, id: 0n };
       return actor.addCategory(categoryWithId);
     },
@@ -113,7 +113,7 @@ export function useAdminUpdateCategory() {
 
   return useMutation({
     mutationFn: async ({ categoryId, category }: { categoryId: CategoryId; category: Category }) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error('Backend service is not available');
       await actor.updateCategory(categoryId, category);
     },
     onSuccess: () => {
@@ -128,7 +128,7 @@ export function useAdminDeleteCategory() {
 
   return useMutation({
     mutationFn: async (categoryId: CategoryId) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error('Backend service is not available');
       await actor.deleteCategory(categoryId);
     },
     onSuccess: () => {

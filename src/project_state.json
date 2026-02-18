@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 67,
+  "projectStateVersion": 71,
   "summary": "Immediate priority: fix deployment reliability by clearing build/deploy cache (resolve prior deployment error), then implement a simplified Vendor/Shopkeeper system starting with a basic Shopkeeper Panel at /vendor where shopkeepers can register/login and add/manage their own products (including stock). Admin approval/blocking and product go-live approvals are deferred to a later phase.",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
@@ -27,6 +27,7 @@
     "Admin \"Site Settings\" page is not working as expected (logo upload/change flow failing); needs fix so branding/logo can be updated."
   ],
   "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Square app icon based on the BISAULI logo (pwa-icon.dim_192x192.png)\n- Square app icon based on the BISAULI logo (pwa-icon.dim_512x512.png)\n- Maskable square app icon based on the BISAULI logo (pwa-icon-maskable.dim_192x192.png)\n- Maskable square app icon based on the BISAULI logo (pwa-icon-maskable.dim_512x512.png)",
   "existing_features": [
     {
       "id": "feature-create-the-shopease-app-shell-with-smooth-navigation-and-fast-loading-pages-including-a-coherent-modern-visual-theme-clean-minimal-amazon-flipkart-inspired-applied-consistently-across-all-screens",
@@ -923,6 +924,70 @@
         "REQ-148"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-category-save-flow-surfaces-the-actual-backend-failure-reason-in-english-instead-of-only-showing-a-generic-unable-to-complete-the-operation-message-when-a-save-fails-for-non-availability-reasons",
+      "title": "Ensure the Admin Category save flow surfaces the actual backend failure reason in English (instead of only showing a generic \"Unable to complete the operation\" message) when a save fails for non-availability reasons.",
+      "reqIds": [
+        "REQ-151"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-no-frontend-token-session-auth-gating-is-applied-to-admin-category-save-actions-and-admin-dashboard-stats-fetch-these-flows-must-use-the-existing-anonymous-admin-actor-path-consistently",
+      "title": "Ensure no frontend token/session/auth gating is applied to Admin Category save actions and Admin Dashboard stats fetch; these flows must use the existing anonymous admin actor path consistently.",
+      "reqIds": [
+        "REQ-152"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-web-app-manifest-for-the-bisauli-store-and-wire-it-into-the-app-so-browsers-recognize-the-site-as-installable",
+      "title": "Add a Web App Manifest for the BISAULI Store and wire it into the app so browsers recognize the site as installable.",
+      "reqIds": [
+        "REQ-153"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-service-worker-that-enables-offline-support-app-shell-caching-and-faster-repeat-loads-and-ensure-it-is-registered-by-the-app-at-runtime",
+      "title": "Add a Service Worker that enables offline support (app shell caching) and faster repeat loads, and ensure it is registered by the app at runtime.",
+      "reqIds": [
+        "REQ-154"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-add-to-home-screen-a2hs-install-prompt-experience-for-mobile-users-that-shows-a-user-friendly-english-popup-banner-when-installation-is-available",
+      "title": "Implement an Add-to-Home-Screen (A2HS) install prompt experience for mobile users that shows a user-friendly English popup/banner when installation is available.",
+      "reqIds": [
+        "REQ-155"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-use-the-existing-bisauli-logo-as-the-pwa-app-icon-set-including-standard-and-maskable-icons-and-ensure-the-icons-are-referenced-correctly-by-the-manifest",
+      "title": "Use the existing BISAULI logo as the PWA app icon set (including standard and maskable icons), and ensure the icons are referenced correctly by the manifest.",
+      "reqIds": [
+        "REQ-156"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-pwa-offline-fast-loading-behavior-is-reliable-and-does-not-break-core-navigation-implement-a-clear-caching-strategy-and-include-an-offline-fallback-for-navigation-when-the-network-is-unavailable",
+      "title": "Ensure the PWA offline/fast-loading behavior is reliable and does not break core navigation: implement a clear caching strategy and include an offline fallback for navigation when the network is unavailable.",
+      "reqIds": [
+        "REQ-157"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-project-documentation-to-include-basic-pwa-testing-steps-manifest-service-worker-offline-test-install-prompt-test-using-english-instructions",
+      "title": "Update project documentation to include basic PWA testing steps (manifest, service worker, offline test, install prompt test) using English instructions.",
+      "reqIds": [
+        "REQ-158"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1382,6 +1447,28 @@
       "reqIds": [
         "REQ-145"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-125",
+      "summary": "Remove backend admin-permission enforcement that currently blocks Admin Category create/update/delete so categories (including the `image` Data URL field) can be saved successfully during the open-admin phase.",
+      "reqIds": [
+        "REQ-149"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-126",
+      "summary": "Remove backend admin-permission enforcement that currently blocks Admin Dashboard stats fetching by making the backend method used by `useDashboardStats` (`getAllOrders()`) callable during the open-admin phase.",
+      "reqIds": [
+        "REQ-150"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-127",
+      "summary": "Convert the website into a Progressive Web App (PWA): add Web App Manifest + Service Worker, use the BISAULI logo as the app icon, enable offline/fast-loading behavior, and implement an Add-to-Home-Screen prompt on mobile.",
+      "reqIds": [],
       "status": "pending"
     }
   ],

@@ -14,6 +14,7 @@ A modern e-commerce web application built with React, TypeScript, and the Intern
 - 🔐 Internet Identity authentication for customers
 - 👨‍💼 Admin panel (no authentication required)
 - 🏪 Vendor / Shopkeeper Panel for product management
+- 📱 Progressive Web App (PWA) with offline support
 
 ## Application Routes
 
@@ -120,6 +121,138 @@ To enable Stripe payments:
 5. Save the configuration
 
 Once configured, customers can choose Stripe as a payment method during checkout.
+
+## Progressive Web App (PWA)
+
+BISAULI is a Progressive Web App that can be installed on mobile and desktop devices for a native app-like experience.
+
+### PWA Features
+
+- **Installable**: Add BISAULI to your home screen on mobile or desktop
+- **Offline Support**: Browse previously viewed products and pages while offline
+- **Fast Loading**: Cached assets load instantly on repeat visits
+- **App-like Experience**: Full-screen mode without browser UI when installed
+
+### Testing PWA Functionality
+
+#### 1. Verify Web App Manifest
+
+1. Open Chrome DevTools (F12)
+2. Go to **Application** tab → **Manifest**
+3. Verify the manifest loads without errors
+4. Check that:
+   - Name: "BISAULI"
+   - Start URL: "/"
+   - Display: "standalone"
+   - Icons: 192x192 and 512x512 (including maskable variants)
+   - Theme color: "#d97706"
+
+#### 2. Verify Service Worker
+
+1. Open Chrome DevTools (F12)
+2. Go to **Application** tab → **Service Workers**
+3. Verify service worker is registered at `/sw.js`
+4. Check status shows "activated and is running"
+5. After first page load, verify service worker "controls" the page
+6. Check **Cache Storage** to see cached assets under `bisauli-v1`
+
+#### 3. Test Offline Mode
+
+1. Load the app while online (visit multiple pages)
+2. Open Chrome DevTools (F12)
+3. Go to **Network** tab
+4. Check "Offline" checkbox to simulate offline mode
+5. Reload the page (Ctrl+R / Cmd+R)
+6. Verify:
+   - App shell loads from cache
+   - Offline banner appears at top: "You are offline. Some features may be unavailable..."
+   - Previously viewed pages load from cache
+   - Navigation still works for cached pages
+7. Uncheck "Offline" to go back online
+8. Verify offline banner disappears
+
+#### 4. Test Installation / Add to Home Screen
+
+**On Android Chrome:**
+
+1. Open the app on your Android device
+2. After a few seconds, an install prompt should appear at the bottom
+3. Tap "Install" to add BISAULI to your home screen
+4. Alternatively, tap the three-dot menu → "Install app" or "Add to Home screen"
+5. Once installed, open from home screen
+6. Verify app opens in standalone mode (no browser UI)
+
+**On iOS Safari:**
+
+1. Open the app in Safari on your iPhone/iPad
+2. An informational prompt should appear with instructions
+3. Tap the Share button (square with arrow pointing up)
+4. Scroll down and tap "Add to Home Screen"
+5. Tap "Add" to confirm
+6. Open from home screen
+7. Verify app opens in standalone mode
+
+**On Desktop Chrome:**
+
+1. Open the app in Chrome on desktop
+2. Look for the install icon in the address bar (⊕ or computer icon)
+3. Click the icon and select "Install"
+4. App opens in a standalone window
+5. Verify it appears in your applications/start menu
+
+**Dismiss Behavior:**
+
+- Tap "Not now" or X to dismiss the prompt
+- Prompt will not reappear in the same browser session
+- Prompt will reappear in a new session if app is still not installed
+
+#### 5. Test Update Handling
+
+1. Make a change to the service worker version (e.g., change `CACHE_VERSION` to `'v2'`)
+2. Rebuild and redeploy the app
+3. Reload the page in the browser
+4. Open DevTools → Application → Service Workers
+5. Verify new service worker is "waiting to activate"
+6. Close all tabs and reopen
+7. Verify new service worker is now "activated"
+8. Check Cache Storage shows new cache version (`bisauli-v2`)
+9. Old cache should be deleted
+
+#### 6. Test Fast Loading
+
+1. Visit the app for the first time (clear cache if needed)
+2. Note the initial load time
+3. Navigate to several pages (home, catalog, product details)
+4. Close the browser completely
+5. Reopen and visit the app again
+6. Verify:
+   - App loads noticeably faster (from cache)
+   - No white screen or long loading time
+   - Core UI appears almost instantly
+
+### PWA Troubleshooting
+
+**Install prompt not showing:**
+- Ensure you're using HTTPS (or localhost for development)
+- Check that manifest is valid in DevTools
+- Verify service worker is registered and active
+- Try clearing site data and reloading
+
+**Offline mode not working:**
+- Check service worker is active and controlling the page
+- Verify assets are cached in DevTools → Application → Cache Storage
+- Ensure you visited pages while online first (they need to be cached)
+
+**Service worker not updating:**
+- Close all tabs with the app open
+- Clear cache and reload
+- Check for errors in DevTools console
+- Verify new service worker version is different from old
+
+**Icons not showing:**
+- Verify icon files exist at `/assets/generated/pwa-icon*.png`
+- Check manifest references correct icon paths
+- Clear cache and reinstall the app
 
 ## Deployment Verification
 
@@ -308,3 +441,4 @@ If you encounter "Unauthorized" errors after deployment:
    - Should work without any authentication prompts
 
 If issues persist, try a full clean rebuild:
+

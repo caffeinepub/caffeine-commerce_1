@@ -1,121 +1,150 @@
 {
   "kind": "build_request",
-  "title": "Add image upload for Categories and render modern category cards on Home",
-  "projectName": "BISAULI Shop",
+  "title": "Convert BISAULI Store to a PWA (Manifest, Service Worker, A2HS prompt, Offline)",
+  "projectName": "BISAULI Store",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-144",
-      "text": "Extend the backend Category model to store an uploaded category image as a Text field (Data URL or URL string) and return it from category queries.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "In the Admin Panel, when I create or edit a category, let me upload a Category Image.",
-          "On the main shop page, instead of just a box, show the uploaded image for each category"
-        ]
-      },
-      "acceptanceCriteria": [
-        "`backend/main.mo` `Category` type includes a new `imageUrl : Text` field.",
-        "`getCategories()` returns categories including `imageUrl`.",
-        "Category image data is persisted in the existing categories storage so that after creating/updating a category image, reloading the app still shows the same image.",
-        "If `imageUrl` is empty, the backend still returns the category successfully (no traps due to missing image)."
-      ]
-    },
-    {
-      "id": "REQ-145",
-      "text": "Update backend category CRUD methods to accept and persist the Category image field when creating and editing categories.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "In the Admin Panel, when I create or edit a category, let me upload a Category Image."
-        ]
-      },
-      "acceptanceCriteria": [
-        "`addCategory` persists the provided `imageUrl` (if any) for the created category.",
-        "`updateCategory` persists the provided `imageUrl` changes for the specified category.",
-        "Existing UI flows that call `addCategory` / `updateCategory` continue to work after the interface change (types align between backend Candid and frontend generated types)."
-      ]
-    },
-    {
-      "id": "REQ-146",
-      "text": "Add a Category Image file upload control with preview to the Admin Category create/edit dialog, storing the selected image in form state as a Data URL string and saving it via the existing category create/update mutations.",
+      "id": "REQ-153",
+      "text": "Add a Web App Manifest for the BISAULI Store and wire it into the app so browsers recognize the site as installable.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "In the Admin Panel, when I create or edit a category, let me upload a Category Image."
+          "I want to convert this website into a PWA (Progressive Web App). Please:\n\n1. Add a Web App Manifest and Service Worker."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/components/admin/CategoryEditorDialog.tsx` includes an image file input (accepting images) for both Add and Edit flows.",
-        "When an admin selects an image file, the dialog shows an inline preview before saving.",
-        "The selected image is converted to a Data URL string and sent in the category payload when saving.",
-        "If a non-image file is selected, show a clear English validation error and do not set the image.",
-        "Provide a clear/remove action to unset a selected image before saving.",
-        "All user-facing labels, helper text, and validation errors in this dialog are in English."
+        "A valid manifest file exists under the frontend static/public assets (e.g., `frontend/public/manifest.webmanifest` or equivalent) and is served by the app.",
+        "`frontend/index.html` includes a `<link rel=\"manifest\" ...>` pointing to the manifest.",
+        "The manifest includes: name/short_name set to BISAULI, start_url, display=standalone, background_color, theme_color, and a set of icons (including 192x192 and 512x512).",
+        "In Chrome DevTools > Application > Manifest, the manifest loads without errors."
       ]
     },
     {
-      "id": "REQ-147",
-      "text": "Display the uploaded category image on the shopper Home page category grid instead of the current placeholder icon box, and style category cards to look modern and professional.",
+      "id": "REQ-154",
+      "text": "Add a Service Worker that enables offline support (app shell caching) and faster repeat loads, and ensure it is registered by the app at runtime.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "On the main shop page, instead of just a box, show the uploaded image for each category (like a picture of a shirt for 'Cloths').",
-          "Make the category cards look modern and professional with the image in the background or top."
+          "1. Add a Web App Manifest and Service Worker.",
+          "4. Make it work offline and ensure it loads fast like a native app."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/components/home/CategoriesGrid.tsx` renders category cards using the category’s `imageUrl` when present.",
-        "Category cards have a modern/professional look (e.g., image at top or as a background with readable overlay text), with hover/focus styling preserved.",
-        "If a category has no image, render a clean fallback (do not show a broken image).",
-        "Category card click behavior remains unchanged (navigates to `/catalog` with the category filter).",
-        "The category grid remains responsive across mobile and desktop."
+        "A service worker file exists under frontend static/public assets (e.g., `frontend/public/sw.js`) and is served by the app.",
+        "The service worker is registered on app load without requiring edits to immutable `frontend/src/main.tsx` (registration can be done via `frontend/index.html` and/or non-immutable React components).",
+        "First visit online caches the core app shell assets needed to render the UI on subsequent visits.",
+        "When the browser is set to Offline and the user reloads, the app still loads a usable offline experience (at minimum: shell + a clear offline message for data that cannot be fetched).",
+        "In Chrome DevTools > Application > Service Workers, the service worker is installed/activated successfully and controls the page after reload."
       ]
     },
     {
-      "id": "REQ-148",
-      "text": "Show a small image thumbnail in the Admin Categories list so admins can verify which image is attached to each category.",
+      "id": "REQ-155",
+      "text": "Implement an Add-to-Home-Screen (A2HS) install prompt experience for mobile users that shows a user-friendly English popup/banner when installation is available.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "I want to add an image upload option for each Category."
+          "Ensure that when a customer opens the site on mobile, they see an 'Add to Home Screen' popup."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/pages/admin/AdminCategoriesPage.tsx` shows a thumbnail column (or equivalent) for each category when `imageUrl` is present.",
-        "If `imageUrl` is empty, show an English fallback indicator (e.g., 'No image') without breaking the table layout.",
-        "The page remains stable with loading/empty/error states and does not crash when images fail to load."
+        "On supported mobile browsers (e.g., Android Chrome) where `beforeinstallprompt` is available, a visible in-app prompt appears after page load (or after a short delay) with clear English text and an Install/Add action.",
+        "Tapping the Install/Add action triggers the browser install prompt (using the captured `beforeinstallprompt` event).",
+        "The prompt includes a Dismiss/Not now action and does not reappear continuously in the same session after dismissal.",
+        "On iOS Safari (where `beforeinstallprompt` is not available), show an English informational prompt with simple steps (e.g., “Tap Share, then ‘Add to Home Screen’.”) and allow dismissing it."
+      ]
+    },
+    {
+      "id": "REQ-156",
+      "text": "Use the existing BISAULI logo as the PWA app icon set (including standard and maskable icons), and ensure the icons are referenced correctly by the manifest.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Use my BISAULI logo as the app icon."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A complete set of PWA icon PNGs is available as static frontend assets and referenced in the manifest (at minimum: 192x192 and 512x512; plus maskable variants).",
+        "The icons visually reflect the BISAULI logo and render crisply at small sizes.",
+        "Chrome DevTools manifest preview shows the correct icon and no icon-related warnings (including maskable warnings if maskable icons are provided)."
+      ]
+    },
+    {
+      "id": "REQ-157",
+      "text": "Ensure the PWA offline/fast-loading behavior is reliable and does not break core navigation: implement a clear caching strategy and include an offline fallback for navigation when the network is unavailable.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Make it work offline and ensure it loads fast like a native app."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Service worker caching strategy avoids trapping the app in a broken state after deployments (e.g., supports updating to new versions cleanly).",
+        "A dedicated offline fallback page or UI state exists and uses English user-facing text (e.g., “You are offline. Some features may be unavailable.”).",
+        "Core route navigation loads the cached app shell quickly on repeat visits, with noticeably reduced load time vs. a cold load.",
+        "The service worker does not cache backend canister errors as successful responses (i.e., it should not permanently serve an error page as the cached content)."
+      ]
+    },
+    {
+      "id": "REQ-158",
+      "text": "Update project documentation to include basic PWA testing steps (manifest, service worker, offline test, install prompt test) using English instructions.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "I want to convert this website into a PWA (Progressive Web App)."
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/README.md` (or an appropriate existing doc) includes a short “PWA” section with steps to: verify manifest, verify service worker registration, test offline mode, and test installation/A2HS on mobile.",
+        "Documentation uses English user-facing text and does not reference unsupported tooling or stacks."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo` (no additional backend services).",
-    "Do not edit files under `frontend/src/components/ui` or any other immutable paths listed in SYSTEM_CONTEXT.",
-    "Do not add backend image storage; store category images as a Text string (Data URL or URL) in the Category record, consistent with existing product/site-logo image patterns.",
-    "Use English for all user-facing text added or changed as part of this request."
+    "Do not edit any paths listed as immutable, including `frontend/src/main.tsx` and `frontend/src/hooks/useActor.ts` (service worker registration must be implemented without modifying immutable paths).",
+    "Keep backend architecture unchanged (single Motoko actor). No backend changes are required for PWA enablement.",
+    "All user-facing text introduced by the PWA install/offline UI must be in English."
   ],
   "nonGoals": [
-    "Implementing image resizing/compression pipelines or external image hosting.",
-    "Changing shopper Catalog filtering behavior beyond using the category cards as navigation.",
-    "Adding new authentication/authorization flows for admin beyond what already exists."
+    "Implementing push notifications (not requested here).",
+    "Adding third-party analytics or external monitoring for PWA usage.",
+    "Building a fully offline-capable e-commerce experience that supports placing orders while offline (offline support here is for app shell + graceful offline messaging)."
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Square app icon based on the BISAULI logo (pwa-icon.dim_192x192.png)",
+      "Square app icon based on the BISAULI logo (pwa-icon.dim_512x512.png)",
+      "Maskable square app icon based on the BISAULI logo (pwa-icon-maskable.dim_192x192.png)",
+      "Maskable square app icon based on the BISAULI logo (pwa-icon-maskable.dim_512x512.png)"
+    ],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

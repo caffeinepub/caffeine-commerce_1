@@ -71,26 +71,37 @@ export function detectBackendUnavailability(error: any): BackendErrorInfo {
     };
   }
 
-  // For authorization-related errors during open admin phase, sanitize to neutral operational message
-  if (errorString.includes('unauthorized') || 
-      errorString.includes('permission') || 
-      errorString.includes('access denied') ||
-      errorString.includes('only admins can') ||
-      errorString.includes('no permission') ||
-      errorString.includes('only users can') ||
-      errorString.includes('admin') && errorString.includes('action')) {
-    return {
-      isBackendUnavailable: false,
-      userMessage: 'Unable to complete the operation. Please refresh the page and try again.',
-      originalError: error,
-    };
+  // Extract the most relevant error message from the backend
+  // Try to get the actual trap/reject message
+  let userMessage = error.message || String(error) || 'An error occurred';
+  
+  // If the error contains "Reject text:", extract that
+  const rejectTextMatch = userMessage.match(/Reject text:\s*(.+?)(?:\n|$)/i);
+  if (rejectTextMatch) {
+    userMessage = rejectTextMatch[1].trim();
+  }
+  
+  // If the error contains "Call was rejected:", extract that
+  const rejectedMatch = userMessage.match(/Call was rejected:\s*(.+?)(?:\n|$)/i);
+  if (rejectedMatch) {
+    userMessage = rejectedMatch[1].trim();
   }
 
-  // Generic error - return the original message
-  const originalMessage = error.message || String(error) || 'An error occurred';
+  // Clean up common prefixes
+  userMessage = userMessage
+    .replace(/^Error:\s*/i, '')
+    .replace(/^Reject text:\s*/i, '')
+    .replace(/^Call was rejected:\s*/i, '')
+    .trim();
+
+  // If the message is too technical or empty, provide a fallback
+  if (!userMessage || userMessage.length < 3) {
+    userMessage = 'Unable to complete the operation. Please try again.';
+  }
+
   return {
     isBackendUnavailable: false,
-    userMessage: originalMessage,
+    userMessage,
     originalError: error,
   };
 }

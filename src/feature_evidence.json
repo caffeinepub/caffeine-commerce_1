@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-category-image-file-upload-control-with-preview-to-the-admin-category-create-edit-dialog-storing-the-selected-image-in-form-state-as-a-data-url-string-and-saving-it-via-the-existing-category-create-update-mutations",
-      "featureTitle": "Add a Category Image file upload control with preview to the Admin Category create/edit dialog, storing the selected image in form state as a Data URL string and saving it via the existing category create/update mutations.",
+      "featureId": "feature-add-a-web-app-manifest-for-the-bisauli-store-and-wire-it-into-the-app-so-browsers-recognize-the-site-as-installable",
+      "featureTitle": "Add a Web App Manifest for the BISAULI Store and wire it into the app so browsers recognize the site as installable.",
       "files": [
-        "frontend/src/components/admin/CategoryEditorDialog.tsx"
+        "frontend/index.html",
+        "frontend/public/manifest.webmanifest"
       ],
       "components": [
         "authorization@4.0.0",
@@ -19,16 +20,18 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-146"
+        "REQ-153"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-display-the-uploaded-category-image-on-the-shopper-home-page-category-grid-instead-of-the-current-placeholder-icon-box-and-style-category-cards-to-look-modern-and-professional",
-      "featureTitle": "Display the uploaded category image on the shopper Home page category grid instead of the current placeholder icon box, and style category cards to look modern and professional.",
+      "featureId": "feature-add-a-service-worker-that-enables-offline-support-app-shell-caching-and-faster-repeat-loads-and-ensure-it-is-registered-by-the-app-at-runtime",
+      "featureTitle": "Add a Service Worker that enables offline support (app shell caching) and faster repeat loads, and ensure it is registered by the app at runtime.",
       "files": [
-        "frontend/src/components/category/CategoryImage.tsx",
-        "frontend/src/components/home/CategoriesGrid.tsx"
+        "frontend/index.html",
+        "frontend/public/sw.js",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/components/pwa/OfflineBanner.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,16 +45,17 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-147"
+        "REQ-154"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-show-a-small-image-thumbnail-in-the-admin-categories-list-so-admins-can-verify-which-image-is-attached-to-each-category",
-      "featureTitle": "Show a small image thumbnail in the Admin Categories list so admins can verify which image is attached to each category.",
+      "featureId": "feature-implement-an-add-to-home-screen-a2hs-install-prompt-experience-for-mobile-users-that-shows-a-user-friendly-english-popup-banner-when-installation-is-available",
+      "featureTitle": "Implement an Add-to-Home-Screen (A2HS) install prompt experience for mobile users that shows a user-friendly English popup/banner when installation is available.",
       "files": [
-        "frontend/src/components/category/CategoryImage.tsx",
-        "frontend/src/pages/admin/AdminCategoriesPage.tsx"
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
+        "frontend/src/hooks/useA2HS.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -65,7 +69,75 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-148"
+        "REQ-155"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-use-the-existing-bisauli-logo-as-the-pwa-app-icon-set-including-standard-and-maskable-icons-and-ensure-the-icons-are-referenced-correctly-by-the-manifest",
+      "featureTitle": "Use the existing BISAULI logo as the PWA app icon set (including standard and maskable icons), and ensure the icons are referenced correctly by the manifest.",
+      "files": [
+        "frontend/public/manifest.webmanifest"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-156"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-pwa-offline-fast-loading-behavior-is-reliable-and-does-not-break-core-navigation-implement-a-clear-caching-strategy-and-include-an-offline-fallback-for-navigation-when-the-network-is-unavailable",
+      "featureTitle": "Ensure the PWA offline/fast-loading behavior is reliable and does not break core navigation: implement a clear caching strategy and include an offline fallback for navigation when the network is unavailable.",
+      "files": [
+        "frontend/public/offline.html",
+        "frontend/public/sw.js",
+        "frontend/src/components/pwa/OfflineBanner.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-157"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-project-documentation-to-include-basic-pwa-testing-steps-manifest-service-worker-offline-test-install-prompt-test-using-english-instructions",
+      "featureTitle": "Update project documentation to include basic PWA testing steps (manifest, service worker, offline test, install prompt test) using English instructions.",
+      "files": [
+        "frontend/README.md"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-158"
       ],
       "confidence": "high"
     }
