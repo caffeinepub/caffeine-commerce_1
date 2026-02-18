@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fully unblock admin Orders/Categories/Products (and related admin features) by removing remaining permission/role checks that cause authorization errors during the open-admin phase, while keeping shopper/user flows protected.
+**Goal:** Add basic inventory management so stock decrements on successful order placement, shoppers see clear out-of-stock UI, and admins can edit product stock.
 
 **Planned changes:**
-- Remove backend admin-only permission checks in admin-used methods so anonymous callers can manage Orders, Categories, Products, Coupons, Site Settings, and Stripe setup without authorization failures.
-- Remove frontend permission gating and permission-based UI blocks within admin pages/components/hooks so `/admin/orders`, `/admin/categories`, and `/admin/products` never show “Unauthorized/No Permission” messaging or block actions due to permission state.
-- Ensure Admin Orders uses the anonymous admin actor path consistently and surfaces failures as neutral operational errors (e.g., backend unavailable, validation, not found) rather than permission-related messages.
-- Preserve existing user/shopper permission checks for cart, wishlist, placing orders, and viewing personal orders.
+- Backend: update `placeOrder(shippingAddress)` to decrement `Product.stock` by ordered quantities on success, prevent underflow/negative stock, and fail the order (without changing stock or clearing cart) when products are missing or have insufficient stock.
+- Frontend (shopper): show products even when stock is 0, but replace/disable Add to Cart with an English “Out of Stock” label on `ProductCard` and `ProductDetailsPage`.
+- Frontend (admin): add an editable Stock field (English label) to `ProductEditorDialog`, validate non-negative numeric input, and persist the value to the backend on save (with list reflecting updates via existing query invalidation).
+- Frontend: after successful order placement, invalidate the products query cache so updated stock (including reaching 0) is reflected without manual reload.
 
-**User-visible outcome:** Admin pages for Orders, Categories, and Products load and allow full CRUD/status updates without any permission popups or access-denied screens, while normal shopper features remain protected behind existing user permissions.
+**User-visible outcome:** Customers cannot add out-of-stock products to the cart and will see an “Out of Stock” label, while admins can edit product stock; placing an order correctly reduces stock and updates the UI automatically.

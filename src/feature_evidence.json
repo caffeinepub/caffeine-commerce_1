@@ -2,13 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-all-frontend-side-permission-checks-role-gating-admin-authorization-ui-blocks-within-frontend-src-pages-admin-frontend-src-components-admin-and-admin-query-mutation-hooks-so-admin-pages-never-show-unauthorized-no-permission-popups-and-never-block-actions-due-to-permission-state-during-the-open-admin-phase",
-      "featureTitle": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within `frontend/src/pages/admin/**`, `frontend/src/components/admin/**`, and admin query/mutation hooks so Admin pages never show 'Unauthorized' / 'No Permission' popups and never block actions due to permission state during the open-admin phase.",
+      "featureId": "feature-update-shopper-facing-product-ui-so-that-when-a-product-s-stock-is-0-the-product-remains-visible-but-the-add-to-cart-action-is-disabled-and-replaced-with-an-out-of-stock-label-english-apply-this-behavior-consistently-at-least-on-the-product-card-grid-frontend-src-components-product-productcard-tsx-and-on-the-product-details-page-frontend-src-pages-productdetailspage-tsx",
+      "featureTitle": "Update shopper-facing product UI so that when a product’s stock is 0, the product remains visible but the Add to Cart action is disabled and replaced with an \"Out of Stock\" label (English). Apply this behavior consistently at least on the product card grid (`frontend/src/components/product/ProductCard.tsx`) and on the product details page (`frontend/src/pages/ProductDetailsPage.tsx`).",
       "files": [
-        "frontend/src/components/admin/CategoryEditorDialog.tsx",
-        "frontend/src/components/admin/ProductEditorDialog.tsx",
-        "frontend/src/pages/admin/AdminCategoriesPage.tsx",
-        "frontend/src/utils/backendAvailabilityErrors.ts"
+        "frontend/src/components/product/ProductCard.tsx",
+        "frontend/src/pages/ProductDetailsPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -21,15 +19,15 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-122"
+        "REQ-125"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-admin-orders-data-loading-and-status-update-flows-use-the-anonymous-admin-actor-path-consistently-no-internet-identity-role-checks-and-that-errors-are-surfaced-as-clear-english-operational-messages-backend-unavailable-validation-not-found-rather-than-permission-messaging",
-      "featureTitle": "Ensure Admin Orders data loading and status update flows use the anonymous/admin actor path consistently (no Internet Identity role checks) and that errors are surfaced as clear English operational messages (backend unavailable, validation, not found) rather than permission messaging.",
+      "featureId": "feature-ensure-the-admin-product-create-edit-ui-includes-an-explicit-editable-stock-field-english-label-and-that-saving-a-product-persists-the-entered-stock-value-to-the-backend-product-record-this-must-be-supported-in-the-existing-admin-product-editor-dialog-frontend-src-components-admin-producteditordialog-tsx",
+      "featureTitle": "Ensure the Admin product create/edit UI includes an explicit editable Stock field (English label) and that saving a product persists the entered stock value to the backend product record. This must be supported in the existing Admin product editor dialog (`frontend/src/components/admin/ProductEditorDialog.tsx`).",
       "files": [
-        "frontend/src/utils/backendAvailabilityErrors.ts"
+        "frontend/src/components/admin/ProductEditorDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,7 +40,28 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-123"
+        "REQ-126"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-after-a-successful-order-placement-refresh-product-data-in-the-shopper-ui-by-invalidating-the-products-query-cache-so-that-stock-changes-including-reaching-0-are-reflected-without-a-manual-reload",
+      "featureTitle": "After a successful order placement, refresh product data in the shopper UI by invalidating the products query cache so that stock changes (including reaching 0) are reflected without a manual reload.",
+      "files": [
+        "frontend/src/hooks/mutations/usePlaceOrder.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-127"
       ],
       "confidence": "high"
     }

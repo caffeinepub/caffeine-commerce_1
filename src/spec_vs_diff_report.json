@@ -1,63 +1,43 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T04:03:26.312Z",
-  "summary": "Diff shows frontend admin Catalog (Categories/Products) components updated to use neutral operational error handling (including backend unavailability detection) and removal/sanitization of permission-related messaging. However, the diff does not provide evidence that backend admin-only permission checks were removed for the listed admin methods, nor that Admin Orders hook/page behavior (useAdminActor usage, no role checks) was updated as required. Some additional changes (image upload handling, migration module) appear unrelated to the permission-removal request.",
+  "generatedAt": "2026-02-18T04:20:12.638Z",
+  "summary": "Frontend implements out-of-stock UX on ProductCard and ProductDetailsPage and invalidates products cache after successful placeOrder. Backend stock-decrement-on-order and admin stock editing persistence/validation cannot be confirmed from the provided (truncated) diff evidence. An extra (unrequested) dashboardStats invalidation was added on order success.",
   "missing_requirements": [
     {
-      "id": "REQ-121",
-      "requirement": "Remove all backend admin-only permission checks that can cause 'Unauthorized'/'No Permission' failures for admin functionality (Orders, Categories, Products, Coupons, Site Settings, Stripe setup), while keeping shopper/user flows protected.",
-      "reason": "The provided backend diff snippet still shows AccessControl checks and admin gating in at least one method (getUserProfile uses AccessControl.isAdmin). The diff summary is truncated and does not show the key admin methods (e.g., getAllOrders, updateOrderStatus, add/update/deleteCategory, add/update/deleteProduct, updateSiteSettings, add/deleteCoupon, setStripeConfiguration), so there is no evidence those guards were removed.",
+      "id": "REQ-124",
+      "requirement": "Update backend placeOrder(shippingAddress) to atomically decrement stock for ordered items, fail with clear English error if product missing/insufficient stock, never underflow/negative, and do not clear cart or modify stocks on failure.",
+      "reason": "The diff snippet for backend/main.mo is truncated and does not show any changes to the placeOrder flow or any stock-decrement/validation logic; there is no visible evidence that stock is checked/decremented or that updates are atomic with respect to cart clearing.",
       "evidence": [
-        "backend/main.mo (truncated) — shows `if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) Runtime.trap(\"Unauthorized: Can only view your own profile\")` and other permission checks"
+        "backend/main.mo (truncated; no placeOrder logic shown)"
       ]
     },
     {
-      "id": "REQ-122",
-      "requirement": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within admin pages/components and admin query/mutation hooks so admin pages never block actions due to permission state.",
-      "reason": "Only Admin Categories page/dialog and Product editor dialog are shown. The diff does not include evidence for removing permission gating across all specified admin areas (e.g., `/admin/orders`, `/admin/products` page, and admin query/mutation hooks broadly).",
+      "id": "REQ-126",
+      "requirement": "Admin product create/edit UI includes an editable Stock field with English label, validates non-negative numeric input with clear English error, and persists stock to backend on save; list reflects updated stock via existing query invalidation.",
+      "reason": "ProductEditorDialog.tsx shows stock added to form state and stockError state, but the provided diff is truncated before confirming: (1) a rendered Stock input with an English label, (2) non-negative numeric validation + user-facing error display, and (3) that save mutations send stock to backend and trigger list refresh/invalidation.",
       "evidence": [
-        "frontend/src/pages/admin/AdminCategoriesPage.tsx (truncated) — shows operational error handling changes, but does not evidence removal of permission gates elsewhere",
-        "frontend/src/components/admin/CategoryEditorDialog.tsx (truncated)",
-        "frontend/src/components/admin/ProductEditorDialog.tsx (truncated)",
-        "frontend-file-summaries.txt (truncated) — mentions useAuthz changes but does not show admin pages/orders/products gating removal details"
-      ]
-    },
-    {
-      "id": "REQ-123",
-      "requirement": "Ensure Admin Orders data loading and status update flows use useAdminActor() consistently (no II role checks) and errors are surfaced as clear English operational messages rather than permission messaging.",
-      "reason": "No diff content is shown for `frontend/src/hooks/queries/useAdminOrders.ts` or the Admin Orders page; therefore there is no evidence that Orders uses `useAdminActor()` without role checks or that Orders-specific error messaging was updated.",
-      "evidence": [
-        "File diff summary does not include `frontend/src/hooks/queries/useAdminOrders.ts` or an Admin Orders page/component"
+        "frontend/src/components/admin/ProductEditorDialog.tsx (truncated; cannot see rendered Stock field, validation, or save payload/invalidation)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added product image file selection, client-side validation of image formats, and conversion to Data URL for ProductEditorDialog.",
-      "reason": "The BuildRequest is focused on removing admin permission checks/gating and permission-related messaging. Image upload/encoding behavior is not requested by REQ-121/122/123.",
+      "description": "Invalidating the admin dashboard stats query after successful order placement (dashboardStats).",
+      "reason": "REQ-127 only asked to invalidate the products query (in addition to existing cart/orders invalidations). The added dashboardStats invalidation is not requested by the BuildRequest.",
       "evidence": [
-        "frontend/src/components/admin/ProductEditorDialog.tsx (truncated) — FileReader Data URL conversion, image type validation, clear image logic"
-      ]
-    },
-    {
-      "description": "Introduced a backend migration module and wired migration into the actor.",
-      "reason": "BuildRequest non-goals state not to require state migration unless strictly necessary for permission removal. The diff adds `backend/migration.mo` and includes it in `backend/main.mo` with `(with migration = Migration.run)` without clear linkage to permission-check removal.",
-      "evidence": [
-        "backend/migration.mo — newly added",
-        "backend/main.mo (truncated) — `import Migration \"migration\";` and `(with migration = Migration.run)`"
+        "frontend/src/hooks/mutations/usePlaceOrder.ts (onSuccess invalidates queryKeys.dashboardStats)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.58,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/admin/CategoryEditorDialog.tsx",
     "frontend/src/components/admin/ProductEditorDialog.tsx",
-    "frontend/src/pages/admin/AdminCategoriesPage.tsx",
-    "frontend/src/utils/backendAvailabilityErrors.ts",
+    "frontend/src/components/product/ProductCard.tsx",
+    "frontend/src/hooks/mutations/usePlaceOrder.ts",
+    "frontend/src/pages/ProductDetailsPage.tsx",
     "project_state.json"
   ]
 }

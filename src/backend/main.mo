@@ -12,9 +12,7 @@ import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import Stripe "stripe/stripe";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   /**************
    * Authorization System (Bundled)
@@ -191,7 +189,9 @@ actor {
   };
 
   public shared ({ caller }) func updateSiteSettings(newSettings : SiteSettings) : async () {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     siteSettings := {
       shopName = "BISAULI";
       logo = newSettings.logo;
@@ -293,7 +293,9 @@ actor {
   };
 
   public shared ({ caller }) func addProduct(product : Product) : async ProductId {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     let productId = generateId();
     let newProduct = {
       product with id = productId
@@ -303,7 +305,9 @@ actor {
   };
 
   public shared ({ caller }) func updateProduct(productId : ProductId, product : Product) : async () {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     switch (products.get(productId)) {
       case (null) { Runtime.trap("Product does not exist") };
       case (?_) {
@@ -313,12 +317,16 @@ actor {
   };
 
   public shared ({ caller }) func deleteProduct(productId : ProductId) : async () {
-    // No permission check;
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     products.remove(productId);
   };
 
   public shared ({ caller }) func addCategory(category : Category) : async CategoryId {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     let categoryId = generateId();
     let newCategory = {
       category with id = categoryId
@@ -328,7 +336,9 @@ actor {
   };
 
   public shared ({ caller }) func updateCategory(categoryId : CategoryId, category : Category) : async () {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     switch (categories.get(categoryId)) {
       case (null) { Runtime.trap("Category does not exist") };
       case (?_) {
@@ -338,7 +348,9 @@ actor {
   };
 
   public shared ({ caller }) func deleteCategory(categoryId : CategoryId) : async () {
-    // No permission check;
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     categories.remove(categoryId);
   };
 
@@ -491,12 +503,16 @@ actor {
   };
 
   public shared ({ caller }) func addCoupon(coupon : Coupon) : async () {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     coupons.add(coupon.code, coupon);
   };
 
   public shared ({ caller }) func deleteCoupon(code : CouponCode) : async () {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     coupons.remove(code);
   };
 
@@ -552,12 +568,16 @@ actor {
   };
 
   public query ({ caller }) func getAllOrders() : async [Order] {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     orders.values().toArray();
   };
 
   public shared ({ caller }) func updateOrderStatus(orderId : OrderId, newStatus : OrderStatus) : async () {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     let order = switch (orders.get(orderId)) {
       case (null) { Runtime.trap("Order does not exist") };
       case (?order) { order };
@@ -616,6 +636,33 @@ actor {
     };
 
     orders.add(orderId, newOrder);
+
+    let cartProducts = Map.empty<ProductId, Product>();
+    for (item in cart.items.values()) {
+      let product = switch (products.get(item.productId)) {
+        case (null) { Runtime.trap("Product does not exist") };
+        case (?p) { p };
+      };
+
+      if (product.stock < item.quantity) {
+        Runtime.trap("Not enough stock for " # product.name # ". Only " # product.stock.toText() # " left in stock.");
+      };
+
+      cartProducts.add(item.productId, product);
+    };
+
+    for (item in cart.items.values()) {
+      let product = switch (cartProducts.get(item.productId)) {
+        case (null) { Runtime.trap("Product does not exist anymore") };
+        case (?p) { p };
+      };
+      let updatedProduct = {
+        product with
+        stock = product.stock - item.quantity;
+      };
+      products.add(item.productId, updatedProduct);
+    };
+
     carts.add(caller, { items = [] });
 
     orderId;
@@ -631,7 +678,9 @@ actor {
   };
 
   public shared ({ caller }) func setStripeConfiguration(config : Stripe.StripeConfiguration) : async () {
-    // No permission check
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     stripeConfiguration := ?config;
   };
 

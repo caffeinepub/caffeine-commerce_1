@@ -1,79 +1,107 @@
 {
   "kind": "build_request",
-  "title": "Remove all remaining Admin permission checks to unblock Orders/Categories/Products",
-  "projectName": "BISAULI ShopEase",
-  "priority": "high",
+  "title": "Inventory management: decrement stock on order, out-of-stock UX, and admin stock editing",
+  "projectName": "BISAULI Shop",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-121",
-      "text": "Remove all backend admin-only permission checks that can cause 'Unauthorized', 'No Permission', or 'You do not have permission' failures for Admin functionality, so any caller (including anonymous) can view and manage Orders, Categories, Products, Coupons, Site Settings, and Stripe setup during the open-admin phase.",
+      "id": "REQ-124",
+      "text": "Update the backend order placement flow so that when `placeOrder(shippingAddress)` succeeds, the stock for each ordered product is decreased by the ordered quantity (and never becomes negative). If any product does not exist or does not have enough stock to fulfill the requested quantity, the backend must fail the order placement with a clear English error message and must not modify any product stock nor clear the cart.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "PLEASE REMOVE ALL PERMISSION CHECKS from the entire Admin folder immediately. I should be able to see Orders, add Categories, and edit Products without any 'Unauthorized' or 'No Permission' popups. Make the access completely open for me."
+          "When an order is placed, automatically decrease the product stock quantity by the amount ordered."
         ]
       },
       "acceptanceCriteria": [
-        "Calling admin-used backend methods no longer traps due to AccessControl admin permission checks (e.g., `getAllOrders`, `updateOrderStatus`, `addCategory`, `updateCategory`, `deleteCategory`, `addProduct`, `updateProduct`, `deleteProduct`, `updateSiteSettings`, `addCoupon`, `deleteCoupon`, `setStripeConfiguration`).",
-        "Admin Orders page can fetch orders and update an order’s status without receiving any authorization-related errors from the backend.",
-        "Admin Categories CRUD and Admin Products CRUD succeed without any authorization-related errors from the backend.",
-        "User-only shopper flows (cart/wishlist/place order/my orders) remain protected and continue to require user permission checks as they do today."
+        "Placing an order decreases each ordered product’s `Product.stock` by the corresponding `CartItem.quantity`.",
+        "If `Product.stock` is less than the requested quantity for any cart item, `placeOrder` traps with a clear English message (e.g., \"Insufficient stock for <product name>\") and no product stocks are changed.",
+        "If order placement fails for any reason, the caller’s cart is not cleared.",
+        "Product stock values never underflow and never become negative."
       ]
     },
     {
-      "id": "REQ-122",
-      "text": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within `frontend/src/pages/admin/**`, `frontend/src/components/admin/**`, and admin query/mutation hooks so Admin pages never show 'Unauthorized' / 'No Permission' popups and never block actions due to permission state during the open-admin phase.",
+      "id": "REQ-125",
+      "text": "Update shopper-facing product UI so that when a product’s stock is 0, the product remains visible but the Add to Cart action is disabled and replaced with an \"Out of Stock\" label (English). Apply this behavior consistently at least on the product card grid (`frontend/src/components/product/ProductCard.tsx`) and on the product details page (`frontend/src/pages/ProductDetailsPage.tsx`).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "PLEASE REMOVE ALL PERMISSION CHECKS from the entire Admin folder immediately.",
-          "I should be able to see Orders, add Categories, and edit Products without any 'Unauthorized' or 'No Permission' popups."
+          "If the stock reaches O, the product should still be visible to customers, but the 'Add to Cart' button should be disabled and replaced with an 'Out of Stock' label."
         ]
       },
       "acceptanceCriteria": [
-        "Visiting `/admin/orders`, `/admin/categories`, and `/admin/products` does not trigger any frontend permission gate, access denied screen, or permission-based toast/dialog.",
-        "Admin actions (add/edit/delete category, add/edit/delete product, update order status) do not display any permission-related error messages; only real backend unavailability/validation errors are shown.",
-        "Any existing admin UI copy that says the user lacks permission (e.g., 'You do not have permission to delete categories right now...') is removed or replaced with neutral, English error handling that does not reference permissions."
+        "Products with `stock === 0` still render in catalog/home/product listings and on the product details page.",
+        "On `ProductCard`, when `stock === 0`, the primary action area shows an English \"Out of Stock\" label instead of the \"Add to Cart\" button.",
+        "On `ProductDetailsPage`, when `stock === 0`, the Add to Cart button is not actionable and an English \"Out of Stock\" label is shown in place of the Add to Cart action text.",
+        "No shopper UI displays a clickable Add to Cart action for `stock === 0`."
       ]
     },
     {
-      "id": "REQ-123",
-      "text": "Ensure Admin Orders data loading and status update flows use the anonymous/admin actor path consistently (no Internet Identity role checks) and that errors are surfaced as clear English operational messages (backend unavailable, validation, not found) rather than permission messaging.",
+      "id": "REQ-126",
+      "text": "Ensure the Admin product create/edit UI includes an explicit editable Stock field (English label) and that saving a product persists the entered stock value to the backend product record. This must be supported in the existing Admin product editor dialog (`frontend/src/components/admin/ProductEditorDialog.tsx`).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "I get a 'You do not have permission' error when trying to view or manage Orders."
+          "Add a 'Stock' field in the Admin Product Edit section so I can manually update quantities whenever I get new items."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/hooks/queries/useAdminOrders.ts` continues to call the backend using `useAdminActor()` and does not depend on any authenticated/II-bound actor or role-check hooks.",
-        "When backend calls fail, the Admin Orders page shows clear English error output via existing formatting utilities, and does not show permission-related text.",
-        "With a running backend, the Admin Orders table renders without errors and the status dropdown successfully updates status and refreshes the list."
+        "Admin product create/edit form shows an editable Stock field with an English label (e.g., \"Stock Quantity\").",
+        "Stock input only accepts non-negative numeric values and shows a clear English validation error when invalid.",
+        "Saving a product updates the backend `Product.stock` to match the value entered in the admin form.",
+        "After saving a stock change, the Admin products list reflects the updated stock without requiring a hard refresh (via existing React Query invalidation behavior)."
+      ]
+    },
+    {
+      "id": "REQ-127",
+      "text": "After a successful order placement, refresh product data in the shopper UI by invalidating the products query cache so that stock changes (including reaching 0) are reflected without a manual reload.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "When an order is placed, automatically decrease the product stock quantity by the amount ordered."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On successful `placeOrder`, the frontend invalidates `queryKeys.products` in addition to existing cart/orders invalidations.",
+        "After placing an order that reduces stock to 0, the relevant product(s) show out-of-stock UX on subsequent navigation without a hard reload."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo` (no new backend services).",
-    "Do not edit any files under `frontend/src/components/ui` (read-only components must be composed).",
-    "Do not modify immutable frontend paths listed in SYSTEM_CONTEXT (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`).",
-    "Use English for all user-facing text changed/added by this work."
+    "Backend must remain a single Motoko actor in `backend/main.mo` (no new canisters/services).",
+    "Do not edit files under `frontend/src/components/ui` or any other immutable frontend paths listed in SYSTEM_CONTEXT.",
+    "Use English for all new/updated user-facing text involved in these changes.",
+    "Keep products visible even when stock is 0 (do not filter them out in queries)."
   ],
   "nonGoals": [
-    "Do not add new authentication methods or reintroduce admin login for this phase.",
-    "Do not change data schemas or require a state migration unless strictly necessary for this permission-removal work.",
-    "Do not remove or weaken shopper/user permission checks for non-admin customer features (cart, wishlist, placing orders, viewing personal orders)."
+    "Implementing stock reservations/holds during checkout (only decrement stock upon successful order placement).",
+    "Adding new database/storage layers or external inventory integrations.",
+    "Adding new authentication/permission gating for admin inventory changes (admin is currently open-access)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

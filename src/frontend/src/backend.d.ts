@@ -165,11 +165,6 @@ export interface backendInterface {
      */
     addToCart(productId: ProductId): Promise<void>;
     addToWishlist(productId: ProductId): Promise<void>;
-    /**
-     * / ************
-     * /    * Authorization System (Bundled)
-     * /    *************
-     */
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     clearCart(): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;

@@ -1,77 +1,59 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Open-admin phase: remove all frontend admin permission gating and sanitize permission error copy",
+  "title": "BISAULI Shop: Stock-aware shopper UX, admin stock editing, and post-order product refresh",
   "requirements": [
     {
-      "id": "REQ-122",
-      "summary": "Remove frontend-side permission checks/role gating and eliminate permission-based UI blocks/messages across Admin pages, Admin components, and Admin hooks.",
+      "id": "REQ-125",
+      "summary": "Show out-of-stock state in shopper product card grid and product details by replacing Add to Cart with an English \"Out of Stock\" label when stock is 0.",
       "acceptanceCriteria": [
-        "Visiting `/admin/orders`, `/admin/categories`, and `/admin/products` does not trigger any frontend permission gate, access denied screen, or permission-based toast/dialog.",
-        "Admin actions (add/edit/delete category, add/edit/delete product, update order status) do not display any permission-related error messages; only real backend unavailability/validation errors are shown.",
-        "Any existing admin UI copy that says the user lacks permission (e.g., 'You do not have permission to delete categories right now...') is removed or replaced with neutral, English error handling that does not reference permissions."
+        "Products with `stock === 0` still render in catalog/home/product listings and on the product details page.",
+        "On `ProductCard`, when `stock === 0`, the primary action area shows an English \"Out of Stock\" label instead of the \"Add to Cart\" button.",
+        "On `ProductDetailsPage`, when `stock === 0`, the Add to Cart button is not actionable and an English \"Out of Stock\" label is shown in place of the Add to Cart action text.",
+        "No shopper UI displays a clickable Add to Cart action for `stock === 0`."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+          "path": "frontend/src/components/product/ProductCard.tsx",
           "operation": "modify",
-          "description": "Remove any permission/role-based UI blocking and replace permission-referencing error copy (e.g., delete failure messages) with neutral operational error handling that does not mention authorization."
+          "description": "Update the primary action area so that when `product.stock === 0n`, the \"Add to Cart\" button is not rendered and is replaced with a non-clickable English \"Out of Stock\" label (keep the product card visible)."
         },
         {
-          "path": "frontend/src/components/admin/CategoryEditorDialog.tsx",
+          "path": "frontend/src/pages/ProductDetailsPage.tsx",
           "operation": "modify",
-          "description": "Remove permission-specific messaging branches (e.g., checks for 'permission' in error messages) and ensure errors are shown as neutral operational messages (validation/backend unavailable/retryable) without referencing permissions."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminProductsPage.tsx",
-          "operation": "modify",
-          "description": "Ensure product CRUD errors never surface permission-based text; keep only neutral operational errors and avoid any role/permission UI gating during the open-admin phase."
-        },
-        {
-          "path": "frontend/src/components/admin/ProductEditorDialog.tsx",
-          "operation": "modify",
-          "description": "Ensure add/update product flow never shows permission-related text and does not block actions due to permission state; keep validation errors and backend unavailable messaging only."
-        },
-        {
-          "path": "frontend/src/hooks/queries/useAuthz.ts",
-          "operation": "modify",
-          "description": "Remove or neutralize admin-role/permission gating usage for admin UI during the open-admin phase (so admin pages/components do not rely on role checks to render/enable actions)."
-        },
-        {
-          "path": "frontend/src/components/layout/Header.tsx",
-          "operation": "modify",
-          "description": "Remove any Admin navigation gating or permission-based UI blocks that prevent reaching admin pages during the open-admin phase (do not add authentication)."
-        },
-        {
-          "path": "frontend/src/utils/backendAvailabilityErrors.ts",
-          "operation": "modify",
-          "description": "Sanitize formatted error output so any Unauthorized/No Permission-style backend errors (or similar strings) are converted into neutral English operational messages that do not reference permissions, while preserving backend unavailable/validation/not-found clarity."
+          "description": "Adjust the Add to Cart action so that when `product.stock === 0n`, it is not actionable and the button text is replaced with an English \"Out of Stock\" label (while keeping the product visible and details accessible)."
         }
       ]
     },
     {
-      "id": "REQ-123",
-      "summary": "Ensure Admin Orders uses the anonymous admin actor consistently and surfaces clear operational errors (not permission messaging) for load and status updates.",
+      "id": "REQ-126",
+      "summary": "Ensure the Admin product create/edit dialog includes an explicit editable Stock field with non-negative numeric validation and persists the value on save.",
       "acceptanceCriteria": [
-        "`frontend/src/hooks/queries/useAdminOrders.ts` continues to call the backend using `useAdminActor()` and does not depend on any authenticated/II-bound actor or role-check hooks.",
-        "When backend calls fail, the Admin Orders page shows clear English error output via existing formatting utilities, and does not show permission-related text.",
-        "With a running backend, the Admin Orders table renders without errors and the status dropdown successfully updates status and refreshes the list."
+        "Admin product create/edit form shows an editable Stock field with an English label (e.g., \"Stock Quantity\").",
+        "Stock input only accepts non-negative numeric values and shows a clear English validation error when invalid.",
+        "Saving a product updates the backend `Product.stock` to match the value entered in the admin form.",
+        "After saving a stock change, the Admin products list reflects the updated stock without requiring a hard refresh (via existing React Query invalidation behavior)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/queries/useAdminOrders.ts",
+          "path": "frontend/src/components/admin/ProductEditorDialog.tsx",
           "operation": "modify",
-          "description": "Verify Admin Orders query/mutation exclusively uses `useAdminActor()` (no II/role-check dependencies) and align thrown/returned errors so they are operational (e.g., backend unavailable) rather than permission-oriented."
-        },
+          "description": "Harden Stock field validation to accept only non-negative numeric values (including allowing 0), display a clear English validation error when invalid (e.g., empty, NaN, negative, non-integer), and ensure the saved `Product` continues to include `stock` derived from the validated input."
+        }
+      ]
+    },
+    {
+      "id": "REQ-127",
+      "summary": "Invalidate the products query after successful order placement so shopper UI reflects updated stock without manual reload.",
+      "acceptanceCriteria": [
+        "On successful `placeOrder`, the frontend invalidates `queryKeys.products` in addition to existing cart/orders invalidations.",
+        "After placing an order that reduces stock to 0, the relevant product(s) show out-of-stock UX on subsequent navigation without a hard reload."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
+          "path": "frontend/src/hooks/mutations/usePlaceOrder.ts",
           "operation": "modify",
-          "description": "Ensure load/update error rendering and toasts use clear English operational messaging (via existing formatting utilities) and never display permission-related text."
-        },
-        {
-          "path": "frontend/src/utils/backendAvailabilityErrors.ts",
-          "operation": "modify",
-          "description": "Adjust shared error formatting used by Admin Orders so authorization-like failures never render permission text, while still clearly communicating backend unavailable, validation errors, and not-found conditions."
+          "description": "On successful `placeOrder`, also invalidate `queryKeys.products` (in addition to existing cart/orders/dashboard invalidations) so product stock changes are refetched and reflected across catalog/product pages."
         }
       ]
     }

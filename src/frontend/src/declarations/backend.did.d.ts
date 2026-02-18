@@ -117,11 +117,6 @@ export interface _SERVICE {
    */
   'addToCart' : ActorMethod<[ProductId], undefined>,
   'addToWishlist' : ActorMethod<[ProductId], undefined>,
-  /**
-   * / ************
-   * /    * Authorization System (Bundled)
-   * /    *************
-   */
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'clearCart' : ActorMethod<[], undefined>,
   'createCheckoutSession' : ActorMethod<

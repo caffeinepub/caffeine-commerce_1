@@ -14,7 +14,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const isOutOfStock = product.stock === BigInt(0);
+  const isOutOfStock = product.stock === 0n;
   const { identity } = useInternetIdentity();
   const addToCart = useAddToCart();
 
@@ -59,15 +59,21 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="text-2xl font-bold text-primary">
             ₹{Number(product.price).toLocaleString()}
           </p>
-          <Button
-            size="sm"
-            className="w-full"
-            disabled={isOutOfStock || addToCart.isPending}
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            {addToCart.isPending ? 'Adding...' : 'Add to Cart'}
-          </Button>
+          {isOutOfStock ? (
+            <div className="w-full py-2 px-4 text-center text-sm font-medium text-muted-foreground bg-muted rounded-md">
+              Out of Stock
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              className="w-full"
+              disabled={addToCart.isPending}
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              {addToCart.isPending ? 'Adding...' : 'Add to Cart'}
+            </Button>
+          )}
         </CardContent>
       </Card>
     </Link>

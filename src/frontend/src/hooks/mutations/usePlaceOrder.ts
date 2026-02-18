@@ -32,6 +32,8 @@ export function usePlaceOrder() {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders });
       // Invalidate dashboard stats so admin sees updated numbers
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboardStats });
+      // Invalidate products query so stock changes are reflected
+      queryClient.invalidateQueries({ queryKey: queryKeys.products });
     },
   });
 }

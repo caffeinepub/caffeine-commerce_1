@@ -1,72 +1,72 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T04:03:26.317Z",
+  "generatedAt": "2026-02-18T04:20:12.644Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 2,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-121",
-        "summary": "Remove all backend admin-only permission checks that can cause 'Unauthorized', 'No Permission', or 'You do not have permission' failures for Admin functionality, so any caller (including anonymous) can view and manage Orders, Categories, Products, Coupons, Site Settings, and Stripe setup during the open-admin phase.",
+        "id": "REQ-124",
+        "summary": "Update the backend order placement flow so that when `placeOrder(shippingAddress)` succeeds, the stock for each ordered product is decreased by the ordered quantity (and never becomes negative). If any product does not exist or does not have enough stock to fulfill the requested quantity, the backend must fail the order placement with a clear English error message and must not modify any product stock nor clear the cart.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-122",
-        "summary": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within `frontend/src/pages/admin/**`, `frontend/src/components/admin/**`, and admin query/mutation hooks so Admin pages never show 'Unauthorized' / 'No Permission' popups and never block actions due to permission state during the open-admin phase.",
+        "id": "REQ-125",
+        "summary": "Update shopper-facing product UI so that when a product’s stock is 0, the product remains visible but the Add to Cart action is disabled and replaced with an \"Out of Stock\" label (English). Apply this behavior consistently at least on the product card grid (`frontend/src/components/product/ProductCard.tsx`) and on the product details page (`frontend/src/pages/ProductDetailsPage.tsx`).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
-          "frontend/src/components/admin/CategoryEditorDialog.tsx",
-          "frontend/src/pages/admin/AdminProductsPage.tsx",
-          "frontend/src/components/admin/ProductEditorDialog.tsx",
-          "frontend/src/hooks/queries/useAuthz.ts",
-          "frontend/src/components/layout/Header.tsx",
-          "frontend/src/utils/backendAvailabilityErrors.ts"
+          "frontend/src/components/product/ProductCard.tsx",
+          "frontend/src/pages/ProductDetailsPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
-          "frontend/src/components/admin/CategoryEditorDialog.tsx",
-          "frontend/src/components/admin/ProductEditorDialog.tsx",
-          "frontend/src/utils/backendAvailabilityErrors.ts"
+          "frontend/src/components/product/ProductCard.tsx",
+          "frontend/src/pages/ProductDetailsPage.tsx"
         ]
       },
       {
-        "id": "REQ-123",
-        "summary": "Ensure Admin Orders data loading and status update flows use the anonymous/admin actor path consistently (no Internet Identity role checks) and that errors are surfaced as clear English operational messages (backend unavailable, validation, not found) rather than permission messaging.",
+        "id": "REQ-126",
+        "summary": "Ensure the Admin product create/edit UI includes an explicit editable Stock field (English label) and that saving a product persists the entered stock value to the backend product record. This must be supported in the existing Admin product editor dialog (`frontend/src/components/admin/ProductEditorDialog.tsx`).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/queries/useAdminOrders.ts",
-          "frontend/src/pages/admin/AdminOrdersPage.tsx",
-          "frontend/src/utils/backendAvailabilityErrors.ts"
+          "frontend/src/components/admin/ProductEditorDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/utils/backendAvailabilityErrors.ts"
+          "frontend/src/components/admin/ProductEditorDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-127",
+        "summary": "After a successful order placement, refresh product data in the shopper UI by invalidating the products query cache so that stock changes (including reaching 0) are reflected without a manual reload.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/mutations/usePlaceOrder.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/mutations/usePlaceOrder.ts"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/admin/CategoryEditorDialog.tsx",
     "frontend/src/components/admin/ProductEditorDialog.tsx",
+    "frontend/src/components/product/ProductCard.tsx",
     "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/pages/admin/AdminCategoriesPage.tsx",
-    "frontend/src/utils/backendAvailabilityErrors.ts",
+    "frontend/src/hooks/mutations/usePlaceOrder.ts",
+    "frontend/src/pages/ProductDetailsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

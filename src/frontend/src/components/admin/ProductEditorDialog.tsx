@@ -37,6 +37,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
   });
   const [errorMessage, setErrorMessage] = useState('');
   const [imageError, setImageError] = useState('');
+  const [stockError, setStockError] = useState('');
   const [lastFailedData, setLastFailedData] = useState<Product | null>(null);
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
     }
     setErrorMessage('');
     setImageError('');
+    setStockError('');
     setLastFailedData(null);
     
     // Reset file input
@@ -117,9 +119,37 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
     }
   };
 
+  const handleStockChange = (value: string) => {
+    setStockError('');
+    setFormData({ ...formData, stock: value });
+    
+    // Validate stock in real-time
+    if (value.trim() === '') {
+      setStockError('Stock quantity is required');
+      return;
+    }
+    
+    const stockNum = Number(value);
+    if (isNaN(stockNum)) {
+      setStockError('Stock must be a valid number');
+      return;
+    }
+    
+    if (!Number.isInteger(stockNum)) {
+      setStockError('Stock must be a whole number');
+      return;
+    }
+    
+    if (stockNum < 0) {
+      setStockError('Stock cannot be negative');
+      return;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+    setStockError('');
 
     // Validation
     if (!formData.name.trim()) {
@@ -134,10 +164,29 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
       setErrorMessage('Valid price is required');
       return;
     }
-    if (!formData.stock || Number(formData.stock) < 0) {
-      setErrorMessage('Valid stock quantity is required');
+    
+    // Stock validation
+    if (!formData.stock || formData.stock.trim() === '') {
+      setStockError('Stock quantity is required');
       return;
     }
+    
+    const stockNum = Number(formData.stock);
+    if (isNaN(stockNum)) {
+      setStockError('Stock must be a valid number');
+      return;
+    }
+    
+    if (!Number.isInteger(stockNum)) {
+      setStockError('Stock must be a whole number');
+      return;
+    }
+    
+    if (stockNum < 0) {
+      setStockError('Stock cannot be negative');
+      return;
+    }
+    
     if (!formData.categoryId) {
       setErrorMessage('Category is required');
       return;
@@ -148,7 +197,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: BigInt(formData.price),
-      stock: BigInt(formData.stock),
+      stock: BigInt(stockNum),
       categoryId: BigInt(formData.categoryId),
       imageUrl: formData.imageUrl.trim(),
     };
@@ -326,7 +375,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Enter product description"
               disabled={isPending}
-              rows={3}
+              rows={4}
               required
             />
           </div>
@@ -338,6 +387,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
                 id="price"
                 type="number"
                 min="0"
+                step="1"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="0"
@@ -352,12 +402,17 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
                 id="stock"
                 type="number"
                 min="0"
+                step="1"
                 value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                onChange={(e) => handleStockChange(e.target.value)}
                 placeholder="0"
                 disabled={isPending}
                 required
+                className={stockError ? 'border-destructive' : ''}
               />
+              {stockError && (
+                <p className="text-sm text-destructive">{stockError}</p>
+              )}
             </div>
           </div>
 
@@ -365,11 +420,11 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
             <Label htmlFor="imageUpload">Product Image</Label>
             <div className="space-y-2">
               {formData.imageUrl ? (
-                <div className="relative border rounded-lg p-4 bg-muted/50">
+                <div className="relative w-full h-48 border rounded-lg overflow-hidden bg-muted">
                   <img
                     src={formData.imageUrl}
                     alt="Product preview"
-                    className="w-full h-48 object-contain rounded"
+                    className="w-full h-full object-contain"
                   />
                   <Button
                     type="button"
@@ -383,25 +438,27 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
                   </Button>
                 </div>
               ) : (
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    PNG, JPEG, GIF, or WebP (recommended: 800x800px)
-                  </p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="imageUpload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    disabled={isPending}
+                    ref={fileInputRef}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isPending}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload
+                  </Button>
                 </div>
               )}
-              <Input
-                ref={fileInputRef}
-                id="imageUpload"
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                disabled={isPending}
-                className="cursor-pointer"
-              />
               {imageError && (
                 <p className="text-sm text-destructive">{imageError}</p>
               )}
@@ -417,15 +474,8 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending || hasNoCategories}>
-              {isPending ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                  Saving...
-                </>
-              ) : (
-                isEditing ? 'Update Product' : 'Add Product'
-              )}
+            <Button type="submit" disabled={isPending || hasNoCategories || !!stockError}>
+              {isPending ? 'Saving...' : isEditing ? 'Update Product' : 'Add Product'}
             </Button>
           </DialogFooter>
         </form>

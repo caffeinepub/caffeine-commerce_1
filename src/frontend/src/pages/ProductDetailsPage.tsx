@@ -41,7 +41,7 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const isOutOfStock = product.stock === BigInt(0);
+  const isOutOfStock = product.stock === 0n;
 
   const handleAddToCart = () => {
     if (!identity) {
@@ -104,15 +104,21 @@ export default function ProductDetailsPage() {
           </div>
 
           <div className="flex gap-4">
-            <Button
-              size="lg"
-              className="flex-1"
-              disabled={isOutOfStock || addToCart.isPending}
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              {addToCart.isPending ? 'Adding...' : t('product.addToCart')}
-            </Button>
+            {isOutOfStock ? (
+              <div className="flex-1 py-3 px-6 text-center text-base font-medium text-muted-foreground bg-muted rounded-md">
+                Out of Stock
+              </div>
+            ) : (
+              <Button
+                size="lg"
+                className="flex-1"
+                disabled={addToCart.isPending}
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                {addToCart.isPending ? 'Adding...' : t('product.addToCart')}
+              </Button>
+            )}
             <Button
               size="lg"
               variant="outline"
