@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Remove backend admin-only authorization blockers for the /admin dashboard and ensure the backend stays running so admin catalog CRUD works without authentication.
+**Goal:** Fully unblock admin Orders/Categories/Products (and related admin features) by removing remaining permission/role checks that cause authorization errors during the open-admin phase, while keeping shopper/user flows protected.
 
 **Planned changes:**
-- Disable/remove backend “admin-only” permission checks for Admin Dashboard operations so anonymous callers can add, update, and delete categories and products without “Unauthorized” errors.
-- Align other backend APIs used by existing /admin pages to not require admin authorization checks during this phase, while keeping existing user-only authorization for shopper features intact.
-- Address the “Canister is stopped” (IC0508) failure mode by ensuring the backend canister remains running and responsive, and confirm availability via the existing `healthCheck()` returning “Running”.
-- Redeploy and verify `/admin`, `/admin/categories`, and `/admin/products` allow full CRUD access in a fresh session without any login flow.
+- Remove backend admin-only permission checks in admin-used methods so anonymous callers can manage Orders, Categories, Products, Coupons, Site Settings, and Stripe setup without authorization failures.
+- Remove frontend permission gating and permission-based UI blocks within admin pages/components/hooks so `/admin/orders`, `/admin/categories`, and `/admin/products` never show “Unauthorized/No Permission” messaging or block actions due to permission state.
+- Ensure Admin Orders uses the anonymous admin actor path consistently and surfaces failures as neutral operational errors (e.g., backend unavailable, validation, not found) rather than permission-related messages.
+- Preserve existing user/shopper permission checks for cart, wishlist, placing orders, and viewing personal orders.
 
-**User-visible outcome:** Visiting `/admin/categories` and `/admin/products` in a fresh browser session allows creating, editing, and deleting categories/products without authentication and without “Unauthorized” or “Canister is stopped” errors, and admin pages show a retryable English error state if the backend becomes unavailable.
+**User-visible outcome:** Admin pages for Orders, Categories, and Products load and allow full CRUD/status updates without any permission popups or access-denied screens, while normal shopper features remain protected behind existing user permissions.

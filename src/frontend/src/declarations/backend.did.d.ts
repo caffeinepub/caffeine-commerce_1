@@ -33,9 +33,13 @@ export type Order = { 'less' : null } |
   { 'equal' : null } |
   { 'greater' : null };
 export type OrderId = bigint;
-export type OrderStatus = { 'cancelled' : null } |
+export type OrderStatus = { 'shipped' : null } |
+  { 'cancelled' : null } |
   { 'pending' : null } |
-  { 'completed' : null };
+  { 'completed' : null } |
+  { 'delivered' : null } |
+  { 'confirmed' : null } |
+  { 'processing' : null };
 export interface Order__1 {
   'id' : OrderId,
   'status' : OrderStatus,
@@ -43,6 +47,7 @@ export interface Order__1 {
   'statusHistory' : Array<OrderStatus>,
   'totalAmount' : bigint,
   'timestamp' : Time,
+  'shippingAddress' : ShippingAddress,
   'items' : Array<CartItem>,
 }
 export interface Product {
@@ -56,6 +61,12 @@ export interface Product {
 }
 export type ProductId = bigint;
 export type ReferralCode = string;
+export interface ShippingAddress {
+  'name' : string,
+  'address' : string,
+  'phone' : string,
+  'pincode' : string,
+}
 export interface ShoppingItem {
   'productName' : string,
   'currency' : string,
@@ -101,11 +112,16 @@ export interface _SERVICE {
   'addProduct' : ActorMethod<[Product], ProductId>,
   /**
    * / ************
-   * /    * Cart & Wishlist Management
+   * /    * Cart & Wishlist
    * /    *************
    */
   'addToCart' : ActorMethod<[ProductId], undefined>,
   'addToWishlist' : ActorMethod<[ProductId], undefined>,
+  /**
+   * / ************
+   * /    * Authorization System (Bundled)
+   * /    *************
+   */
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'clearCart' : ActorMethod<[], undefined>,
   'createCheckoutSession' : ActorMethod<
@@ -118,7 +134,7 @@ export interface _SERVICE {
   'deleteProduct' : ActorMethod<[ProductId], undefined>,
   /**
    * / ************
-   * /    * Coupon Management
+   * /    * Coupons
    * /    *************
    */
   'getAllCoupons' : ActorMethod<[], Array<Coupon>>,
@@ -126,7 +142,7 @@ export interface _SERVICE {
   'getAllOrders' : ActorMethod<[], Array<Order__1>>,
   /**
    * / ************
-   * /    * User Profile Management
+   * /    * User Profile
    * /    *************
    */
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -134,10 +150,15 @@ export interface _SERVICE {
   'getCart' : ActorMethod<[], Cart>,
   'getCategories' : ActorMethod<[], Array<Category>>,
   'getOrder' : ActorMethod<[OrderId], Order__1>,
+  /**
+   * / ************
+   * /    * Products & Categories
+   * /    *************
+   */
   'getProducts' : ActorMethod<[Array<Filter>], Array<Product>>,
   /**
    * / ************
-   * /    * Site Settings Management
+   * /    * Site Settings
    * /    *************
    */
   'getSiteSettings' : ActorMethod<[], SiteSettings>,
@@ -145,19 +166,25 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   /**
    * / ************
-   * /    * Referral & Order Management
+   * /    * Referrals & Orders
    * /    *************
    */
   'getUserReferrals' : ActorMethod<[UserId], Array<UserId>>,
   'getWishlist' : ActorMethod<[], Wishlist>,
   /**
    * / ************
-   * /    * General Health Check
+   * /    * General
    * /    *************
    */
   'healthCheck' : ActorMethod<[], string>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
+  /**
+   * / ************
+   * /    * Place Order
+   * /    *************
+   */
+  'placeOrder' : ActorMethod<[ShippingAddress], OrderId>,
   'removeFromCart' : ActorMethod<[ProductId], undefined>,
   'removeFromWishlist' : ActorMethod<[ProductId], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,

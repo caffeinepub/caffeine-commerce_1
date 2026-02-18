@@ -1,91 +1,76 @@
 {
   "kind": "build_request",
-  "title": "Disable backend admin-only authorization for /admin dashboard and redeploy with backend running",
-  "projectName": "BISAULI Admin Dashboard",
+  "title": "Remove all remaining Admin permission checks to unblock Orders/Categories/Products",
+  "projectName": "BISAULI ShopEase",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-82",
-      "text": "Remove/disable all backend \"admin-only\" permission checks that block the Admin Dashboard CRUD flows, so any caller (including anonymous) can add, update, and delete categories and products without receiving \"Unauthorized\" errors.",
+      "id": "REQ-121",
+      "text": "Remove all backend admin-only permission checks that can cause 'Unauthorized', 'No Permission', or 'You do not have permission' failures for Admin functionality, so any caller (including anonymous) can view and manage Orders, Categories, Products, Coupons, Site Settings, and Stripe setup during the open-admin phase.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "I am getting an 'Unauthorized: Only admins can add categories' error. Since I removed the login page, please disable all 'Admin-only' permission checks for the Dashboard. Make sure anyone who accesses the /admin URL has full permissions to add/delete categories and products."
+          "PLEASE REMOVE ALL PERMISSION CHECKS from the entire Admin folder immediately. I should be able to see Orders, add Categories, and edit Products without any 'Unauthorized' or 'No Permission' popups. Make the access completely open for me."
         ]
       },
       "acceptanceCriteria": [
-        "Calling `addCategory`, `updateCategory`, and `deleteCategory` succeeds from the admin UI without requiring any identity/admin role and without trapping with an \"Unauthorized\" message.",
-        "Calling `addProduct`, `updateProduct`, and `deleteProduct` succeeds from the admin UI without requiring any identity/admin role and without trapping with an \"Unauthorized\" message.",
-        "The specific trap text \"Unauthorized: Only admins can add categories\" is no longer possible from the current backend build."
+        "Calling admin-used backend methods no longer traps due to AccessControl admin permission checks (e.g., `getAllOrders`, `updateOrderStatus`, `addCategory`, `updateCategory`, `deleteCategory`, `addProduct`, `updateProduct`, `deleteProduct`, `updateSiteSettings`, `addCoupon`, `deleteCoupon`, `setStripeConfiguration`).",
+        "Admin Orders page can fetch orders and update an order’s status without receiving any authorization-related errors from the backend.",
+        "Admin Categories CRUD and Admin Products CRUD succeed without any authorization-related errors from the backend.",
+        "User-only shopper flows (cart/wishlist/place order/my orders) remain protected and continue to require user permission checks as they do today."
       ]
     },
     {
-      "id": "REQ-83",
-      "text": "Align remaining Admin Dashboard backend APIs to not require admin authorization checks during this phase (so /admin pages do not break due to hidden admin-only guards), while keeping existing user-only checks for shopper features (cart/wishlist/profile/orders) intact.",
-      "target": "backend",
+      "id": "REQ-122",
+      "text": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within `frontend/src/pages/admin/**`, `frontend/src/components/admin/**`, and admin query/mutation hooks so Admin pages never show 'Unauthorized' / 'No Permission' popups and never block actions due to permission state during the open-admin phase.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "please disable all 'Admin-only' permission checks for the Dashboard."
+          "PLEASE REMOVE ALL PERMISSION CHECKS from the entire Admin folder immediately.",
+          "I should be able to see Orders, add Categories, and edit Products without any 'Unauthorized' or 'No Permission' popups."
         ]
       },
       "acceptanceCriteria": [
-        "Admin-area operations used by existing /admin pages (e.g., coupons, order management placeholders, site settings, Stripe setup) do not fail due to backend `#admin` permission checks during this phase.",
-        "Shopper/user-only operations (cart, wishlist, profile save, user referrals, and viewing personal orders) continue to enforce their existing user-level authorization checks (no new anonymous access granted)."
+        "Visiting `/admin/orders`, `/admin/categories`, and `/admin/products` does not trigger any frontend permission gate, access denied screen, or permission-based toast/dialog.",
+        "Admin actions (add/edit/delete category, add/edit/delete product, update order status) do not display any permission-related error messages; only real backend unavailability/validation errors are shown.",
+        "Any existing admin UI copy that says the user lacks permission (e.g., 'You do not have permission to delete categories right now...') is removed or replaced with neutral, English error handling that does not reference permissions."
       ]
     },
     {
-      "id": "REQ-84",
-      "text": "Resolve the \"Canister is stopped\" (IC0508) failure mode for admin catalog mutations by ensuring the backend canister remains running and responsive during category/product CRUD, and ensure the backend health check can be used to confirm service availability.",
-      "target": "backend",
+      "id": "REQ-123",
+      "text": "Ensure Admin Orders data loading and status update flows use the anonymous/admin actor path consistently (no Internet Identity role checks) and that errors are surfaced as clear English operational messages (backend unavailable, validation, not found) rather than permission messaging.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "Also, fix the 'Canister is stopped' error by ensuring the backend is running."
+          "I get a 'You do not have permission' error when trying to view or manage Orders."
         ]
       },
       "acceptanceCriteria": [
-        "After deployment, calling the existing `healthCheck()` query returns the English text \"Running\".",
-        "In the deployed environment, performing category/product CRUD from `/admin/categories` and `/admin/products` does not result in IC0508 \"Canister is stopped\" errors.",
-        "If the backend becomes unavailable, the admin UI continues to show an English retryable error state (no blank screen / route-level crash)."
-      ]
-    },
-    {
-      "id": "REQ-85",
-      "text": "Redeploy the application after implementing the backend authorization changes and backend availability fix, and verify that `/admin`, `/admin/categories`, and `/admin/products` allow full CRUD access without authentication.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Please redeploy now."
-        ]
-      },
-      "acceptanceCriteria": [
-        "In the redeployed build, a fresh browser session can open `/admin/categories`, create a category, edit it, and delete it without any login flow or \"Unauthorized\" errors.",
-        "In the redeployed build, a fresh browser session can open `/admin/products`, create a product, edit it, and delete it without any login flow or \"Unauthorized\" errors.",
-        "No admin-login route is required to perform the above actions."
+        "`frontend/src/hooks/queries/useAdminOrders.ts` continues to call the backend using `useAdminActor()` and does not depend on any authenticated/II-bound actor or role-check hooks.",
+        "When backend calls fail, the Admin Orders page shows clear English error output via existing formatting utilities, and does not show permission-related text.",
+        "With a running backend, the Admin Orders table renders without errors and the status dropdown successfully updates status and refreshes the list."
       ]
     }
   ],
   "constraints": [
-    "Keep all Motoko backend logic within the single actor in `backend/main.mo` (single-actor architecture).",
-    "Do not edit files under `frontend/src/components/ui` (compose existing UI components instead).",
-    "Do not modify immutable frontend hook paths listed in SYSTEM_CONTEXT (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`).",
-    "Use English for any user-facing text (including error messages)."
+    "Backend must remain a single Motoko actor in `backend/main.mo` (no new backend services).",
+    "Do not edit any files under `frontend/src/components/ui` (read-only components must be composed).",
+    "Do not modify immutable frontend paths listed in SYSTEM_CONTEXT (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`).",
+    "Use English for all user-facing text changed/added by this work."
   ],
   "nonGoals": [
-    "Do not add or reintroduce an admin login page, admin token flow, or Internet Identity requirement for /admin access during this phase.",
-    "Do not change the shopper authentication model for user-only areas (cart/wishlist/profile/orders remain user-authenticated).",
-    "Do not add new product features beyond fixing authorization, backend availability, and redeploy verification."
+    "Do not add new authentication methods or reintroduce admin login for this phase.",
+    "Do not change data schemas or require a state migration unless strictly necessary for this permission-removal work.",
+    "Do not remove or weaken shopper/user permission checks for non-admin customer features (cart, wishlist, placing orders, viewing personal orders)."
   ],
   "imageRequirements": {
     "required": [],

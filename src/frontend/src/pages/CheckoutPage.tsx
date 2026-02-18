@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useGetCart } from '../hooks/queries/useCartWishlist';
 import { useGetProducts } from '../hooks/queries/useCatalog';
+import { usePlaceOrder } from '../hooks/mutations/usePlaceOrder';
 import { useTranslation } from '../i18n';
 import { toast } from 'sonner';
+import { formatBackendError } from '../utils/backendAvailabilityErrors';
+import type { ShippingAddress } from '../backend';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -17,8 +20,16 @@ export default function CheckoutPage() {
   const { t } = useTranslation();
   const { data: cart } = useGetCart();
   const { data: products } = useGetProducts();
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'stripe'>('cod');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const placeOrder = usePlaceOrder();
+
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+    name: '',
+    phone: '',
+    address: '',
+    pincode: '',
+  });
+
+  const [errors, setErrors] = useState<Partial<Record<keyof ShippingAddress, string>>>({});
 
   if (!identity) {
     return (
@@ -43,19 +54,67 @@ export default function CheckoutPage() {
     0
   );
 
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof ShippingAddress, string>> = {};
+
+    if (!shippingAddress.name.trim()) {
+      newErrors.name = 'Customer Name is required';
+    }
+
+    if (!shippingAddress.phone.trim()) {
+      newErrors.phone = 'Mobile Number is required';
+    } else if (!/^\d{10}$/.test(shippingAddress.phone.trim())) {
+      newErrors.phone = 'Mobile Number must be exactly 10 digits';
+    }
+
+    if (!shippingAddress.address.trim()) {
+      newErrors.address = 'Full Address is required';
+    }
+
+    if (!shippingAddress.pincode.trim()) {
+      newErrors.pincode = 'Pincode is required';
+    } else if (!/^\d{6}$/.test(shippingAddress.pincode.trim())) {
+      newErrors.pincode = 'Pincode must be exactly 6 digits';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handlePlaceOrder = async () => {
-    setIsProcessing(true);
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+
     try {
-      // Simulate order placement
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const orderId = await placeOrder.mutateAsync(shippingAddress);
       toast.success('Order placed successfully!');
-      navigate({ to: '/orders' });
-    } catch (error) {
-      toast.error('Failed to place order');
-    } finally {
-      setIsProcessing(false);
+      navigate({ to: '/order-confirmation/$orderId', params: { orderId: String(orderId) } });
+    } catch (error: any) {
+      toast.error(formatBackendError(error));
     }
   };
+
+  const handleInputChange = (field: keyof ShippingAddress, value: string) => {
+    setShippingAddress((prev) => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const isFormValid = 
+    shippingAddress.name.trim() !== '' &&
+    /^\d{10}$/.test(shippingAddress.phone.trim()) &&
+    shippingAddress.address.trim() !== '' &&
+    /^\d{6}$/.test(shippingAddress.pincode.trim()) &&
+    cartItems.length > 0;
 
   return (
     <div className="container py-8 max-w-4xl">
@@ -64,30 +123,64 @@ export default function CheckoutPage() {
       <div className="grid gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>{t('checkout.shippingAddress')}</CardTitle>
+            <CardTitle>Shipping Address</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Address management will be available soon
-            </p>
-          </CardContent>
-        </Card>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Customer Name *</Label>
+              <Input
+                id="name"
+                placeholder="Enter customer name"
+                value={shippingAddress.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className={errors.name ? 'border-destructive' : ''}
+              />
+              {errors.name && (
+                <p className="text-sm text-destructive">{errors.name}</p>
+              )}
+            </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('checkout.paymentMethod')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as 'cod' | 'stripe')}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="cod" id="cod" />
-                <Label htmlFor="cod">{t('checkout.cod')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="stripe" id="stripe" />
-                <Label htmlFor="stripe">{t('checkout.stripe')}</Label>
-              </div>
-            </RadioGroup>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Mobile Number *</Label>
+              <Input
+                id="phone"
+                placeholder="10-digit mobile number"
+                value={shippingAddress.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                className={errors.phone ? 'border-destructive' : ''}
+              />
+              {errors.phone && (
+                <p className="text-sm text-destructive">{errors.phone}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address">Full Address *</Label>
+              <Input
+                id="address"
+                placeholder="House no., Street, Area, City, State"
+                value={shippingAddress.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                className={errors.address ? 'border-destructive' : ''}
+              />
+              {errors.address && (
+                <p className="text-sm text-destructive">{errors.address}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="pincode">Pincode *</Label>
+              <Input
+                id="pincode"
+                placeholder="6-digit pincode"
+                value={shippingAddress.pincode}
+                onChange={(e) => handleInputChange('pincode', e.target.value)}
+                className={errors.pincode ? 'border-destructive' : ''}
+              />
+              {errors.pincode && (
+                <p className="text-sm text-destructive">{errors.pincode}</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -115,9 +208,9 @@ export default function CheckoutPage() {
               size="lg"
               className="w-full"
               onClick={handlePlaceOrder}
-              disabled={isProcessing}
+              disabled={!isFormValid || placeOrder.isPending}
             >
-              {isProcessing ? 'Processing...' : t('checkout.placeOrder')}
+              {placeOrder.isPending ? 'Processing...' : 'Place Order'}
             </Button>
           </CardContent>
         </Card>

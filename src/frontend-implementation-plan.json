@@ -1,36 +1,77 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin dashboard redeploy verification UX (frontend-only)",
+  "title": "Open-admin phase: remove all frontend admin permission gating and sanitize permission error copy",
   "requirements": [
     {
-      "id": "REQ-85",
-      "summary": "Ensure the admin UI supports unauthenticated access to /admin catalog CRUD after redeploy, with clear, retryable error states when the backend is unavailable.",
+      "id": "REQ-122",
+      "summary": "Remove frontend-side permission checks/role gating and eliminate permission-based UI blocks/messages across Admin pages, Admin components, and Admin hooks.",
       "acceptanceCriteria": [
-        "In the redeployed build, a fresh browser session can open `/admin/categories`, create a category, edit it, and delete it without any login flow or \"Unauthorized\" errors.",
-        "In the redeployed build, a fresh browser session can open `/admin/products`, create a product, edit it, and delete it without any login flow or \"Unauthorized\" errors.",
-        "No admin-login route is required to perform the above actions."
+        "Visiting `/admin/orders`, `/admin/categories`, and `/admin/products` does not trigger any frontend permission gate, access denied screen, or permission-based toast/dialog.",
+        "Admin actions (add/edit/delete category, add/edit/delete product, update order status) do not display any permission-related error messages; only real backend unavailability/validation errors are shown.",
+        "Any existing admin UI copy that says the user lacks permission (e.g., 'You do not have permission to delete categories right now...') is removed or replaced with neutral, English error handling that does not reference permissions."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/queries/useAdminHealthCheck.ts",
-          "operation": "create",
-          "description": "Add an admin-scoped React Query hook that uses the anonymous admin actor to call `healthCheck()` and expose a retryable status for the admin area (success expects English text \"Running\")."
+          "path": "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+          "operation": "modify",
+          "description": "Remove any permission/role-based UI blocking and replace permission-referencing error copy (e.g., delete failure messages) with neutral operational error handling that does not mention authorization."
         },
         {
-          "path": "frontend/src/pages/admin/AdminLayoutPage.tsx",
+          "path": "frontend/src/components/admin/CategoryEditorDialog.tsx",
           "operation": "modify",
-          "description": "Wire the admin health-check hook into the admin shell UI to show a small, English status indicator (Running / Unavailable with Retry) so /admin routes never appear blank and failures remain retryable instead of crashing the route."
+          "description": "Remove permission-specific messaging branches (e.g., checks for 'permission' in error messages) and ensure errors are shown as neutral operational messages (validation/backend unavailable/retryable) without referencing permissions."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminProductsPage.tsx",
+          "operation": "modify",
+          "description": "Ensure product CRUD errors never surface permission-based text; keep only neutral operational errors and avoid any role/permission UI gating during the open-admin phase."
+        },
+        {
+          "path": "frontend/src/components/admin/ProductEditorDialog.tsx",
+          "operation": "modify",
+          "description": "Ensure add/update product flow never shows permission-related text and does not block actions due to permission state; keep validation errors and backend unavailable messaging only."
+        },
+        {
+          "path": "frontend/src/hooks/queries/useAuthz.ts",
+          "operation": "modify",
+          "description": "Remove or neutralize admin-role/permission gating usage for admin UI during the open-admin phase (so admin pages/components do not rely on role checks to render/enable actions)."
+        },
+        {
+          "path": "frontend/src/components/layout/Header.tsx",
+          "operation": "modify",
+          "description": "Remove any Admin navigation gating or permission-based UI blocks that prevent reaching admin pages during the open-admin phase (do not add authentication)."
         },
         {
           "path": "frontend/src/utils/backendAvailabilityErrors.ts",
           "operation": "modify",
-          "description": "Ensure backend-unavailability detection and userMessage formatting remain English and are suitable for reuse by admin health-check + admin CRUD pages (retryable, no route-level crash messaging)."
+          "description": "Sanitize formatted error output so any Unauthorized/No Permission-style backend errors (or similar strings) are converted into neutral English operational messages that do not reference permissions, while preserving backend unavailable/validation/not-found clarity."
+        }
+      ]
+    },
+    {
+      "id": "REQ-123",
+      "summary": "Ensure Admin Orders uses the anonymous admin actor consistently and surfaces clear operational errors (not permission messaging) for load and status updates.",
+      "acceptanceCriteria": [
+        "`frontend/src/hooks/queries/useAdminOrders.ts` continues to call the backend using `useAdminActor()` and does not depend on any authenticated/II-bound actor or role-check hooks.",
+        "When backend calls fail, the Admin Orders page shows clear English error output via existing formatting utilities, and does not show permission-related text.",
+        "With a running backend, the Admin Orders table renders without errors and the status dropdown successfully updates status and refreshes the list."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/queries/useAdminOrders.ts",
+          "operation": "modify",
+          "description": "Verify Admin Orders query/mutation exclusively uses `useAdminActor()` (no II/role-check dependencies) and align thrown/returned errors so they are operational (e.g., backend unavailable) rather than permission-oriented."
         },
         {
-          "path": "frontend/README.md",
+          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
           "operation": "modify",
-          "description": "Update redeploy verification steps to explicitly confirm anonymous admin CRUD on `/admin/categories` and `/admin/products` in a fresh browser session, and to use the admin health indicator/healthCheck as the quick confirmation that the backend is running."
+          "description": "Ensure load/update error rendering and toasts use clear English operational messaging (via existing formatting utilities) and never display permission-related text."
+        },
+        {
+          "path": "frontend/src/utils/backendAvailabilityErrors.ts",
+          "operation": "modify",
+          "description": "Adjust shared error formatting used by Admin Orders so authorization-like failures never render permission text, while still clearly communicating backend unavailable, validation errors, and not-found conditions."
         }
       ]
     }

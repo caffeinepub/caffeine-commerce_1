@@ -43,9 +43,19 @@ export const ReferralCode = IDL.Text;
 export const UserId = IDL.Principal;
 export const OrderId = IDL.Nat;
 export const OrderStatus = IDL.Variant({
+  'shipped' : IDL.Null,
   'cancelled' : IDL.Null,
   'pending' : IDL.Null,
   'completed' : IDL.Null,
+  'delivered' : IDL.Null,
+  'confirmed' : IDL.Null,
+  'processing' : IDL.Null,
+});
+export const ShippingAddress = IDL.Record({
+  'name' : IDL.Text,
+  'address' : IDL.Text,
+  'phone' : IDL.Text,
+  'pincode' : IDL.Text,
 });
 export const CartItem = IDL.Record({
   'productId' : ProductId,
@@ -58,6 +68,7 @@ export const Order__1 = IDL.Record({
   'statusHistory' : IDL.Vec(OrderStatus),
   'totalAmount' : IDL.Nat,
   'timestamp' : Time,
+  'shippingAddress' : ShippingAddress,
   'items' : IDL.Vec(CartItem),
 });
 export const UserProfile = IDL.Record({
@@ -155,6 +166,7 @@ export const idlService = IDL.Service({
   'healthCheck' : IDL.Func([], [IDL.Text], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+  'placeOrder' : IDL.Func([ShippingAddress], [OrderId], []),
   'removeFromCart' : IDL.Func([ProductId], [], []),
   'removeFromWishlist' : IDL.Func([ProductId], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
@@ -208,9 +220,19 @@ export const idlFactory = ({ IDL }) => {
   const UserId = IDL.Principal;
   const OrderId = IDL.Nat;
   const OrderStatus = IDL.Variant({
+    'shipped' : IDL.Null,
     'cancelled' : IDL.Null,
     'pending' : IDL.Null,
     'completed' : IDL.Null,
+    'delivered' : IDL.Null,
+    'confirmed' : IDL.Null,
+    'processing' : IDL.Null,
+  });
+  const ShippingAddress = IDL.Record({
+    'name' : IDL.Text,
+    'address' : IDL.Text,
+    'phone' : IDL.Text,
+    'pincode' : IDL.Text,
   });
   const CartItem = IDL.Record({
     'productId' : ProductId,
@@ -223,6 +245,7 @@ export const idlFactory = ({ IDL }) => {
     'statusHistory' : IDL.Vec(OrderStatus),
     'totalAmount' : IDL.Nat,
     'timestamp' : Time,
+    'shippingAddress' : ShippingAddress,
     'items' : IDL.Vec(CartItem),
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text, 'address' : IDL.Text });
@@ -311,6 +334,7 @@ export const idlFactory = ({ IDL }) => {
     'healthCheck' : IDL.Func([], [IDL.Text], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+    'placeOrder' : IDL.Func([ShippingAddress], [OrderId], []),
     'removeFromCart' : IDL.Func([ProductId], [], []),
     'removeFromWishlist' : IDL.Func([ProductId], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),

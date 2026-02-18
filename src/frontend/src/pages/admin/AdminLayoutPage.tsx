@@ -114,7 +114,7 @@ export default function AdminLayoutPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">
                 <span>
-                  The backend service is currently unavailable or stopped. Please ensure the canister is running and try again.
+                  The backend service is currently unavailable. Please ensure the canister is running and try again.
                 </span>
                 <Button
                   variant="outline"

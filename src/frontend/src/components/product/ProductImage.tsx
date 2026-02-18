@@ -5,6 +5,7 @@ interface ProductImageProps {
 }
 
 export default function ProductImage({ imageUrl, alt, className = '' }: ProductImageProps) {
+  // Handle both remote URLs and Data URLs
   const src = imageUrl && imageUrl.trim() !== '' 
     ? imageUrl 
     : '/assets/generated/product-placeholder.dim_800x800.png';
@@ -16,7 +17,10 @@ export default function ProductImage({ imageUrl, alt, className = '' }: ProductI
       className={className}
       onError={(e) => {
         const target = e.target as HTMLImageElement;
-        target.src = '/assets/generated/product-placeholder.dim_800x800.png';
+        // Only set fallback if not already showing it
+        if (target.src !== window.location.origin + '/assets/generated/product-placeholder.dim_800x800.png') {
+          target.src = '/assets/generated/product-placeholder.dim_800x800.png';
+        }
       }}
     />
   );

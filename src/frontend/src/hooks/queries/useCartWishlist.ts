@@ -3,6 +3,7 @@ import { useActor } from '../useActor';
 import { useInternetIdentity } from '../useInternetIdentity';
 import { queryKeys } from './queryClientKeys';
 import type { Cart, Wishlist, ProductId } from '../../backend';
+import { detectBackendUnavailability } from '../../utils/backendAvailabilityErrors';
 
 export function useGetCart() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -41,7 +42,94 @@ export function useAddToCart() {
     mutationFn: async (productId: ProductId) => {
       if (!actor) throw new Error('Actor not available');
       if (!identity) throw new Error('Please login to add items to cart');
-      await actor.addToCart(productId);
+      
+      try {
+        await actor.addToCart(productId);
+      } catch (error: any) {
+        const errorInfo = detectBackendUnavailability(error);
+        if (errorInfo.isBackendUnavailable) {
+          throw new Error(errorInfo.userMessage);
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
+    },
+  });
+}
+
+export function useIncrementCartItem() {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (productId: ProductId) => {
+      if (!actor) throw new Error('Backend service is not available');
+      if (!identity) throw new Error('Please login to update cart');
+      
+      try {
+        await actor.addToCart(productId);
+      } catch (error: any) {
+        const errorInfo = detectBackendUnavailability(error);
+        if (errorInfo.isBackendUnavailable) {
+          throw new Error(errorInfo.userMessage);
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
+    },
+  });
+}
+
+export function useDecrementCartItem() {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (productId: ProductId) => {
+      if (!actor) throw new Error('Backend service is not available');
+      if (!identity) throw new Error('Please login to update cart');
+      
+      try {
+        await actor.removeFromCart(productId);
+      } catch (error: any) {
+        const errorInfo = detectBackendUnavailability(error);
+        if (errorInfo.isBackendUnavailable) {
+          throw new Error(errorInfo.userMessage);
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
+    },
+  });
+}
+
+export function useRemoveFromCart() {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (productId: ProductId) => {
+      if (!actor) throw new Error('Backend service is not available');
+      if (!identity) throw new Error('Please login to update cart');
+      
+      try {
+        await actor.removeFromCart(productId);
+      } catch (error: any) {
+        const errorInfo = detectBackendUnavailability(error);
+        if (errorInfo.isBackendUnavailable) {
+          throw new Error(errorInfo.userMessage);
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });

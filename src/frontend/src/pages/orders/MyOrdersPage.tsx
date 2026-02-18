@@ -8,6 +8,7 @@ import { OrderRowSkeleton } from '../../components/LoadingSkeletons';
 import { useTranslation } from '../../i18n';
 import { ShoppingBag } from 'lucide-react';
 import { OrderStatus } from '../../backend';
+import { getOrderStatusLabel, getOrderStatusColor } from '../../utils/orderStatus';
 
 export default function MyOrdersPage() {
   const navigate = useNavigate();
@@ -45,13 +46,6 @@ export default function MyOrdersPage() {
     );
   }
 
-  const getStatusLabel = (status: OrderStatus): string => {
-    if (status === OrderStatus.completed) return 'completed';
-    if (status === OrderStatus.pending) return 'pending';
-    if (status === OrderStatus.cancelled) return 'cancelled';
-    return 'unknown';
-  };
-
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-8">{t('orders.title')}</h1>
@@ -74,8 +68,8 @@ export default function MyOrdersPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-lg">₹{Number(order.totalAmount).toLocaleString()}</p>
-                  <Badge variant={order.status === OrderStatus.completed ? 'default' : 'secondary'}>
-                    {getStatusLabel(order.status)}
+                  <Badge className={getOrderStatusColor(order.status)}>
+                    {getOrderStatusLabel(order.status)}
                   </Badge>
                 </div>
               </div>

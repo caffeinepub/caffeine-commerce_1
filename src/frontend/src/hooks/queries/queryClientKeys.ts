@@ -6,6 +6,8 @@ export const queryKeys = {
   wishlist: ['wishlist'] as const,
   orders: ['orders'] as const,
   order: (id: string) => ['order', id] as const,
+  adminOrders: ['adminOrders'] as const,
+  dashboardStats: ['dashboardStats'] as const,
   coupons: ['coupons'] as const,
   userProfile: ['userProfile'] as const,
   userRole: ['userRole'] as const,

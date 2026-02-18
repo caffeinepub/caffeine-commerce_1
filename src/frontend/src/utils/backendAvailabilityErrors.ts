@@ -1,6 +1,6 @@
 /**
  * Utility functions for detecting and handling backend unavailability errors,
- * including IC0508 "Canister is stopped" errors.
+ * including IC0508 "Canister is stopped" errors and deployment issues.
  */
 
 export interface BackendErrorInfo {
@@ -28,27 +28,69 @@ export function detectBackendUnavailability(error: any): BackendErrorInfo {
   const isIC0508 = errorString.includes('ic0508') || errorString.includes('canister is stopped');
   
   // Check for other common unavailability patterns
-  const isUnavailable = 
-    isIC0508 ||
-    errorString.includes('canister not found') ||
-    errorString.includes('canister rejected') ||
-    errorString.includes('destination invalid') ||
+  const isCanisterNotFound = errorString.includes('canister not found');
+  const isCanisterRejected = errorString.includes('canister rejected') || errorString.includes('reject code');
+  const isDestinationInvalid = errorString.includes('destination invalid');
+  const isNetworkError = 
     errorString.includes('no route to host') ||
     errorString.includes('connection refused') ||
-    errorString.includes('timeout');
+    errorString.includes('timeout') ||
+    errorString.includes('network error') ||
+    errorString.includes('failed to fetch');
+  
+  const isDeploymentIssue = 
+    errorString.includes('deployment') ||
+    errorString.includes('not deployed') ||
+    errorString.includes('canister id not found');
+
+  const isUnavailable = 
+    isIC0508 ||
+    isCanisterNotFound ||
+    isCanisterRejected ||
+    isDestinationInvalid ||
+    isNetworkError ||
+    isDeploymentIssue;
 
   if (isUnavailable) {
+    let userMessage = 'Service temporarily unavailable. ';
+    
+    if (isIC0508) {
+      userMessage += 'The backend canister is stopped. Please start it and try again.';
+    } else if (isCanisterNotFound || isDeploymentIssue) {
+      userMessage += 'The backend canister may not be deployed. Please ensure it is running.';
+    } else if (isNetworkError) {
+      userMessage += 'Network connection issue. Please check your connection and try again.';
+    } else {
+      userMessage += 'Please ensure the backend is running and try again.';
+    }
+
     return {
       isBackendUnavailable: true,
-      userMessage: 'The backend service is currently unavailable or stopped. Please ensure the canister is running and try again.',
+      userMessage,
       originalError: error,
     };
   }
 
-  // Generic error
+  // For any other error (including authorization-like messages from backend),
+  // return a neutral operational message
+  const originalMessage = error.message || 'An error occurred';
+  
+  // Sanitize authorization-related messages to be neutral
+  if (errorString.includes('unauthorized') || 
+      errorString.includes('permission') || 
+      errorString.includes('access denied') ||
+      errorString.includes('only admins can')) {
+    return {
+      isBackendUnavailable: false,
+      userMessage: 'Unable to complete the operation. Please try again.',
+      originalError: error,
+    };
+  }
+
+  // Generic error - return the original message
   return {
     isBackendUnavailable: false,
-    userMessage: error.message || 'An error occurred while communicating with the backend',
+    userMessage: originalMessage,
     originalError: error,
   };
 }

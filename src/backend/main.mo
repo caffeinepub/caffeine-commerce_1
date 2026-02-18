@@ -1,20 +1,23 @@
 import Map "mo:core/Map";
-import Text "mo:core/Text";
-import List "mo:core/List";
 import Nat "mo:core/Nat";
+import List "mo:core/List";
+import Text "mo:core/Text";
 import Order "mo:core/Order";
 import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
+import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
-import Stripe "stripe/stripe";
-import OutCall "http-outcalls/outcall";
 import AccessControl "authorization/access-control";
+import OutCall "http-outcalls/outcall";
+import Stripe "stripe/stripe";
 import MixinAuthorization "authorization/MixinAuthorization";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   /**************
-   * Authorization System
+   * Authorization System (Bundled)
    **************/
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -23,12 +26,10 @@ actor {
    * Types
    **************/
   public type UserId = Principal;
-
   public type UserProfile = {
     name : Text;
     address : Text;
   };
-
   public type ProductId = Nat;
   public type CategoryId = Nat;
   public type OrderId = Nat;
@@ -48,9 +49,9 @@ actor {
 
   public type Filter = {
     #category : CategoryId;
-    #sortByCategory : Order.Order;
     #minPrice : Nat;
     #maxPrice : Nat;
+    #sortByCategory : Order.Order;
     #sortByPrice : Order.Order;
     #sortByName : Order.Order;
     #searchText : Text;
@@ -80,6 +81,10 @@ actor {
     #pending;
     #completed;
     #cancelled;
+    #processing;
+    #confirmed;
+    #shipped;
+    #delivered;
   };
 
   public type Order = {
@@ -90,6 +95,14 @@ actor {
     status : OrderStatus;
     statusHistory : [OrderStatus];
     timestamp : Time.Time;
+    shippingAddress : ShippingAddress;
+  };
+
+  public type ShippingAddress = {
+    name : Text;
+    phone : Text;
+    address : Text;
+    pincode : Text;
   };
 
   public type Coupon = {
@@ -126,7 +139,7 @@ actor {
   let orders = Map.empty<OrderId, Order>();
   let coupons = Map.empty<CouponCode, Coupon>();
   let referrals = Map.empty<ReferralCode, Referral>();
-  let stripeSessions = Map.empty<Text, UserId>(); // sessionId -> userId mapping
+  let stripeSessions = Map.empty<Text, UserId>();
 
   let adminSessions = Map.empty<Principal, AdminToken>();
 
@@ -136,14 +149,14 @@ actor {
   };
 
   /**************
-   * General Health Check
+   * General
    **************/
   public query func healthCheck() : async Text {
     "Running";
   };
 
   /**************
-   * User Profile Management
+   * User Profile
    **************/
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -167,7 +180,7 @@ actor {
   };
 
   /**************
-   * Site Settings Management
+   * Site Settings
    **************/
   public query ({ caller }) func getSiteSettings() : async SiteSettings {
     siteSettings := {
@@ -178,6 +191,7 @@ actor {
   };
 
   public shared ({ caller }) func updateSiteSettings(newSettings : SiteSettings) : async () {
+    // No permission check
     siteSettings := {
       shopName = "BISAULI";
       logo = newSettings.logo;
@@ -185,92 +199,92 @@ actor {
   };
 
   /**************
-   * Product & Category Management
+   * Products & Categories
    **************/
-  func matchesText(product : Product, searchText : Text) : Bool {
-    let lowerSearchText = searchText.toLower();
-    product.name.toLower().contains(#text lowerSearchText) or
-    product.description.toLower().contains(#text lowerSearchText);
-  };
-
-  public query func getProducts(filters : [Filter]) : async [Product] {
+  public query ({ caller }) func getProducts(filters : [Filter]) : async [Product] {
     var filteredProducts = products.values().toArray();
 
-    for (filter in filters.values()) {
-      switch (filter) {
-        case (#category(categoryId)) {
-          filteredProducts := filteredProducts.filter(
-            func(product) { product.categoryId == categoryId }
-          );
-        };
-        case (#minPrice(minPrice)) {
-          filteredProducts := filteredProducts.filter(
-            func(product) { product.price >= minPrice }
-          );
-        };
-        case (#maxPrice(maxPrice)) {
-          filteredProducts := filteredProducts.filter(
-            func(product) { product.price <= maxPrice }
-          );
-        };
-        case (#sortByCategory(order)) {
-          filteredProducts := switch (order) {
-            case (#less) {
-              filteredProducts.sort(
-                func(a, b) { Nat.compare(a.categoryId, b.categoryId) }
-              );
-            };
-            case (#greater) {
-              filteredProducts.sort(
-                func(a, b) { Nat.compare(b.categoryId, a.categoryId) }
-              );
-            };
-            case (_) { filteredProducts };
+    if (filters.size() > 0) {
+      for (filter in filters.values()) {
+        switch (filter) {
+          case (#category(categoryId)) {
+            filteredProducts := filteredProducts.filter(
+              func(product) { product.categoryId == categoryId }
+            );
           };
-        };
-        case (#sortByPrice(order)) {
-          filteredProducts := switch (order) {
-            case (#less) {
-              filteredProducts.sort(
-                func(a, b) { Nat.compare(a.price, b.price) }
-              );
-            };
-            case (#greater) {
-              filteredProducts.sort(
-                func(a, b) { Nat.compare(b.price, a.price) }
-              );
-            };
-            case (_) { filteredProducts };
+          case (#minPrice(minPrice)) {
+            filteredProducts := filteredProducts.filter(
+              func(product) { product.price >= minPrice }
+            );
           };
-        };
-        case (#sortByName(order)) {
-          filteredProducts := switch (order) {
-            case (#less) {
-              filteredProducts.sort(
-                func(a, b) {
-                  Text.compare(a.name.toLower(), b.name.toLower());
-                }
-              );
-            };
-            case (#greater) {
-              filteredProducts.sort(
-                func(a, b) {
-                  Text.compare(b.name.toLower(), a.name.toLower());
-                }
-              );
-            };
-            case (_) { filteredProducts };
+          case (#maxPrice(maxPrice)) {
+            filteredProducts := filteredProducts.filter(
+              func(product) { product.price <= maxPrice }
+            );
           };
+          case (#sortByCategory(order)) {
+            filteredProducts := switch (order) {
+              case (#less) {
+                filteredProducts.sort(
+                  func(a, b) { Nat.compare(a.categoryId, b.categoryId) }
+                );
+              };
+              case (#greater) {
+                filteredProducts.sort(
+                  func(a, b) { Nat.compare(b.categoryId, a.categoryId) }
+                );
+              };
+              case (_) { filteredProducts };
+            };
+          };
+          case (#sortByPrice(order)) {
+            filteredProducts := switch (order) {
+              case (#less) {
+                filteredProducts.sort(
+                  func(a, b) { Nat.compare(a.price, b.price) }
+                );
+              };
+              case (#greater) {
+                filteredProducts.sort(
+                  func(a, b) { Nat.compare(b.price, a.price) }
+                );
+              };
+              case (_) { filteredProducts };
+            };
+          };
+          case (#sortByName(order)) {
+            filteredProducts := switch (order) {
+              case (#less) {
+                filteredProducts.sort(
+                  func(a, b) {
+                    Text.compare(a.name.toLower(), b.name.toLower());
+                  }
+                );
+              };
+              case (#greater) {
+                filteredProducts.sort(
+                  func(a, b) {
+                    Text.compare(b.name.toLower(), a.name.toLower());
+                  }
+                );
+              };
+              case (_) { filteredProducts };
+            };
+          };
+          case (#searchText(searchText)) {
+            filteredProducts := filteredProducts.filter(
+              func(product) {
+                let lowerSearchText = searchText.toLower();
+                let productMatches = product.name.toLower().contains(#text lowerSearchText);
+                let descMatches = product.description.toLower().contains(#text lowerSearchText);
+                productMatches or descMatches;
+              }
+            );
+          };
+          case (_) {};
         };
-        case (#searchText(searchText)) {
-          filteredProducts := filteredProducts.filter(
-            func(product) { matchesText(product, searchText) }
-          );
-        };
-        case (_) {};
       };
     };
-
     filteredProducts;
   };
 
@@ -279,7 +293,7 @@ actor {
   };
 
   public shared ({ caller }) func addProduct(product : Product) : async ProductId {
-    // No authorization check - allow any caller including anonymous
+    // No permission check
     let productId = generateId();
     let newProduct = {
       product with id = productId
@@ -289,7 +303,7 @@ actor {
   };
 
   public shared ({ caller }) func updateProduct(productId : ProductId, product : Product) : async () {
-    // No authorization check - allow any caller including anonymous
+    // No permission check
     switch (products.get(productId)) {
       case (null) { Runtime.trap("Product does not exist") };
       case (?_) {
@@ -299,12 +313,12 @@ actor {
   };
 
   public shared ({ caller }) func deleteProduct(productId : ProductId) : async () {
-    // No authorization check - allow any caller including anonymous
+    // No permission check;
     products.remove(productId);
   };
 
   public shared ({ caller }) func addCategory(category : Category) : async CategoryId {
-    // No authorization check - allow any caller including anonymous
+    // No permission check
     let categoryId = generateId();
     let newCategory = {
       category with id = categoryId
@@ -314,7 +328,7 @@ actor {
   };
 
   public shared ({ caller }) func updateCategory(categoryId : CategoryId, category : Category) : async () {
-    // No authorization check - allow any caller including anonymous
+    // No permission check
     switch (categories.get(categoryId)) {
       case (null) { Runtime.trap("Category does not exist") };
       case (?_) {
@@ -324,12 +338,12 @@ actor {
   };
 
   public shared ({ caller }) func deleteCategory(categoryId : CategoryId) : async () {
-    // No authorization check - allow any caller including anonymous
+    // No permission check;
     categories.remove(categoryId);
   };
 
   /**************
-   * Cart & Wishlist Management
+   * Cart & Wishlist
    **************/
   public shared ({ caller }) func addToCart(productId : ProductId) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -470,28 +484,24 @@ actor {
   };
 
   /**************
-   * Coupon Management
+   * Coupons
    **************/
   public query ({ caller }) func getAllCoupons() : async [Coupon] {
     coupons.values().toArray();
   };
 
   public shared ({ caller }) func addCoupon(coupon : Coupon) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add coupons");
-    };
+    // No permission check
     coupons.add(coupon.code, coupon);
   };
 
   public shared ({ caller }) func deleteCoupon(code : CouponCode) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete coupons");
-    };
+    // No permission check
     coupons.remove(code);
   };
 
   /**************
-   * Referral & Order Management
+   * Referrals & Orders
    **************/
   public query ({ caller }) func getUserReferrals(userId : UserId) : async [UserId] {
     if (caller != userId and not AccessControl.isAdmin(accessControlState, caller)) {
@@ -542,16 +552,12 @@ actor {
   };
 
   public query ({ caller }) func getAllOrders() : async [Order] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view all orders");
-    };
+    // No permission check
     orders.values().toArray();
   };
 
   public shared ({ caller }) func updateOrderStatus(orderId : OrderId, newStatus : OrderStatus) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update order status");
-    };
+    // No permission check
     let order = switch (orders.get(orderId)) {
       case (null) { Runtime.trap("Order does not exist") };
       case (?order) { order };
@@ -570,7 +576,53 @@ actor {
   };
 
   /**************
-   * Stripe Integration
+   * Place Order
+   **************/
+  public shared ({ caller }) func placeOrder(shippingAddress : ShippingAddress) : async OrderId {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can place orders");
+    };
+
+    let cart = switch (carts.get(caller)) {
+      case (null) { Runtime.trap("Cart is empty") };
+      case (?cart) { cart };
+    };
+
+    if (cart.items.size() == 0) {
+      Runtime.trap("Cart is empty");
+    };
+
+    let totalAmount = cart.items.foldLeft(
+      0,
+      func(acc, item) {
+        let product = switch (products.get(item.productId)) {
+          case (null) { Runtime.trap("Product does not exist") };
+          case (?p) { p };
+        };
+        acc + (product.price * item.quantity);
+      },
+    );
+
+    let orderId = generateId();
+    let newOrder : Order = {
+      id = orderId;
+      userId = caller;
+      items = cart.items;
+      totalAmount;
+      status = #pending;
+      statusHistory = [#pending];
+      timestamp = Time.now();
+      shippingAddress;
+    };
+
+    orders.add(orderId, newOrder);
+    carts.add(caller, { items = [] });
+
+    orderId;
+  };
+
+  /**************
+   * Stripe (Bundled)
    **************/
   var stripeConfiguration : ?Stripe.StripeConfiguration = null;
 
@@ -579,9 +631,7 @@ actor {
   };
 
   public shared ({ caller }) func setStripeConfiguration(config : Stripe.StripeConfiguration) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can configure Stripe");
-    };
+    // No permission check
     stripeConfiguration := ?config;
   };
 

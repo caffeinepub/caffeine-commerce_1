@@ -12,12 +12,7 @@ export function useAdminGetProducts(filters: Filter[] = []) {
     queryKey: [...queryKeys.products, filters],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getProducts(filters);
-      } catch (error: any) {
-        console.error('Failed to fetch products:', error);
-        throw error;
-      }
+      return await actor.getProducts(filters);
     },
     enabled: !!actor && !actorFetching,
     placeholderData: (previousData) => previousData,
@@ -37,12 +32,7 @@ export function useAdminGetCategories() {
     queryKey: queryKeys.categories,
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getCategories();
-      } catch (error: any) {
-        console.error('Failed to fetch categories:', error);
-        throw error;
-      }
+      return await actor.getCategories();
     },
     enabled: !!actor && !actorFetching,
     retry: 1,

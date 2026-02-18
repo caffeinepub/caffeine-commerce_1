@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAdminActor } from '../useAdminActor';
+import { detectBackendUnavailability } from '../../utils/backendAvailabilityErrors';
 
 /**
  * Admin-scoped health check hook that uses the anonymous admin actor
@@ -13,6 +14,9 @@ export function useAdminHealthCheck() {
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       const result = await actor.healthCheck();
+      if (result !== 'Running') {
+        throw new Error(`Unexpected health check response: ${result}`);
+      }
       return result;
     },
     enabled: !!actor && !actorFetching,
@@ -22,14 +26,14 @@ export function useAdminHealthCheck() {
     staleTime: 10000, // Consider data stale after 10 seconds
   });
 
-  const isHealthy = query.data === 'Running';
-  const isUnavailable = query.isError || (query.isFetched && !isHealthy);
+  const isHealthy = query.data === 'Running' && !query.isError;
+  const isUnavailable = query.isError || (query.isFetched && query.data !== 'Running');
 
   return {
     ...query,
     isLoading: actorFetching || query.isLoading,
     isHealthy,
     isUnavailable,
-    status: query.isError ? 'Unavailable' : isHealthy ? 'Running' : 'Unknown',
+    status: isHealthy ? 'Running' : isUnavailable ? 'Unavailable' : 'Checking',
   };
 }

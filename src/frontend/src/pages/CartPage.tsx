@@ -3,10 +3,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetCart } from '../hooks/queries/useCartWishlist';
+import { useGetCart, useIncrementCartItem, useDecrementCartItem } from '../hooks/queries/useCartWishlist';
 import { useGetProducts } from '../hooks/queries/useCatalog';
 import { useTranslation } from '../i18n';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Plus, Minus } from 'lucide-react';
+import { toast } from 'sonner';
+import { formatBackendError } from '../utils/backendAvailabilityErrors';
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -14,6 +16,8 @@ export default function CartPage() {
   const { t } = useTranslation();
   const { data: cart, isLoading: cartLoading } = useGetCart();
   const { data: products } = useGetProducts();
+  const incrementItem = useIncrementCartItem();
+  const decrementItem = useDecrementCartItem();
 
   if (!identity) {
     return (
@@ -49,6 +53,22 @@ export default function CartPage() {
     0
   );
 
+  const handleIncrement = async (productId: bigint) => {
+    try {
+      await incrementItem.mutateAsync(productId);
+    } catch (error: any) {
+      toast.error(formatBackendError(error));
+    }
+  };
+
+  const handleDecrement = async (productId: bigint) => {
+    try {
+      await decrementItem.mutateAsync(productId);
+    } catch (error: any) {
+      toast.error(formatBackendError(error));
+    }
+  };
+
   if (cartItems.length === 0) {
     return (
       <div className="container py-16 text-center">
@@ -78,9 +98,29 @@ export default function CartPage() {
                   <p className="text-lg font-bold text-primary mt-2">
                     ₹{Number(item.product!.price).toLocaleString()}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t('cart.quantity')}: {Number(item.quantity)}
-                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleDecrement(item.productId)}
+                      disabled={decrementItem.isPending}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium min-w-[2rem] text-center">
+                      {Number(item.quantity)}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleIncrement(item.productId)}
+                      disabled={incrementItem.isPending}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

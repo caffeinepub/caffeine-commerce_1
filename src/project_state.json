@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 37,
-  "summary": "Admin panel branding is set to \"BISAULI\"; top priority is fixing admin dashboard functionality by disabling all backend admin-only authorization checks (since /admin login is removed) so anyone accessing /admin can add/delete categories and products, and resolving the backend outage where the backend canister is stopped (IC0508) causing CRUD (e.g., adding category \"cloths\") to fail; then redeploy and verify all admin dashboard pages load and CRUD works without unauthorized/rejection errors.",
+  "projectStateVersion": 55,
+  "summary": "Immediate priority: remove/disable all permission checks across the entire Admin area (frontend admin folder and any remaining backend guards) so Orders, Categories, and Products are fully accessible without any 'Unauthorized'/'No Permission' errors; admin access must be completely open during this phase.",
   "architectural_notes": [
     "Cross-platform mobile app (Android + iOS) with clean, minimal UI inspired by Amazon/Flipkart.",
     "Backend to use Firebase or Supabase, including secure authentication, real-time database updates, and cloud image storage.",
@@ -555,6 +555,246 @@
         "REQ-85"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-replace-the-image-url-text-input-in-the-admin-add-new-product-edit-product-dialog-frontend-src-components-admin-producteditordialog-tsx-with-an-image-file-upload-control-that-lets-an-admin-select-an-image-from-their-device-phone-computer",
+      "title": "Replace the \"Image URL\" text input in the Admin \"Add New Product\" / \"Edit Product\" dialog (`frontend/src/components/admin/ProductEditorDialog.tsx`) with an image file upload control that lets an admin select an image from their device (phone/computer).",
+      "reqIds": [
+        "REQ-86"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-inline-preview-of-the-selected-product-image-in-producteditordialog-and-store-the-selected-image-in-the-form-state-as-a-data-url-string-so-it-can-be-persisted-via-the-existing-product-imageurl-text-field",
+      "title": "Add an inline preview of the selected product image in `ProductEditorDialog`, and store the selected image in the form state as a Data URL string so it can be persisted via the existing `Product.imageUrl : Text` field.",
+      "reqIds": [
+        "REQ-87"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-persist-and-render-uploaded-product-images-end-to-end-by-ensuring-products-saved-with-a-data-url-imageurl-display-correctly-across-shopper-facing-surfaces-that-render-products-including-the-home-page-featured-product-grid",
+      "title": "Persist and render uploaded product images end-to-end by ensuring products saved with a Data URL `imageUrl` display correctly across shopper-facing surfaces that render products (including the Home page featured product grid).",
+      "reqIds": [
+        "REQ-88"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-basic-english-validation-and-guidance-for-product-image-uploads-in-producteditordialog-to-prevent-broken-saves-and-improve-usability-e-g-non-image-file-selection-and-a-clear-way-to-remove-clear-a-selected-image-before-saving",
+      "title": "Add basic, English validation and guidance for product image uploads in `ProductEditorDialog` to prevent broken saves and improve usability (e.g., non-image file selection, and a clear way to remove/clear a selected image before saving).",
+      "reqIds": [
+        "REQ-89"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-current-checkout-shipping-address-placeholder-on-frontend-src-pages-checkoutpage-tsx-with-a-working-shipping-address-form-containing-the-following-fields-name-phone-full-address-and-pincode-with-english-labels-and-validation-errors",
+      "title": "Replace the current checkout \"Shipping Address\" placeholder on `frontend/src/pages/CheckoutPage.tsx` with a working \"Shipping Address\" form containing the following fields: Name, Phone, Full Address, and Pincode, with English labels and validation errors.",
+      "reqIds": [
+        "REQ-90"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-pages-cartpage-tsx-to-show-functional-quantity-controls-and-for-each-cart-line-item-and-wire-them-to-backend-mutations-so-customers-can-change-product-quantities-from-the-cart-ui",
+      "title": "Update `frontend/src/pages/CartPage.tsx` to show functional quantity controls (\"+\" and \"-\") for each cart line item and wire them to backend mutations so customers can change product quantities from the cart UI.",
+      "reqIds": [
+        "REQ-92"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-checkout-place-order-behavior-in-frontend-src-pages-checkoutpage-tsx-so-the-button-is-reliably-clickable-when-the-form-and-cart-are-valid-calls-the-backend-to-persist-the-order-including-shipping-address-item-quantities-and-shows-a-customer-facing-english-success-message-before-navigating-to-the-order-confirmation-screen",
+      "title": "Fix the checkout \"Place Order\" behavior in `frontend/src/pages/CheckoutPage.tsx` so the button is reliably clickable when the form and cart are valid, calls the backend to persist the order (including shipping address + item quantities), and shows a customer-facing English success message before navigating to the order confirmation screen.",
+      "reqIds": [
+        "REQ-94"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-admin-orders-section-frontend-src-pages-admin-adminorderspage-tsx-show-real-order-data-from-the-backend-instead-of-the-coming-soon-placeholder-including-shipping-address-details-and-per-item-quantities-so-admins-can-verify-what-customers-submitted-at-checkout",
+      "title": "Make the Admin Orders section (`frontend/src/pages/admin/AdminOrdersPage.tsx`) show real order data from the backend (instead of the \"Coming Soon\" placeholder), including shipping address details and per-item quantities, so admins can verify what customers submitted at checkout.",
+      "reqIds": [
+        "REQ-95"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-clear-the-deployment-build-cache-and-retry-deployment-so-the-latest-frontend-and-backend-changes-are-actually-pushed-live-to-the-internet-computer",
+      "title": "Clear the deployment/build cache and retry deployment so the latest frontend and backend changes are actually pushed live to the Internet Computer.",
+      "reqIds": [
+        "REQ-96"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-if-deployment-fails-again-identify-the-exact-build-deploy-error-typescript-build-motoko-compile-asset-build-or-canister-deploy-step-implement-the-minimal-fixes-required-and-re-run-deployment-until-it-succeeds",
+      "title": "If deployment fails again, identify the exact build/deploy error (TypeScript build, Motoko compile, asset build, or canister deploy step), implement the minimal fixes required, and re-run deployment until it succeeds.",
+      "reqIds": [
+        "REQ-97"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-deployment-errors-indicate-backend-connectivity-or-availability-issues-check-backend-canister-logs-ensure-the-backend-canister-is-running-and-reachable-and-fix-any-connection-availability-issues-so-frontend-can-reliably-call-backend-methods",
+      "title": "When deployment errors indicate backend connectivity or availability issues, check backend canister logs, ensure the backend canister is running and reachable, and fix any connection/availability issues so frontend can reliably call backend methods.",
+      "reqIds": [
+        "REQ-98"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-deployed-production-app-includes-and-verifies-the-checkout-cart-fixes-a-working-shipping-address-form-on-frontend-src-pages-checkoutpage-tsx-name-phone-full-address-pincode-functional-cart-quantity-controls-on-frontend-src-pages-cartpage-tsx-and-a-reliably-clickable-place-order-button-that-creates-persists-the-order-including-shipping-details-and-item-quantities-and-shows-an-english-success-message-before-navigating",
+      "title": "Ensure the deployed production app includes and verifies the checkout/cart fixes: a working Shipping Address form on `frontend/src/pages/CheckoutPage.tsx` (Name, Phone, Full Address, Pincode), functional cart quantity +/- controls on `frontend/src/pages/CartPage.tsx`, and a reliably clickable “Place Order” button that creates/persists the order (including shipping details and item quantities) and shows an English success message before navigating.",
+      "reqIds": [
+        "REQ-99"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redeploy-after-implementing-the-above-and-confirm-the-site-is-live-with-the-updated-checkout-cart-behavior-in-a-fresh-session-no-cached-state",
+      "title": "Redeploy after implementing the above and confirm the site is live with the updated checkout/cart behavior in a fresh session (no cached state).",
+      "reqIds": [
+        "REQ-100"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-ui-does-not-ask-for-login-and-does-not-block-saving-categories-products-due-to-any-frontend-side-authorization-gating-admin-pages-must-rely-on-the-existing-anonymous-admin-actor-for-crud-and-surface-backend-errors-in-english-without-redirecting-to-admin-login",
+      "title": "Ensure the admin UI does not ask for login and does not block saving categories/products due to any frontend-side authorization gating; admin pages must rely on the existing anonymous admin actor for CRUD and surface backend errors in English without redirecting to `/admin/login`.",
+      "reqIds": [
+        "REQ-102"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-recurring-deployment-ran-into-an-issue-situation-by-clearing-the-build-deployment-cache-ensuring-the-backend-canister-is-running-and-reachable-and-redeploying-so-the-latest-backend-authorization-removals-and-admin-crud-functionality-are-live",
+      "title": "Fix the recurring \"Deployment ran into an issue\" situation by clearing the build/deployment cache, ensuring the backend canister is running and reachable, and redeploying so the latest backend authorization removals and admin CRUD functionality are live.",
+      "reqIds": [
+        "REQ-103"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-checkout-page-placeholder-text-address-management-will-be-available-soon-with-a-real-visible-shipping-delivery-address-form-that-collects-exactly-these-fields-in-english-customer-name-mobile-number-full-address-and-pincode",
+      "title": "Replace the Checkout page placeholder text \"Address management will be available soon\" with a real, visible Shipping/Delivery Address form that collects exactly these fields in English: Customer Name, Mobile Number, Full Address, and Pincode.",
+      "reqIds": [
+        "REQ-104"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-checkout-place-order-button-becomes-enabled-clickable-only-when-the-address-form-is-valid-not-just-non-empty-and-the-cart-has-at-least-1-item-show-clear-english-validation-errors-when-invalid",
+      "title": "Ensure the Checkout \"Place Order\" button becomes enabled/clickable only when the address form is valid (not just non-empty) and the cart has at least 1 item; show clear English validation errors when invalid.",
+      "reqIds": [
+        "REQ-105"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-admin-orders-page-show-real-order-data-from-the-backend-not-the-coming-soon-placeholder-including-each-order-s-shipping-address-details-and-per-item-quantities-so-the-admin-can-fulfill-deliveries",
+      "title": "Make the Admin Orders page show real order data from the backend (not the \"Coming Soon\" placeholder), including each order’s shipping address details and per-item quantities so the admin can fulfill deliveries.",
+      "reqIds": [
+        "REQ-107"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-status-update-control-to-frontend-src-pages-admin-adminorderspage-tsx-replace-the-read-only-status-badge-cell-with-a-dropdown-select-that-shows-the-current-status-and-allows-updating-it-to-confirmed-shipped-or-delivered-with-english-labels",
+      "title": "Add a status update control to `frontend/src/pages/admin/AdminOrdersPage.tsx`: replace the read-only status badge cell with a dropdown (select) that shows the current status and allows updating it to \"Confirmed\", \"Shipped\", or \"Delivered\" with English labels.",
+      "reqIds": [
+        "REQ-111"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-react-query-mutation-hook-for-updating-order-status-using-the-admin-actor-e-g-in-frontend-src-hooks-queries-useadminorders-ts-and-ensure-it-invalidates-refreshes-both-querykeys-adminorders-and-customer-order-queries-querykeys-orders-and-the-relevant-querykeys-order-id-after-a-successful-update",
+      "title": "Create a React Query mutation hook for updating order status using the admin actor (e.g., in `frontend/src/hooks/queries/useAdminOrders.ts`), and ensure it invalidates/refreshes both `queryKeys.adminOrders` and customer order queries (`queryKeys.orders` and the relevant `queryKeys.order(id)`) after a successful update.",
+      "reqIds": [
+        "REQ-112"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-customers-can-see-updated-order-statuses-on-the-shopper-ui-update-frontend-src-pages-orders-myorderspage-tsx-and-frontend-src-pages-orders-orderdetailspage-tsx-where-applicable-to-display-the-new-statuses-confirmed-shipped-delivered-with-english-labels-and-add-a-periodic-refresh-so-status-changes-made-by-admin-become-visible-without-requiring-a-manual-reload",
+      "title": "Ensure customers can see updated order statuses on the shopper UI: update `frontend/src/pages/orders/MyOrdersPage.tsx` (and `frontend/src/pages/orders/OrderDetailsPage.tsx` where applicable) to display the new statuses (Confirmed/Shipped/Delivered) with English labels, and add a periodic refresh so status changes made by admin become visible without requiring a manual reload.",
+      "reqIds": [
+        "REQ-113"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-shopper-header-frontend-src-components-layout-header-tsx-so-the-product-search-input-is-prominently-visible-directly-in-the-header-navigation-bar-not-only-inside-the-mobile-three-dot-hamburger-menu-place-it-next-to-the-bisauli-logo-and-or-near-the-cart-icon-so-customers-can-see-it-immediately",
+      "title": "Update the shopper header (`frontend/src/components/layout/Header.tsx`) so the product search input is prominently visible directly in the header/navigation bar (not only inside the mobile three-dot/hamburger menu). Place it next to the BISAULI logo and/or near the Cart icon so customers can see it immediately.",
+      "reqIds": [
+        "REQ-114"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-header-search-ui-clean-and-responsive-across-mobile-and-desktop-ensure-the-search-input-has-appropriate-width-spacing-does-not-overlap-the-logo-or-action-icons-and-remains-usable-readable-placeholder-text-clear-focus-state-in-both-light-and-dark-themes",
+      "title": "Make the header search UI clean and responsive across mobile and desktop: ensure the search input has appropriate width/spacing, does not overlap the logo or action icons, and remains usable (readable placeholder text, clear focus state) in both light and dark themes.",
+      "reqIds": [
+        "REQ-115"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-header-search-placeholder-and-any-related-search-ui-text-render-in-english-correctly-by-adding-using-a-valid-i18n-key-the-current-t-search-placeholder-must-not-render-as-the-raw-key-string",
+      "title": "Ensure the header search placeholder and any related search UI text render in English correctly by adding/using a valid i18n key (the current `t('search.placeholder')` must not render as the raw key string).",
+      "reqIds": [
+        "REQ-116"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-real-admin-dashboard-stats-sourced-from-backend-orders-1-total-orders-must-count-all-orders-returned-by-the-backend-2-total-sales-revenue-must-equal-the-sum-of-all-orders-totalamount-and-3-add-a-refresh-stats-button-that-manually-refetches-the-stats",
+      "title": "Implement real Admin Dashboard stats sourced from backend orders: (1) Total Orders must count all orders returned by the backend, (2) Total Sales/Revenue must equal the sum of all orders’ totalAmount, and (3) add a “Refresh Stats” button that manually refetches the stats.",
+      "reqIds": [
+        "REQ-117"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-dedicated-react-query-cache-key-and-query-flow-for-admin-dashboard-stats-and-ensure-the-dashboard-automatically-updates-when-a-new-order-is-placed-and-when-an-order-status-is-updated-by-an-admin",
+      "title": "Add a dedicated React Query cache key and query flow for Admin Dashboard stats, and ensure the Dashboard automatically updates when a new order is placed and when an order status is updated by an admin.",
+      "reqIds": [
+        "REQ-118"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-admin-categories-unauthorized-error-so-categories-can-be-added-updated-deleted-from-the-admin-ui-without-permission-blocks-using-clear-english-error-handling-when-failures-occur",
+      "title": "Fix the Admin Categories “Unauthorized” error so categories can be added/updated/deleted from the admin UI without permission blocks, using clear English error handling when failures occur.",
+      "reqIds": [
+        "REQ-119"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-and-deploy-the-update-after-implementing-the-dashboard-stats-sync-and-categories-unauthorized-fix-ensuring-the-production-build-is-clean-and-the-changes-are-live",
+      "title": "Build and deploy the update after implementing the Dashboard stats sync and Categories Unauthorized fix, ensuring the production build is clean and the changes are live.",
+      "reqIds": [
+        "REQ-120"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-all-frontend-side-permission-checks-role-gating-admin-authorization-ui-blocks-within-frontend-src-pages-admin-frontend-src-components-admin-and-admin-query-mutation-hooks-so-admin-pages-never-show-unauthorized-no-permission-popups-and-never-block-actions-due-to-permission-state-during-the-open-admin-phase",
+      "title": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within `frontend/src/pages/admin/**`, `frontend/src/components/admin/**`, and admin query/mutation hooks so Admin pages never show 'Unauthorized' / 'No Permission' popups and never block actions due to permission state during the open-admin phase.",
+      "reqIds": [
+        "REQ-122"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-admin-orders-data-loading-and-status-update-flows-use-the-anonymous-admin-actor-path-consistently-no-internet-identity-role-checks-and-that-errors-are-surfaced-as-clear-english-operational-messages-backend-unavailable-validation-not-found-rather-than-permission-messaging",
+      "title": "Ensure Admin Orders data loading and status update flows use the anonymous/admin actor path consistently (no Internet Identity role checks) and that errors are surfaced as clear English operational messages (backend unavailable, validation, not found) rather than permission messaging.",
+      "reqIds": [
+        "REQ-123"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -793,6 +1033,112 @@
       "summary": "Resolve the \"Canister is stopped\" (IC0508) failure mode for admin catalog mutations by ensuring the backend canister remains running and responsive during category/product CRUD, and ensure the backend health check can be used to confirm service availability.",
       "reqIds": [
         "REQ-84"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-82",
+      "summary": "Replace the Image URL field in the Admin 'Add Product' form with an image File Upload button; persist the uploaded image (storage strategy TBD) and ensure the saved product image displays on the home page/product listings after save/reload.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-83",
+      "summary": "Checkout: Add Shipping Address form (Name, Phone, Full Address, Pincode) and persist it with the order.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-84",
+      "summary": "Cart: Enable quantity increment/decrement (+/-) buttons so customers can change product quantities and persist updates.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-85",
+      "summary": "Checkout: Fix 'Place Order' button not clickable; ensure it creates/saves the order to the database, shows a success message, and the order (with address + line items/quantities) appears in Admin Orders.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-87",
+      "summary": "Extend the backend order model and APIs in `backend/main.mo` to persist shipping address details with each order, and expose an order-creation method that the checkout page can call to create an order from the caller’s cart items (including quantities).",
+      "reqIds": [
+        "REQ-91"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-89",
+      "summary": "Add backend cart quantity update capability in `backend/main.mo` so the frontend can increment/decrement or set quantity for a cart item while enforcing basic constraints (e.g., quantity bounds and product existence).",
+      "reqIds": [
+        "REQ-93"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-90",
+      "summary": "Remove all backend authorization checks that block anonymous callers from adding, updating, or deleting categories and products, so the Admin dashboard at `/admin` can perform category/product CRUD without any authentication.",
+      "reqIds": [
+        "REQ-101"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-93",
+      "summary": "Ensure the backend order placement persists the provided shipping address (Customer Name, Mobile Number, Full Address, Pincode) inside the stored Order record so it is retrievable later via order queries.",
+      "reqIds": [
+        "REQ-106"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-95",
+      "summary": "Ensure the Admin Orders data fetch works with the current no-login admin phase by making the backend method used by the Admin Orders page callable without requiring an admin Internet Identity session or admin permission checks that would block the open admin panel.",
+      "reqIds": [
+        "REQ-108"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-96",
+      "summary": "Admin Orders: add an order-status dropdown (Confirmed/Shipped/Delivered) to update status from Pending; persist to backend and reflect the updated status to customers on My Orders (and optionally via notification).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-97",
+      "summary": "Extend the backend `OrderStatus` type in `backend/main.mo` to support the admin-manageable statuses \"Confirmed\", \"Shipped\", and \"Delivered\" (in addition to existing statuses), and ensure all order records can store and return these statuses without trapping.",
+      "reqIds": [
+        "REQ-109"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-98",
+      "summary": "Update the backend `updateOrderStatus(orderId, newStatus)` method in `backend/main.mo` so that the Admin panel can successfully change order status during the current no-login admin phase (i.e., do not block the call due to admin authorization checks), and ensure `statusHistory` is appended with each change.",
+      "reqIds": [
+        "REQ-110"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-99",
+      "summary": "Make the shopper Search Bar prominently visible in the main Header/Navigation bar (not inside the three-dot menu); place a clean, responsive search input next to the BISAULI logo and/or Cart icon for both mobile and desktop.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-101",
+      "summary": "Remove all frontend-side permission checks/authorization gating across the entire Admin folder so Admin Orders/Categories/Products are fully accessible with no 'Unauthorized'/'No Permission' popups during the open-admin phase.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-102",
+      "summary": "Remove all backend admin-only permission checks that can cause 'Unauthorized', 'No Permission', or 'You do not have permission' failures for Admin functionality, so any caller (including anonymous) can view and manage Orders, Categories, Products, Coupons, Site Settings, and Stripe setup during the open-admin phase.",
+      "reqIds": [
+        "REQ-121"
       ],
       "status": "pending"
     }

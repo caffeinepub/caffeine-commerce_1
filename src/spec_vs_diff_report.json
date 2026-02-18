@@ -1,53 +1,62 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T13:02:55.404Z",
-  "summary": "Diff adds an anonymous admin health-check hook and UI status indicator + backend-unavailability error detection utilities, and keeps backend healthCheck() returning \"Running\". However, the diff does not provide clear evidence that backend admin-only authorization checks were removed for category/product CRUD or that all remaining admin-area APIs no longer enforce #admin guards, and redeploy/verification is not evidenced.",
+  "generatedAt": "2026-02-18T04:03:26.312Z",
+  "summary": "Diff shows frontend admin Catalog (Categories/Products) components updated to use neutral operational error handling (including backend unavailability detection) and removal/sanitization of permission-related messaging. However, the diff does not provide evidence that backend admin-only permission checks were removed for the listed admin methods, nor that Admin Orders hook/page behavior (useAdminActor usage, no role checks) was updated as required. Some additional changes (image upload handling, migration module) appear unrelated to the permission-removal request.",
   "missing_requirements": [
     {
-      "id": "REQ-82",
-      "requirement": "Remove/disable all backend admin-only permission checks blocking Admin Dashboard CRUD flows for categories and products (add/update/delete) so anonymous callers do not get Unauthorized traps, and ensure the specific trap text \"Unauthorized: Only admins can add categories\" is no longer possible.",
-      "reason": "The backend diff excerpt shows the authorization system still present (AccessControl + MixinAuthorization) and still uses permission checks/traps for user profile APIs, but does not show any changes to addCategory/updateCategory/deleteCategory or addProduct/updateProduct/deleteProduct removing admin-only guards or eliminating the specified trap text. Because backend/main.mo is truncated, there is insufficient evidence these specific admin-only checks were removed.",
+      "id": "REQ-121",
+      "requirement": "Remove all backend admin-only permission checks that can cause 'Unauthorized'/'No Permission' failures for admin functionality (Orders, Categories, Products, Coupons, Site Settings, Stripe setup), while keeping shopper/user flows protected.",
+      "reason": "The provided backend diff snippet still shows AccessControl checks and admin gating in at least one method (getUserProfile uses AccessControl.isAdmin). The diff summary is truncated and does not show the key admin methods (e.g., getAllOrders, updateOrderStatus, add/update/deleteCategory, add/update/deleteProduct, updateSiteSettings, add/deleteCoupon, setStripeConfiguration), so there is no evidence those guards were removed.",
       "evidence": [
-        "backend/main.mo (truncated excerpt only shows user-profile authz traps; no category/product CRUD changes visible)"
+        "backend/main.mo (truncated) — shows `if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) Runtime.trap(\"Unauthorized: Can only view your own profile\")` and other permission checks"
       ]
     },
     {
-      "id": "REQ-83",
-      "requirement": "Ensure remaining admin-dashboard backend APIs used by /admin pages do not fail due to backend #admin permission checks during this phase, while keeping shopper/user-only authorization checks intact for cart/wishlist/profile/orders.",
-      "reason": "There is no visible evidence in the provided backend diff excerpt that admin-area APIs beyond catalog CRUD (e.g., coupons, site settings, Stripe setup, order management placeholders) had their #admin checks removed/disabled. The excerpt only demonstrates that shopper/user-only checks still exist (e.g., profile APIs), but does not demonstrate the required relaxation for admin-area APIs.",
+      "id": "REQ-122",
+      "requirement": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within admin pages/components and admin query/mutation hooks so admin pages never block actions due to permission state.",
+      "reason": "Only Admin Categories page/dialog and Product editor dialog are shown. The diff does not include evidence for removing permission gating across all specified admin areas (e.g., `/admin/orders`, `/admin/products` page, and admin query/mutation hooks broadly).",
       "evidence": [
-        "backend/main.mo (truncated; only shows user-profile authorization checks, not admin-area API changes)"
+        "frontend/src/pages/admin/AdminCategoriesPage.tsx (truncated) — shows operational error handling changes, but does not evidence removal of permission gates elsewhere",
+        "frontend/src/components/admin/CategoryEditorDialog.tsx (truncated)",
+        "frontend/src/components/admin/ProductEditorDialog.tsx (truncated)",
+        "frontend-file-summaries.txt (truncated) — mentions useAuthz changes but does not show admin pages/orders/products gating removal details"
       ]
     },
     {
-      "id": "REQ-84",
-      "requirement": "Resolve IC0508 \"Canister is stopped\" failure mode for admin catalog mutations by ensuring backend remains running/responsive during CRUD, and ensure admin UI shows an English retryable error state if backend unavailable.",
-      "reason": "Frontend adds detection and a retryable health indicator, but the diff does not show an actual backend/runtime change that would prevent the canister from stopping (IC0508) during mutations. Also, no evidence is shown that category/product CRUD pages are wired to use the new backend-unavailability detection to avoid route-level crashes (only AdminLayoutPage sidebar status is shown).",
+      "id": "REQ-123",
+      "requirement": "Ensure Admin Orders data loading and status update flows use useAdminActor() consistently (no II role checks) and errors are surfaced as clear English operational messages rather than permission messaging.",
+      "reason": "No diff content is shown for `frontend/src/hooks/queries/useAdminOrders.ts` or the Admin Orders page; therefore there is no evidence that Orders uses `useAdminActor()` without role checks or that Orders-specific error messaging was updated.",
       "evidence": [
-        "frontend/src/utils/backendAvailabilityErrors.ts",
-        "frontend/src/hooks/queries/useAdminHealthCheck.ts",
-        "frontend/src/pages/admin/AdminLayoutPage.tsx"
-      ]
-    },
-    {
-      "id": "REQ-85",
-      "requirement": "Redeploy and verify that /admin, /admin/categories, and /admin/products allow full anonymous CRUD access without authentication and without Unauthorized errors.",
-      "reason": "The diff contains code changes and README verification instructions, but does not provide evidence of an actual redeploy or that CRUD endpoints now succeed anonymously (backend CRUD changes are not evidenced in the provided excerpt).",
-      "evidence": [
-        "frontend/README.md",
-        "backend/main.mo (truncated; does not show CRUD auth removal)"
+        "File diff summary does not include `frontend/src/hooks/queries/useAdminOrders.ts` or an Admin Orders page/component"
       ]
     }
   ],
-  "hallucinated_features": [],
+  "hallucinated_features": [
+    {
+      "description": "Added product image file selection, client-side validation of image formats, and conversion to Data URL for ProductEditorDialog.",
+      "reason": "The BuildRequest is focused on removing admin permission checks/gating and permission-related messaging. Image upload/encoding behavior is not requested by REQ-121/122/123.",
+      "evidence": [
+        "frontend/src/components/admin/ProductEditorDialog.tsx (truncated) — FileReader Data URL conversion, image type validation, clear image logic"
+      ]
+    },
+    {
+      "description": "Introduced a backend migration module and wired migration into the actor.",
+      "reason": "BuildRequest non-goals state not to require state migration unless strictly necessary for permission removal. The diff adds `backend/migration.mo` and includes it in `backend/main.mo` with `(with migration = Migration.run)` without clear linkage to permission-check removal.",
+      "evidence": [
+        "backend/migration.mo — newly added",
+        "backend/main.mo (truncated) — `import Migration \"migration\";` and `(with migration = Migration.run)`"
+      ]
+    }
+  ],
   "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/README.md",
-    "frontend/src/hooks/queries/useAdminHealthCheck.ts",
-    "frontend/src/pages/admin/AdminLayoutPage.tsx",
+    "frontend/src/components/admin/CategoryEditorDialog.tsx",
+    "frontend/src/components/admin/ProductEditorDialog.tsx",
+    "frontend/src/pages/admin/AdminCategoriesPage.tsx",
     "frontend/src/utils/backendAvailabilityErrors.ts",
     "project_state.json"
   ]

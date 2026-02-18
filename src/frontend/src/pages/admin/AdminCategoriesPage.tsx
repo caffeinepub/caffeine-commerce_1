@@ -118,7 +118,7 @@ export default function AdminCategoriesPage() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">
-                <span>{errorInfo?.userMessage || 'Failed to load categories. Please refresh and try again.'}</span>
+                <span>{errorInfo?.userMessage || 'Failed to load categories. Please try again.'}</span>
                 <Button
                   variant="outline"
                   size="sm"
@@ -179,7 +179,7 @@ export default function AdminCategoriesPage() {
                               onClick={() => handleDeleteClick(category)}
                               title="Delete category"
                             >
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -189,11 +189,11 @@ export default function AdminCategoriesPage() {
                 </Table>
               </div>
             </>
-          ) : !error ? (
+          ) : (
             <div className="text-center py-8 text-muted-foreground">
-              No categories available. Click "Add Category" to create your first category.
+              No categories yet. Click "Add Category" to create one.
             </div>
-          ) : null}
+          )}
         </CardContent>
       </Card>
 
@@ -216,9 +216,8 @@ export default function AdminCategoriesPage() {
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteCategory.isPending}
             >
-              {deleteCategory.isPending ? 'Deleting...' : 'Delete'}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

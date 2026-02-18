@@ -17,6 +17,10 @@ const translations: Record<Language, Translations> = {
     'nav.admin': 'Admin',
     'nav.login': 'Login',
     'nav.logout': 'Logout',
+    'nav.orders': 'My Orders',
+    
+    // Search
+    'search.placeholder': 'Search products...',
     
     // Home
     'home.featured': 'Featured Products',
@@ -75,6 +79,16 @@ const translations: Record<Language, Translations> = {
     'admin.siteSettings': 'Site Settings',
     'admin.stripe': 'Stripe Setup',
     
+    // Auth
+    'auth.login': 'Login',
+    'auth.logout': 'Logout',
+    'auth.loggingIn': 'Logging in...',
+    
+    // Theme
+    'theme.light': 'Light',
+    'theme.dark': 'Dark',
+    'theme.system': 'System',
+    
     // Common
     'common.loading': 'Loading...',
     'common.error': 'Error',
@@ -101,6 +115,10 @@ const translations: Record<Language, Translations> = {
     'nav.admin': 'एडमिन',
     'nav.login': 'लॉगिन',
     'nav.logout': 'लॉगआउट',
+    'nav.orders': 'मेरे ऑर्डर',
+    
+    // Search
+    'search.placeholder': 'उत्पाद खोजें...',
     
     // Home
     'home.featured': 'फीचर्ड प्रोडक्ट्स',
@@ -151,18 +169,28 @@ const translations: Record<Language, Translations> = {
     
     // Admin
     'admin.dashboard': 'डैशबोर्ड',
-    'admin.products': 'प्रोडक्ट्स',
-    'admin.categories': 'कैटेगरी',
+    'admin.products': 'उत्पाद',
+    'admin.categories': 'श्रेणियाँ',
     'admin.orders': 'ऑर्डर',
-    'admin.users': 'यूजर्स',
+    'admin.users': 'उपयोगकर्ता',
     'admin.coupons': 'कूपन',
     'admin.siteSettings': 'साइट सेटिंग्स',
     'admin.stripe': 'स्ट्राइप सेटअप',
     
+    // Auth
+    'auth.login': 'लॉगिन',
+    'auth.logout': 'लॉगआउट',
+    'auth.loggingIn': 'लॉगिन हो रहा है...',
+    
+    // Theme
+    'theme.light': 'लाइट',
+    'theme.dark': 'डार्क',
+    'theme.system': 'सिस्टम',
+    
     // Common
     'common.loading': 'लोड हो रहा है...',
     'common.error': 'त्रुटि',
-    'common.save': 'सेव करें',
+    'common.save': 'सहेजें',
     'common.cancel': 'रद्द करें',
     'common.delete': 'हटाएं',
     'common.edit': 'संपादित करें',
@@ -172,45 +200,48 @@ const translations: Record<Language, Translations> = {
     'common.sort': 'क्रमबद्ध करें',
     'common.price': 'कीमत',
     'common.name': 'नाम',
-    'common.category': 'कैटेगरी',
+    'common.category': 'श्रेणी',
     'common.rating': 'रेटिंग',
   },
 };
 
-interface I18nContextType {
+interface TranslationContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
 
-const I18nContext = createContext<I18nContextType | undefined>(undefined);
+const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
-export function I18nProvider({ children }: { children: ReactNode }) {
+export function TranslationProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const stored = localStorage.getItem('language');
-    return (stored === 'hi' ? 'hi' : 'en') as Language;
+    return (stored === 'en' || stored === 'hi') ? stored : 'en';
   });
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('language', lang);
-  };
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
 
   const t = (key: string): string => {
     return translations[language][key] || key;
   };
 
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+  };
+
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>
+    <TranslationContext.Provider value={{ language, setLanguage, t }}>
       {children}
-    </I18nContext.Provider>
+    </TranslationContext.Provider>
   );
 }
 
 export function useTranslation() {
-  const context = useContext(I18nContext);
+  const context = useContext(TranslationContext);
   if (!context) {
-    throw new Error('useTranslation must be used within I18nProvider');
+    throw new Error('useTranslation must be used within TranslationProvider');
   }
   return context;
 }

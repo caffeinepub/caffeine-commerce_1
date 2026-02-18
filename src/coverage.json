@@ -1,64 +1,71 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T13:02:55.408Z",
+  "generatedAt": "2026-02-18T04:03:26.317Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-82",
-        "summary": "Remove/disable all backend \"admin-only\" permission checks that block the Admin Dashboard CRUD flows, so any caller (including anonymous) can add, update, and delete categories and products without receiving \"Unauthorized\" errors.",
+        "id": "REQ-121",
+        "summary": "Remove all backend admin-only permission checks that can cause 'Unauthorized', 'No Permission', or 'You do not have permission' failures for Admin functionality, so any caller (including anonymous) can view and manage Orders, Categories, Products, Coupons, Site Settings, and Stripe setup during the open-admin phase.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-83",
-        "summary": "Align remaining Admin Dashboard backend APIs to not require admin authorization checks during this phase (so /admin pages do not break due to hidden admin-only guards), while keeping existing user-only checks for shopper features (cart/wishlist/profile/orders) intact.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-84",
-        "summary": "Resolve the \"Canister is stopped\" (IC0508) failure mode for admin catalog mutations by ensuring the backend canister remains running and responsive during category/product CRUD, and ensure the backend health check can be used to confirm service availability.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-85",
-        "summary": "Redeploy the application after implementing the backend authorization changes and backend availability fix, and verify that `/admin`, `/admin/categories`, and `/admin/products` allow full CRUD access without authentication.",
+        "id": "REQ-122",
+        "summary": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within `frontend/src/pages/admin/**`, `frontend/src/components/admin/**`, and admin query/mutation hooks so Admin pages never show 'Unauthorized' / 'No Permission' popups and never block actions due to permission state during the open-admin phase.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/queries/useAdminHealthCheck.ts",
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/utils/backendAvailabilityErrors.ts",
-          "frontend/README.md"
+          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+          "frontend/src/components/admin/CategoryEditorDialog.tsx",
+          "frontend/src/pages/admin/AdminProductsPage.tsx",
+          "frontend/src/components/admin/ProductEditorDialog.tsx",
+          "frontend/src/hooks/queries/useAuthz.ts",
+          "frontend/src/components/layout/Header.tsx",
+          "frontend/src/utils/backendAvailabilityErrors.ts"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/queries/useAdminHealthCheck.ts",
-          "frontend/src/pages/admin/AdminLayoutPage.tsx",
-          "frontend/src/utils/backendAvailabilityErrors.ts",
-          "frontend/README.md"
+          "frontend/src/pages/admin/AdminCategoriesPage.tsx",
+          "frontend/src/components/admin/CategoryEditorDialog.tsx",
+          "frontend/src/components/admin/ProductEditorDialog.tsx",
+          "frontend/src/utils/backendAvailabilityErrors.ts"
+        ]
+      },
+      {
+        "id": "REQ-123",
+        "summary": "Ensure Admin Orders data loading and status update flows use the anonymous/admin actor path consistently (no Internet Identity role checks) and that errors are surfaced as clear English operational messages (backend unavailable, validation, not found) rather than permission messaging.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/queries/useAdminOrders.ts",
+          "frontend/src/pages/admin/AdminOrdersPage.tsx",
+          "frontend/src/utils/backendAvailabilityErrors.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/backendAvailabilityErrors.ts"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/README.md",
-    "frontend/src/hooks/queries/useAdminHealthCheck.ts",
-    "frontend/src/pages/admin/AdminLayoutPage.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/admin/CategoryEditorDialog.tsx",
+    "frontend/src/components/admin/ProductEditorDialog.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/pages/admin/AdminCategoriesPage.tsx",
     "frontend/src/utils/backendAvailabilityErrors.ts",
     "project_state.json",
     "scratch/component-selection.json",

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useGetOrder } from '../../hooks/queries/useOrders';
 import { useTranslation } from '../../i18n';
-import { OrderStatus } from '../../backend';
+import { getOrderStatusLabel, getOrderStatusColor } from '../../utils/orderStatus';
 
 export default function OrderDetailsPage() {
   const { orderId } = useParams({ from: '/orders/$orderId' });
@@ -33,21 +33,14 @@ export default function OrderDetailsPage() {
     );
   }
 
-  const getStatusLabel = (status: OrderStatus): string => {
-    if (status === OrderStatus.completed) return 'completed';
-    if (status === OrderStatus.pending) return 'pending';
-    if (status === OrderStatus.cancelled) return 'cancelled';
-    return 'unknown';
-  };
-
   return (
     <div className="container py-8 max-w-4xl">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">
           {t('orders.orderNumber')} #{Number(order.id)}
         </h1>
-        <Badge variant={order.status === OrderStatus.completed ? 'default' : 'secondary'}>
-          {getStatusLabel(order.status)}
+        <Badge className={getOrderStatusColor(order.status)}>
+          {getOrderStatusLabel(order.status)}
         </Badge>
       </div>
 

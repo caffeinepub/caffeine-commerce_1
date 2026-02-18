@@ -2,12 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-redeploy-the-application-after-implementing-the-backend-authorization-changes-and-backend-availability-fix-and-verify-that-admin-admin-categories-and-admin-products-allow-full-crud-access-without-authentication",
-      "featureTitle": "Redeploy the application after implementing the backend authorization changes and backend availability fix, and verify that `/admin`, `/admin/categories`, and `/admin/products` allow full CRUD access without authentication.",
+      "featureId": "feature-remove-all-frontend-side-permission-checks-role-gating-admin-authorization-ui-blocks-within-frontend-src-pages-admin-frontend-src-components-admin-and-admin-query-mutation-hooks-so-admin-pages-never-show-unauthorized-no-permission-popups-and-never-block-actions-due-to-permission-state-during-the-open-admin-phase",
+      "featureTitle": "Remove all frontend-side permission checks / role gating / admin-authorization UI blocks within `frontend/src/pages/admin/**`, `frontend/src/components/admin/**`, and admin query/mutation hooks so Admin pages never show 'Unauthorized' / 'No Permission' popups and never block actions due to permission state during the open-admin phase.",
       "files": [
-        "frontend/README.md",
-        "frontend/src/hooks/queries/useAdminHealthCheck.ts",
-        "frontend/src/pages/admin/AdminLayoutPage.tsx",
+        "frontend/src/components/admin/CategoryEditorDialog.tsx",
+        "frontend/src/components/admin/ProductEditorDialog.tsx",
+        "frontend/src/pages/admin/AdminCategoriesPage.tsx",
         "frontend/src/utils/backendAvailabilityErrors.ts"
       ],
       "components": [
@@ -21,7 +21,28 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-85"
+        "REQ-122"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-admin-orders-data-loading-and-status-update-flows-use-the-anonymous-admin-actor-path-consistently-no-internet-identity-role-checks-and-that-errors-are-surfaced-as-clear-english-operational-messages-backend-unavailable-validation-not-found-rather-than-permission-messaging",
+      "featureTitle": "Ensure Admin Orders data loading and status update flows use the anonymous/admin actor path consistently (no Internet Identity role checks) and that errors are surfaced as clear English operational messages (backend unavailable, validation, not found) rather than permission messaging.",
+      "files": [
+        "frontend/src/utils/backendAvailabilityErrors.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-123"
       ],
       "confidence": "high"
     }

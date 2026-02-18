@@ -1,7 +1,7 @@
 import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
-import { I18nProvider } from './i18n';
+import { TranslationProvider } from './i18n';
 import AppLayout from './components/layout/AppLayout';
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
@@ -209,10 +209,10 @@ declare module '@tanstack/react-router' {
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <I18nProvider>
+      <TranslationProvider>
         <RouterProvider router={router} />
         <Toaster />
-      </I18nProvider>
+      </TranslationProvider>
     </ThemeProvider>
   );
 }

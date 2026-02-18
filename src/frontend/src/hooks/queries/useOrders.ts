@@ -16,6 +16,7 @@ export function useGetAllCustomerOrders() {
       return actor.getAllCustomerOrders(userId);
     },
     enabled: !!actor && !actorFetching && !!identity,
+    refetchInterval: 15000, // Poll every 15 seconds to pick up admin status changes
   });
 }
 
@@ -26,9 +27,11 @@ export function useGetOrder(orderId: string) {
     queryKey: queryKeys.order(orderId),
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.getOrder(BigInt(orderId));
+      const id = BigInt(orderId);
+      return actor.getOrder(id);
     },
     enabled: !!actor && !actorFetching && !!orderId,
     refetchInterval: 10000, // Poll every 10 seconds
+    retry: 1,
   });
 }

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { useAdminAddCategory, useAdminUpdateCategory } from '../../hooks/queries/useAdminCatalog';
 import type { Category } from '../../backend';
 import { toast } from 'sonner';
@@ -22,7 +22,7 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
   const updateCategory = useAdminUpdateCategory();
 
   const [name, setName] = useState('');
-  const [validationError, setValidationError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [lastFailedData, setLastFailedData] = useState<Category | null>(null);
 
   useEffect(() => {
@@ -31,17 +31,17 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
     } else {
       setName('');
     }
-    setValidationError('');
+    setErrorMessage('');
     setLastFailedData(null);
   }, [category, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationError('');
+    setErrorMessage('');
 
     // Validation
     if (!name.trim()) {
-      setValidationError('Category name is required');
+      setErrorMessage('Category name is required');
       return;
     }
 
@@ -64,23 +64,35 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
     } catch (error: any) {
       console.error('Failed to save category:', error);
       const errorInfo = detectBackendUnavailability(error);
-      setValidationError(errorInfo.userMessage);
+      setErrorMessage(errorInfo.userMessage);
       setLastFailedData(categoryData);
     }
   };
 
-  const handleRetry = () => {
-    if (lastFailedData) {
-      setValidationError('');
-      // Trigger form submission with the last failed data
-      const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
-      handleSubmit(syntheticEvent);
+  const handleRetry = async () => {
+    if (!lastFailedData) return;
+    
+    setErrorMessage('');
+    
+    try {
+      if (isEditing && category) {
+        await updateCategory.mutateAsync({ categoryId: category.id, category: lastFailedData });
+        toast.success('Category updated successfully');
+      } else {
+        await addCategory.mutateAsync(lastFailedData);
+        toast.success('Category added successfully');
+      }
+
+      setLastFailedData(null);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Retry failed:', error);
+      const errorInfo = detectBackendUnavailability(error);
+      setErrorMessage(errorInfo.userMessage);
     }
   };
 
   const isPending = addCategory.isPending || updateCategory.isPending;
-  const errorInfo = validationError ? detectBackendUnavailability({ message: validationError }) : null;
-  const isBackendUnavailable = errorInfo?.isBackendUnavailable || false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -93,21 +105,31 @@ export function CategoryEditorDialog({ open, onOpenChange, category }: CategoryE
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {validationError && (
-            <Alert variant={isBackendUnavailable ? 'destructive' : 'destructive'}>
+          {errorMessage && (
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="flex items-center justify-between">
-                <span>{validationError}</span>
-                {isBackendUnavailable && lastFailedData && (
+              <AlertDescription className="flex items-center justify-between gap-4">
+                <span className="flex-1">{errorMessage}</span>
+                {lastFailedData && (
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={handleRetry}
                     disabled={isPending}
-                    className="ml-4"
+                    className="shrink-0"
                   >
-                    {isPending ? 'Retrying...' : 'Retry'}
+                    {isPending ? (
+                      <>
+                        <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                        Retrying...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="mr-2 h-3 w-3" />
+                        Retry
+                      </>
+                    )}
                   </Button>
                 )}
               </AlertDescription>

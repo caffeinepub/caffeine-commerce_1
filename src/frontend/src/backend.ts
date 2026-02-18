@@ -89,14 +89,14 @@ export class ExternalBlob {
         return this;
     }
 }
-export type OrderId = bigint;
-export interface Category {
-    id: CategoryId;
+export interface Product {
+    id: ProductId;
+    categoryId: CategoryId;
     name: string;
-}
-export interface CartItem {
-    productId: ProductId;
-    quantity: bigint;
+    description: string;
+    stock: bigint;
+    imageUrl: string;
+    price: bigint;
 }
 export interface TransformationOutput {
     status: bigint;
@@ -104,29 +104,6 @@ export interface TransformationOutput {
     headers: Array<http_header>;
 }
 export type Time = bigint;
-export interface Coupon {
-    code: CouponCode;
-    discountPercentage: bigint;
-    validUntil: Time;
-}
-export interface Order__1 {
-    id: OrderId;
-    status: OrderStatus;
-    userId: UserId;
-    statusHistory: Array<OrderStatus>;
-    totalAmount: bigint;
-    timestamp: Time;
-    items: Array<CartItem>;
-}
-export interface http_header {
-    value: string;
-    name: string;
-}
-export interface http_request_result {
-    status: bigint;
-    body: Uint8Array;
-    headers: Array<http_header>;
-}
 export type Filter = {
     __kind__: "sortByCategory";
     sortByCategory: Order;
@@ -155,27 +132,14 @@ export type Filter = {
     __kind__: "minPrice";
     minPrice: bigint;
 };
-export type UserId = Principal;
-export interface SiteSettings {
-    logo: string;
-    shopName: string;
-}
 export interface Wishlist {
     productIds: Array<ProductId>;
-}
-export interface ShoppingItem {
-    productName: string;
-    currency: string;
-    quantity: bigint;
-    priceInCents: bigint;
-    productDescription: string;
 }
 export interface TransformationInput {
     context: Uint8Array;
     response: http_request_result;
 }
 export type CouponCode = string;
-export type CategoryId = bigint;
 export interface Cart {
     items: Array<CartItem>;
 }
@@ -195,20 +159,63 @@ export interface StripeConfiguration {
     allowedCountries: Array<string>;
     secretKey: string;
 }
+export interface Category {
+    id: CategoryId;
+    name: string;
+}
+export interface ShippingAddress {
+    name: string;
+    address: string;
+    phone: string;
+    pincode: string;
+}
+export interface Coupon {
+    code: CouponCode;
+    discountPercentage: bigint;
+    validUntil: Time;
+}
+export interface Order__1 {
+    id: OrderId;
+    status: OrderStatus;
+    userId: UserId;
+    statusHistory: Array<OrderStatus>;
+    totalAmount: bigint;
+    timestamp: Time;
+    shippingAddress: ShippingAddress;
+    items: Array<CartItem>;
+}
+export interface http_header {
+    value: string;
+    name: string;
+}
+export interface http_request_result {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
+export type UserId = Principal;
+export interface SiteSettings {
+    logo: string;
+    shopName: string;
+}
+export interface ShoppingItem {
+    productName: string;
+    currency: string;
+    quantity: bigint;
+    priceInCents: bigint;
+    productDescription: string;
+}
+export type CategoryId = bigint;
+export interface CartItem {
+    productId: ProductId;
+    quantity: bigint;
+}
 export type ReferralCode = string;
 export type ProductId = bigint;
+export type OrderId = bigint;
 export interface UserProfile {
     name: string;
     address: string;
-}
-export interface Product {
-    id: ProductId;
-    categoryId: CategoryId;
-    name: string;
-    description: string;
-    stock: bigint;
-    imageUrl: string;
-    price: bigint;
 }
 export enum Order {
     less = "less",
@@ -216,9 +223,13 @@ export enum Order {
     greater = "greater"
 }
 export enum OrderStatus {
+    shipped = "shipped",
     cancelled = "cancelled",
     pending = "pending",
-    completed = "completed"
+    completed = "completed",
+    delivered = "delivered",
+    confirmed = "confirmed",
+    processing = "processing"
 }
 export enum UserRole {
     admin = "admin",
@@ -232,11 +243,16 @@ export interface backendInterface {
     addProduct(product: Product): Promise<ProductId>;
     /**
      * / ************
-     * /    * Cart & Wishlist Management
+     * /    * Cart & Wishlist
      * /    *************
      */
     addToCart(productId: ProductId): Promise<void>;
     addToWishlist(productId: ProductId): Promise<void>;
+    /**
+     * / ************
+     * /    * Authorization System (Bundled)
+     * /    *************
+     */
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     clearCart(): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
@@ -246,7 +262,7 @@ export interface backendInterface {
     deleteProduct(productId: ProductId): Promise<void>;
     /**
      * / ************
-     * /    * Coupon Management
+     * /    * Coupons
      * /    *************
      */
     getAllCoupons(): Promise<Array<Coupon>>;
@@ -254,7 +270,7 @@ export interface backendInterface {
     getAllOrders(): Promise<Array<Order__1>>;
     /**
      * / ************
-     * /    * User Profile Management
+     * /    * User Profile
      * /    *************
      */
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -262,10 +278,15 @@ export interface backendInterface {
     getCart(): Promise<Cart>;
     getCategories(): Promise<Array<Category>>;
     getOrder(orderId: OrderId): Promise<Order__1>;
+    /**
+     * / ************
+     * /    * Products & Categories
+     * /    *************
+     */
     getProducts(filters: Array<Filter>): Promise<Array<Product>>;
     /**
      * / ************
-     * /    * Site Settings Management
+     * /    * Site Settings
      * /    *************
      */
     getSiteSettings(): Promise<SiteSettings>;
@@ -273,19 +294,25 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     /**
      * / ************
-     * /    * Referral & Order Management
+     * /    * Referrals & Orders
      * /    *************
      */
     getUserReferrals(userId: UserId): Promise<Array<UserId>>;
     getWishlist(): Promise<Wishlist>;
     /**
      * / ************
-     * /    * General Health Check
+     * /    * General
      * /    *************
      */
     healthCheck(): Promise<string>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
+    /**
+     * / ************
+     * /    * Place Order
+     * /    *************
+     */
+    placeOrder(shippingAddress: ShippingAddress): Promise<OrderId>;
     removeFromCart(productId: ProductId): Promise<void>;
     removeFromWishlist(productId: ProductId): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
@@ -296,7 +323,7 @@ export interface backendInterface {
     updateProduct(productId: ProductId, product: Product): Promise<void>;
     updateSiteSettings(newSettings: SiteSettings): Promise<void>;
 }
-import type { CartItem as _CartItem, CategoryId as _CategoryId, Filter as _Filter, Order as _Order, OrderId as _OrderId, OrderStatus as _OrderStatus, Order__1 as _Order__1, StripeSessionStatus as _StripeSessionStatus, Time as _Time, UserId as _UserId, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { CartItem as _CartItem, CategoryId as _CategoryId, Filter as _Filter, Order as _Order, OrderId as _OrderId, OrderStatus as _OrderStatus, Order__1 as _Order__1, ShippingAddress as _ShippingAddress, StripeSessionStatus as _StripeSessionStatus, Time as _Time, UserId as _UserId, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -719,6 +746,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async placeOrder(arg0: ShippingAddress): Promise<OrderId> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.placeOrder(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.placeOrder(arg0);
+            return result;
+        }
+    }
     async removeFromCart(arg0: ProductId): Promise<void> {
         if (this.processError) {
             try {
@@ -883,6 +924,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     statusHistory: Array<_OrderStatus>;
     totalAmount: bigint;
     timestamp: _Time;
+    shippingAddress: _ShippingAddress;
     items: Array<_CartItem>;
 }): {
     id: OrderId;
@@ -891,6 +933,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     statusHistory: Array<OrderStatus>;
     totalAmount: bigint;
     timestamp: Time;
+    shippingAddress: ShippingAddress;
     items: Array<CartItem>;
 } {
     return {
@@ -900,6 +943,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         statusHistory: from_candid_vec_n8(_uploadFile, _downloadFile, value.statusHistory),
         totalAmount: value.totalAmount,
         timestamp: value.timestamp,
+        shippingAddress: value.shippingAddress,
         items: value.items
     };
 }
@@ -942,13 +986,21 @@ function from_candid_variant_n18(_uploadFile: (file: ExternalBlob) => Promise<Ui
     } : value;
 }
 function from_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    shipped: null;
+} | {
     cancelled: null;
 } | {
     pending: null;
 } | {
     completed: null;
+} | {
+    delivered: null;
+} | {
+    confirmed: null;
+} | {
+    processing: null;
 }): OrderStatus {
-    return "cancelled" in value ? OrderStatus.cancelled : "pending" in value ? OrderStatus.pending : "completed" in value ? OrderStatus.completed : value;
+    return "shipped" in value ? OrderStatus.shipped : "cancelled" in value ? OrderStatus.cancelled : "pending" in value ? OrderStatus.pending : "completed" in value ? OrderStatus.completed : "delivered" in value ? OrderStatus.delivered : "confirmed" in value ? OrderStatus.confirmed : "processing" in value ? OrderStatus.processing : value;
 }
 function from_candid_vec_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Order__1>): Array<Order__1> {
     return value.map((x)=>from_candid_Order__1_n4(_uploadFile, _downloadFile, x));
@@ -1065,18 +1117,34 @@ function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     } : value;
 }
 function to_candid_variant_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: OrderStatus): {
+    shipped: null;
+} | {
     cancelled: null;
 } | {
     pending: null;
 } | {
     completed: null;
+} | {
+    delivered: null;
+} | {
+    confirmed: null;
+} | {
+    processing: null;
 } {
-    return value == OrderStatus.cancelled ? {
+    return value == OrderStatus.shipped ? {
+        shipped: null
+    } : value == OrderStatus.cancelled ? {
         cancelled: null
     } : value == OrderStatus.pending ? {
         pending: null
     } : value == OrderStatus.completed ? {
         completed: null
+    } : value == OrderStatus.delivered ? {
+        delivered: null
+    } : value == OrderStatus.confirmed ? {
+        confirmed: null
+    } : value == OrderStatus.processing ? {
+        processing: null
     } : value;
 }
 function to_candid_vec_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<Filter>): Array<_Filter> {
