@@ -185,7 +185,7 @@ export interface backendInterface {
     getCart(): Promise<Cart>;
     getCategories(): Promise<Array<Category>>;
     getOrder(orderId: OrderId): Promise<Order__1>;
-    getOwnerProducts(): Promise<Array<Product>>;
+    getOwnerProducts(owner: Principal): Promise<Array<Product>>;
     getProductOwner(productId: ProductId): Promise<Principal>;
     getProducts(filters: Array<Filter>): Promise<Array<Product>>;
     getSiteSettings(): Promise<SiteSettings>;

@@ -72,7 +72,6 @@ export function detectBackendUnavailability(error: any): BackendErrorInfo {
   }
 
   // Extract the most relevant error message from the backend
-  // Try to get the actual trap/reject message
   let userMessage = error.message || String(error) || 'An error occurred';
   
   // If the error contains "Reject text:", extract that
@@ -94,9 +93,14 @@ export function detectBackendUnavailability(error: any): BackendErrorInfo {
     .replace(/^Call was rejected:\s*/i, '')
     .trim();
 
-  // If the message is too technical or empty, provide a fallback
+  // If the message is still too generic or empty, provide a more helpful fallback
   if (!userMessage || userMessage.length < 3) {
-    userMessage = 'Unable to complete the operation. Please try again.';
+    userMessage = 'An error occurred while processing your request. Please try again.';
+  }
+
+  // Avoid returning the generic "Backend service is not available" message
+  if (userMessage === 'Backend service is not available') {
+    userMessage = 'Unable to connect to the backend service. Please ensure the canister is running and try again.';
   }
 
   return {

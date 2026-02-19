@@ -285,7 +285,7 @@ export interface backendInterface {
     getCart(): Promise<Cart>;
     getCategories(): Promise<Array<Category>>;
     getOrder(orderId: OrderId): Promise<Order__1>;
-    getOwnerProducts(): Promise<Array<Product>>;
+    getOwnerProducts(owner: Principal): Promise<Array<Product>>;
     getProductOwner(productId: ProductId): Promise<Principal>;
     getProducts(filters: Array<Filter>): Promise<Array<Product>>;
     getSiteSettings(): Promise<SiteSettings>;
@@ -688,17 +688,17 @@ export class Backend implements backendInterface {
             return from_candid_Order__1_n11(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getOwnerProducts(): Promise<Array<Product>> {
+    async getOwnerProducts(arg0: Principal): Promise<Array<Product>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getOwnerProducts();
+                const result = await this.actor.getOwnerProducts(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getOwnerProducts();
+            const result = await this.actor.getOwnerProducts(arg0);
             return result;
         }
     }

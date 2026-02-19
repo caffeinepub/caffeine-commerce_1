@@ -26,11 +26,15 @@ import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminCouponsPage from './pages/admin/AdminCouponsPage';
 import AdminSiteSettingsPage from './pages/admin/AdminSiteSettingsPage';
 import StripePaymentSetup from './components/admin/StripePaymentSetup';
-import VendorPage from './pages/vendor/VendorPage';
+import RootErrorBoundary from './components/errors/RootErrorBoundary';
+import AppErrorFallback from './components/errors/AppErrorFallback';
+import { unregisterServiceWorkers } from './utils/serviceWorker';
+import { useEffect } from 'react';
 
 // Root route for customer-facing pages with AppLayout (Header + Footer)
 const rootRoute = createRootRoute({
   component: AppLayout,
+  errorComponent: AppErrorFallback,
 });
 
 const indexRoute = createRoute({
@@ -117,13 +121,6 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
-// Vendor route
-const vendorRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/vendor',
-  component: VendorPage,
-});
-
 // Admin routes with AdminLayoutPage (no Header/Footer, just sidebar)
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -194,7 +191,6 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   addressesRoute,
   settingsRoute,
-  vendorRoute,
   adminRoute.addChildren([
     adminDashboardRoute,
     adminProductsRoute,
@@ -215,13 +211,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
-export default function App() {
+function AppWithServiceWorkerCleanup() {
+  useEffect(() => {
+    // Unregister any service workers on app startup
+    unregisterServiceWorkers();
+  }, []);
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TranslationProvider>
-        <RouterProvider router={router} />
-        <Toaster />
-      </TranslationProvider>
-    </ThemeProvider>
+    <RootErrorBoundary>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <TranslationProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </TranslationProvider>
+      </ThemeProvider>
+    </RootErrorBoundary>
   );
 }
+
+export default AppWithServiceWorkerCleanup;

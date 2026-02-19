@@ -1,14 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Convert BISAULI Store into an installable PWA with a manifest, service worker, add-to-home-screen prompts, and a usable offline experience.
+**Goal:** Restore product and category data display on the home page by fixing backend data fetching and ensuring frontend components properly connect to the backend.
 
 **Planned changes:**
-- Add and wire in a Web App Manifest (name/short_name BISAULI, standalone display, start_url, theme/background colors, and icon set including 192x192 and 512x512).
-- Add a service worker for app-shell caching, faster repeat loads, and offline support, and register it at runtime without editing immutable paths.
-- Implement an in-app Add-to-Home-Screen (A2HS) prompt: use `beforeinstallprompt` on supported browsers; show iOS Safari install instructions; include dismiss behavior.
-- Add an offline fallback page or UI messaging in English for when network requests cannot be completed.
-- Generate and reference a PWA icon set based on the existing BISAULI logo (including maskable variants).
-- Update frontend documentation with English PWA testing steps (manifest, service worker, offline test, install prompt test).
+- Verify and fix backend getProducts() and getCategories() methods to return all stored data
+- Populate sample products (including mobile phones) and categories (including 'Mobiles') if HashMaps are empty
+- Ensure Featured Products section displays up to 8 products on home page
+- Ensure Shop by Category section displays all categories on home page
 
-**User-visible outcome:** Users can install BISAULI Store to their home screen, see a clear install prompt on mobile, and reopen the app with faster loading and a usable offline fallback when the network is unavailable.
+**User-visible outcome:** Users can see featured products and browse categories on the home page, with all data properly loaded from the backend. The 'Mobiles' category and related products are visible.

@@ -29,40 +29,49 @@ export function getOrderStatusLabel(status: OrderStatus): string {
 }
 
 /**
- * Returns Tailwind CSS classes for status badge styling.
+ * Returns Badge variant for status styling.
  */
-export function getOrderStatusColor(status: OrderStatus): string {
+export function getOrderStatusColor(status: OrderStatus): 'default' | 'destructive' | 'outline' | 'secondary' {
   switch (status) {
     case OrderStatus.pending:
-      return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400';
+      return 'outline';
     case OrderStatus.processing:
-      return 'bg-blue-500/10 text-blue-700 dark:text-blue-400';
+      return 'default';
     case OrderStatus.confirmed:
-      return 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400';
+      return 'default';
     case OrderStatus.shipped:
-      return 'bg-purple-500/10 text-purple-700 dark:text-purple-400';
+      return 'secondary';
     case OrderStatus.delivered:
-      return 'bg-green-500/10 text-green-700 dark:text-green-400';
+      return 'default';
     case OrderStatus.completed:
-      return 'bg-green-500/10 text-green-700 dark:text-green-400';
+      return 'default';
     case OrderStatus.cancelled:
-      return 'bg-red-500/10 text-red-700 dark:text-red-400';
+      return 'destructive';
     default:
-      return 'bg-gray-500/10 text-gray-700 dark:text-gray-400';
+      return 'outline';
   }
+}
+
+/**
+ * Status option for admin dropdown with key and label.
+ */
+export interface OrderStatusOption {
+  key: string;
+  label: string;
+  value: OrderStatus;
 }
 
 /**
  * Returns all available order statuses for admin dropdown.
  */
-export function getAvailableOrderStatuses(): OrderStatus[] {
+export function getAvailableOrderStatuses(): OrderStatusOption[] {
   return [
-    OrderStatus.pending,
-    OrderStatus.processing,
-    OrderStatus.confirmed,
-    OrderStatus.shipped,
-    OrderStatus.delivered,
-    OrderStatus.completed,
-    OrderStatus.cancelled,
+    { key: 'pending', label: 'Pending', value: OrderStatus.pending },
+    { key: 'processing', label: 'Processing', value: OrderStatus.processing },
+    { key: 'confirmed', label: 'Confirmed', value: OrderStatus.confirmed },
+    { key: 'shipped', label: 'Shipped', value: OrderStatus.shipped },
+    { key: 'delivered', label: 'Delivered', value: OrderStatus.delivered },
+    { key: 'completed', label: 'Completed', value: OrderStatus.completed },
+    { key: 'cancelled', label: 'Cancelled', value: OrderStatus.cancelled },
   ];
 }

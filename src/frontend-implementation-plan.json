@@ -1,165 +1,62 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "BISAULI Store PWA Enablement (Manifest, Service Worker, A2HS, Offline UX)",
+  "title": "Restore product and category data display",
   "requirements": [
     {
-      "id": "REQ-153",
-      "summary": "Add a valid web app manifest and wire it into the app so the site is recognized as installable.",
+      "id": "REQ-5",
+      "summary": "Ensure the HomePage's Featured Products section successfully fetches and displays products using the useGetProducts hook",
       "acceptanceCriteria": [
-        "A valid manifest file exists under the frontend static/public assets (e.g., `frontend/public/manifest.webmanifest` or equivalent) and is served by the app.",
-        "`frontend/index.html` includes a `<link rel=\"manifest\" ...>` pointing to the manifest.",
-        "The manifest includes: name/short_name set to BISAULI, start_url, display=standalone, background_color, theme_color, and a set of icons (including 192x192 and 512x512).",
-        "In Chrome DevTools > Application > Manifest, the manifest loads without errors."
+        "Featured Products section displays up to 8 product cards on the home page",
+        "Product cards show product images, names, prices, and add-to-cart buttons",
+        "Loading states and error handling work correctly"
       ],
       "file_operations": [
         {
-          "path": "frontend/public/manifest.webmanifest",
-          "operation": "create",
-          "description": "Create the PWA manifest for BISAULI with required fields (name/short_name=BISAULI, start_url, display=standalone, background_color, theme_color) and icon references (including 192x192 and 512x512, plus maskable variants)."
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Review and verify the Featured Products section correctly uses useGetProducts hook to fetch products. Ensure the query is properly enabled, error states are handled with retry functionality, and the first 8 products are displayed in the grid. Confirm loading skeleton displays during fetch and error messages with retry button appear on failure. Verify ProductCard components receive correct props and render product data including images, names, prices, and add-to-cart functionality."
         },
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/hooks/queries/useCatalog.ts",
           "operation": "modify",
-          "description": "Wire the manifest into the document head by adding a `<link rel=\"manifest\">` pointing to `manifest.webmanifest`, and ensure relevant meta tags (e.g., theme-color) align with the manifest."
+          "description": "Review and verify useGetProducts hook correctly calls the public actor's getProducts method with appropriate filters. Ensure the hook handles timeout errors, formats backend errors properly, and provides retry capability. Confirm the query key is correctly configured and caching strategy is appropriate. Verify the hook returns loading, error, and data states that the HomePage can consume."
+        },
+        {
+          "path": "frontend/src/components/product/ProductCard.tsx",
+          "operation": "modify",
+          "description": "Review and verify ProductCard correctly renders product data including image (with fallback), name, price formatting, stock status, and add-to-cart button. Ensure authentication checks are in place before allowing cart operations and toast notifications display on success/failure. Confirm the component handles missing or invalid product data gracefully."
         }
       ]
     },
     {
-      "id": "REQ-154",
-      "summary": "Add a service worker for offline app-shell caching and register it at runtime without modifying immutable files.",
+      "id": "REQ-6",
+      "summary": "Ensure the HomePage's Shop by Category section successfully fetches and displays all categories using the useGetCategories hook",
       "acceptanceCriteria": [
-        "A service worker file exists under frontend static/public assets (e.g., `frontend/public/sw.js`) and is served by the app.",
-        "The service worker is registered on app load without requiring edits to immutable `frontend/src/main.tsx` (registration can be done via `frontend/index.html` and/or non-immutable React components).",
-        "First visit online caches the core app shell assets needed to render the UI on subsequent visits.",
-        "When the browser is set to Offline and the user reloads, the app still loads a usable offline experience (at minimum: shell + a clear offline message for data that cannot be fetched).",
-        "In Chrome DevTools > Application > Service Workers, the service worker is installed/activated successfully and controls the page after reload."
+        "Shop by Category section displays all available categories in a grid",
+        "Category cards show category images and names",
+        "Clicking a category navigates to the catalog page filtered by that category"
       ],
       "file_operations": [
         {
-          "path": "frontend/public/sw.js",
-          "operation": "create",
-          "description": "Implement a service worker that caches core app shell assets on first online visit, serves cached shell on repeat loads, and provides an offline-capable navigation fallback behavior."
-        },
-        {
-          "path": "frontend/index.html",
+          "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Register the service worker on app load via an additional script (without editing immutable `frontend/src/main.tsx`), ensuring registration only runs when supported and uses a stable scope."
+          "description": "Review and verify the Shop by Category section correctly uses useGetCategories hook through the CategoriesGrid component. Ensure the component is properly integrated into the page layout, receives the categories data, and displays loading/error states appropriately. Confirm the section renders after the Featured Products section."
         },
         {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "path": "frontend/src/components/home/CategoriesGrid.tsx",
           "operation": "modify",
-          "description": "Wire offline UX into the app shell by rendering a global offline banner/message when the browser is offline so reloads in Offline mode still present a usable experience with clear English messaging."
+          "description": "Review and verify CategoriesGrid correctly uses useGetCategories hook to fetch all categories. Ensure the component displays categories in a responsive grid layout, handles loading states with skeletons, provides error handling with retry functionality, and implements navigation to catalog page filtered by category on click. Confirm category cards display both image and name using the CategoryImage component."
         },
         {
-          "path": "frontend/src/components/pwa/OfflineBanner.tsx",
-          "operation": "create",
-          "description": "Create a lightweight app-wide offline banner component with English text indicating the user is offline and that some features may be unavailable."
-        }
-      ]
-    },
-    {
-      "id": "REQ-155",
-      "summary": "Implement an in-app Add-to-Home-Screen prompt for supported browsers, with iOS Safari instructions and dismissal behavior.",
-      "acceptanceCriteria": [
-        "On supported mobile browsers (e.g., Android Chrome) where `beforeinstallprompt` is available, a visible in-app prompt appears after page load (or after a short delay) with clear English text and an Install/Add action.",
-        "Tapping the Install/Add action triggers the browser install prompt (using the captured `beforeinstallprompt` event).",
-        "The prompt includes a Dismiss/Not now action and does not reappear continuously in the same session after dismissal.",
-        "On iOS Safari (where `beforeinstallprompt` is not available), show an English informational prompt with simple steps (e.g., “Tap Share, then ‘Add to Home Screen’.”) and allow dismissing it."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
-          "operation": "create",
-          "description": "Create an in-app A2HS prompt component that (a) captures and defers the `beforeinstallprompt` event on supported browsers to trigger installation on user action, (b) supports dismissing for the current session, and (c) shows iOS Safari-specific English instructions with dismiss."
-        },
-        {
-          "path": "frontend/src/hooks/useA2HS.ts",
-          "operation": "create",
-          "description": "Add a hook to manage `beforeinstallprompt` capture, prompt triggering, session-level dismissal state, and basic iOS Safari detection for A2HS UX."
-        },
-        {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "path": "frontend/src/hooks/queries/useCatalog.ts",
           "operation": "modify",
-          "description": "Wire the A2HS prompt into the app shell by rendering it in a top-level layout so it can appear on mobile after page load without adding new routes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-156",
-      "summary": "Provide a PWA icon set from the BISAULI logo (including maskable variants) and reference them correctly from the manifest.",
-      "acceptanceCriteria": [
-        "A complete set of PWA icon PNGs is available as static frontend assets and referenced in the manifest (at minimum: 192x192 and 512x512; plus maskable variants).",
-        "The icons visually reflect the BISAULI logo and render crisply at small sizes.",
-        "Chrome DevTools manifest preview shows the correct icon and no icon-related warnings (including maskable warnings if maskable icons are provided)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-          "operation": "create",
-          "description": "Add the generated BISAULI square PWA icon asset at `frontend/public/assets/generated/pwa-icon.dim_192x192.png`."
+          "description": "Review and verify useGetCategories hook correctly calls the public actor's getCategories method. Ensure the hook handles timeout errors, formats backend errors properly, provides retry capability, and returns all categories without filtering. Confirm the query key is correctly configured for categories and caching strategy allows fresh data on page load."
         },
         {
-          "path": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-          "operation": "create",
-          "description": "Add the generated BISAULI square PWA icon asset at `frontend/public/assets/generated/pwa-icon.dim_512x512.png`."
-        },
-        {
-          "path": "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
-          "operation": "create",
-          "description": "Add the generated BISAULI maskable PWA icon asset at `frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png`."
-        },
-        {
-          "path": "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
-          "operation": "create",
-          "description": "Add the generated BISAULI maskable PWA icon asset at `frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png`."
-        },
-        {
-          "path": "frontend/public/manifest.webmanifest",
+          "path": "frontend/src/components/category/CategoryImage.tsx",
           "operation": "modify",
-          "description": "Update the manifest icons array to reference `frontend/public/assets/generated/pwa-icon.dim_192x192.png`, `frontend/public/assets/generated/pwa-icon.dim_512x512.png`, `frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png`, and `frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png` with correct sizes/types and maskable purpose where applicable."
-        }
-      ]
-    },
-    {
-      "id": "REQ-157",
-      "summary": "Ensure reliable offline/fast-loading behavior with a safe caching strategy, update handling, and an offline navigation fallback that avoids caching error responses.",
-      "acceptanceCriteria": [
-        "Service worker caching strategy avoids trapping the app in a broken state after deployments (e.g., supports updating to new versions cleanly).",
-        "A dedicated offline fallback page or UI state exists and uses English user-facing text (e.g., “You are offline. Some features may be unavailable.”).",
-        "Core route navigation loads the cached app shell quickly on repeat visits, with noticeably reduced load time vs. a cold load.",
-        "The service worker does not cache backend canister errors as successful responses (i.e., it should not permanently serve an error page as the cached content)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/offline.html",
-          "operation": "create",
-          "description": "Create a simple offline fallback page with English messaging (e.g., “You are offline. Some features may be unavailable.”) to be served by the service worker when navigation cannot be fulfilled."
-        },
-        {
-          "path": "frontend/public/sw.js",
-          "operation": "modify",
-          "description": "Implement a robust caching strategy: versioned caches with cleanup on activate; navigation handling with network-first and offline fallback; asset handling that improves repeat-load performance; cache only successful responses (avoid persisting error pages as valid cached content); ensure updates can take effect cleanly after new deployments."
-        },
-        {
-          "path": "frontend/src/components/pwa/OfflineBanner.tsx",
-          "operation": "modify",
-          "description": "Ensure the offline UI state uses English user-facing text and provides clear guidance that some features (e.g., live data) may be unavailable while offline."
-        }
-      ]
-    },
-    {
-      "id": "REQ-158",
-      "summary": "Document basic PWA testing steps for manifest, service worker, offline mode, and install/A2HS prompts.",
-      "acceptanceCriteria": [
-        "`frontend/README.md` (or an appropriate existing doc) includes a short “PWA” section with steps to: verify manifest, verify service worker registration, test offline mode, and test installation/A2HS on mobile.",
-        "Documentation uses English user-facing text and does not reference unsupported tooling or stacks."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/README.md",
-          "operation": "modify",
-          "description": "Add a concise “PWA” section with English testing steps: verify manifest in DevTools, confirm service worker install/activation/control, perform offline reload test (including offline fallback message/page), and test A2HS behavior for Android Chrome (`beforeinstallprompt`) and iOS Safari (Share -> Add to Home Screen)."
+          "description": "Review and verify CategoryImage component correctly handles both remote URLs and data URLs for category images. Ensure fallback to placeholder image works when image fails to load or URL is missing. Confirm the component provides appropriate error handling and displays images with correct sizing and styling."
         }
       ]
     }

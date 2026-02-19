@@ -5,13 +5,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { SlidersHorizontal } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SlidersHorizontal, AlertCircle, RefreshCw } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import { useGetProducts, useGetCategories } from '../hooks/queries/useCatalog';
 import { ProductGridSkeleton } from '../components/LoadingSkeletons';
 import { useTranslation } from '../i18n';
 import { Order } from '../backend';
 import type { Filter } from '../backend';
+import { formatBackendError } from '../utils/backendAvailabilityErrors';
 
 export default function CatalogPage() {
   const searchParams = useSearch({ from: '/catalog' }) as { category?: number; q?: string };
@@ -63,7 +65,7 @@ export default function CatalogPage() {
     });
   }
 
-  const { data: products, isLoading } = useGetProducts(filters);
+  const { data: products, isLoading, error, refetch, isFetching } = useGetProducts(filters);
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -99,24 +101,26 @@ export default function CatalogPage() {
       </div>
 
       <div>
-        <Label className="mb-2 block">{t('common.price')} Range</Label>
-        <Slider
-          min={0}
-          max={100000}
-          step={1000}
-          value={priceRange}
-          onValueChange={(value) => setPriceRange(value as [number, number])}
-          className="mb-2"
-        />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>₹{priceRange[0].toLocaleString()}</span>
-          <span>₹{priceRange[1].toLocaleString()}</span>
+        <Label className="mb-2 block">{t('common.priceRange')}</Label>
+        <div className="space-y-4">
+          <Slider
+            value={priceRange}
+            onValueChange={(value) => setPriceRange(value as [number, number])}
+            min={0}
+            max={100000}
+            step={1000}
+            className="w-full"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>₹{priceRange[0].toLocaleString()}</span>
+            <span>₹{priceRange[1].toLocaleString()}</span>
+          </div>
         </div>
       </div>
 
       <div>
-        <Label className="mb-2 block">{t('common.sort')} by {t('common.price')}</Label>
-        <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as 'asc' | 'desc' | '')}>
+        <Label className="mb-2 block">{t('common.sortBy')}</Label>
+        <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as typeof sortOrder)}>
           <SelectTrigger>
             <SelectValue placeholder="Default" />
           </SelectTrigger>
@@ -130,29 +134,28 @@ export default function CatalogPage() {
     </div>
   );
 
-  const productList = products || [];
-
   return (
     <div className="container py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">{t('nav.catalog')}</h1>
+          <h1 className="text-3xl font-bold mb-2">{t('catalog.title')}</h1>
           {trimmedQuery && (
-            <p className="text-sm text-muted-foreground mt-1">
-              Search results for "{trimmedQuery}"
+            <p className="text-muted-foreground">
+              Search results for: <span className="font-medium text-foreground">"{trimmedQuery}"</span>
             </p>
           )}
         </div>
+
+        {/* Mobile Filter Button */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" className="lg:hidden">
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              {t('common.filter')}
+            <Button variant="outline" size="icon" className="lg:hidden">
+              <SlidersHorizontal className="h-4 w-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent>
+          <SheetContent side="left">
             <SheetHeader>
-              <SheetTitle>{t('common.filter')}</SheetTitle>
+              <SheetTitle>{t('catalog.filters')}</SheetTitle>
             </SheetHeader>
             <div className="mt-6">
               <FilterContent />
@@ -162,27 +165,60 @@ export default function CatalogPage() {
       </div>
 
       <div className="flex gap-8">
+        {/* Desktop Sidebar Filters */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-24">
-            <h2 className="font-semibold mb-4">{t('common.filter')}</h2>
+          <div className="sticky top-20">
+            <h2 className="text-lg font-semibold mb-4">{t('catalog.filters')}</h2>
             <FilterContent />
           </div>
         </aside>
 
+        {/* Product Grid */}
         <div className="flex-1">
           {isLoading ? (
             <ProductGridSkeleton />
-          ) : productList.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {productList.map((product) => (
-                <ProductCard key={Number(product.id)} product={product} />
-              ))}
-            </div>
+          ) : error ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>{error.message || formatBackendError(error)}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                  className="ml-4 shrink-0"
+                >
+                  {isFetching ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Retrying...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Retry
+                    </>
+                  )}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          ) : products && products.length > 0 ? (
+            <>
+              <p className="text-sm text-muted-foreground mb-4">
+                {products.length} product{products.length !== 1 ? 's' : ''} found
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <ProductCard key={Number(product.id)} product={product} />
+                ))}
+              </div>
+            </>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               {trimmedQuery
                 ? `No products found matching "${trimmedQuery}"`
-                : 'No products found matching your filters'}
+                : 'No products available. Check back soon!'}
             </div>
           )}
         </div>

@@ -169,7 +169,7 @@ export interface _SERVICE {
   'getCart' : ActorMethod<[], Cart>,
   'getCategories' : ActorMethod<[], Array<Category>>,
   'getOrder' : ActorMethod<[OrderId], Order__1>,
-  'getOwnerProducts' : ActorMethod<[], Array<Product>>,
+  'getOwnerProducts' : ActorMethod<[Principal], Array<Product>>,
   'getProductOwner' : ActorMethod<[ProductId], Principal>,
   'getProducts' : ActorMethod<[Array<Filter>], Array<Product>>,
   'getSiteSettings' : ActorMethod<[], SiteSettings>,

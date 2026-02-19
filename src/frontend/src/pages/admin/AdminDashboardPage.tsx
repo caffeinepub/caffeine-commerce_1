@@ -5,7 +5,6 @@ import { RefreshCw, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../../i18n';
 import { useDashboardStats } from '../../hooks/queries/useDashboardStats';
 import { useAdminGetProducts } from '../../hooks/queries/useAdminCatalog';
-import { formatBackendError } from '../../utils/backendAvailabilityErrors';
 
 export default function AdminDashboardPage() {
   const { t } = useTranslation();
@@ -16,27 +15,38 @@ export default function AdminDashboardPage() {
     refetch: refetchStats, 
     isFetching: statsRefetching 
   } = useDashboardStats();
-  const { data: products } = useAdminGetProducts([]);
-
-  const totalOrders = stats?.totalOrders ?? 0;
-  const totalRevenue = stats?.totalRevenue ?? 0;
-  const totalProducts = products?.length ?? 0;
+  const { 
+    data: products, 
+    isLoading: productsLoading, 
+    error: productsError,
+    refetch: refetchProducts,
+    isFetching: productsRefetching
+  } = useAdminGetProducts([]);
 
   const handleRefreshStats = () => {
     refetchStats();
   };
+
+  const handleRefreshProducts = () => {
+    refetchProducts();
+  };
+
+  const isRefreshing = statsRefetching || productsRefetching;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">{t('admin.dashboard')}</h1>
         <Button
-          onClick={handleRefreshStats}
-          disabled={statsRefetching}
+          onClick={() => {
+            handleRefreshStats();
+            handleRefreshProducts();
+          }}
+          disabled={isRefreshing}
           variant="outline"
           size="sm"
         >
-          {statsRefetching ? (
+          {isRefreshing ? (
             <>
               <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
               Refreshing...
@@ -54,7 +64,11 @@ export default function AdminDashboardPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
-            <span>{formatBackendError(statsError)}</span>
+            <span>
+              {statsError.message.includes('Unauthorized') 
+                ? 'Please ensure you are logged in with admin privileges to view dashboard statistics.'
+                : statsError.message}
+            </span>
             <Button
               variant="outline"
               size="sm"
@@ -78,6 +92,38 @@ export default function AdminDashboardPage() {
         </Alert>
       )}
 
+      {productsError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              {productsError.message.includes('Unauthorized')
+                ? 'Please ensure you are logged in with admin privileges to view products.'
+                : productsError.message}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshProducts}
+              disabled={productsRefetching}
+              className="ml-4 shrink-0"
+            >
+              {productsRefetching ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Retrying...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Retry
+                </>
+              )}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
@@ -85,34 +131,42 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             {statsLoading ? (
-              <p className="text-3xl font-bold text-muted-foreground">Loading...</p>
+              <div className="text-3xl font-bold text-muted-foreground">Loading...</div>
             ) : statsError ? (
-              <p className="text-3xl font-bold text-destructive">Error</p>
+              <div className="text-3xl font-bold text-destructive">—</div>
             ) : (
-              <p className="text-3xl font-bold">{totalOrders}</p>
+              <div className="text-3xl font-bold">{stats?.totalOrders ?? 0}</div>
             )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Total Revenue</CardTitle>
           </CardHeader>
           <CardContent>
             {statsLoading ? (
-              <p className="text-3xl font-bold text-muted-foreground">Loading...</p>
+              <div className="text-3xl font-bold text-muted-foreground">Loading...</div>
             ) : statsError ? (
-              <p className="text-3xl font-bold text-destructive">Error</p>
+              <div className="text-3xl font-bold text-destructive">—</div>
             ) : (
-              <p className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</p>
+              <div className="text-3xl font-bold">₹{(stats?.totalRevenue ?? 0).toLocaleString()}</div>
             )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Total Products</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{totalProducts}</p>
+            {productsLoading ? (
+              <div className="text-3xl font-bold text-muted-foreground">Loading...</div>
+            ) : productsError ? (
+              <div className="text-3xl font-bold text-destructive">—</div>
+            ) : (
+              <div className="text-3xl font-bold">{products?.length ?? 0}</div>
+            )}
           </CardContent>
         </Card>
       </div>

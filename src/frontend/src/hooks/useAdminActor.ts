@@ -1,33 +1,15 @@
-import { useEffect, useState } from 'react';
-import type { backendInterface } from '../backend';
-import { createActorWithConfig } from '../config';
+import { useActor } from './useActor';
 
 /**
- * Admin actor hook that creates an anonymous actor for open admin access.
- * No Internet Identity or authentication required.
+ * Admin actor hook that uses the authenticated actor from useActor.
+ * Requires Internet Identity authentication and admin role.
  */
 export function useAdminActor() {
-  const [actor, setActor] = useState<backendInterface | null>(null);
-  const [isFetching, setIsFetching] = useState(true);
+  const { actor, isFetching } = useActor();
 
-  useEffect(() => {
-    const initActor = async () => {
-      try {
-        // Create an anonymous actor for admin operations (open access)
-        // This actor does not use Internet Identity or any stored session
-        const newActor = await createActorWithConfig();
-        setActor(newActor);
-      } catch (error) {
-        console.error('Failed to initialize admin actor:', error);
-        // Set actor to null but mark as not fetching so UI can show error state
-        setActor(null);
-      } finally {
-        setIsFetching(false);
-      }
-    };
-
-    initActor();
-  }, []);
-
-  return { actor, isFetching };
+  return {
+    actor,
+    isFetching,
+    error: null,
+  };
 }

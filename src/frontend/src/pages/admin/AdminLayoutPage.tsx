@@ -12,15 +12,28 @@ import {
   AlertCircle,
   CheckCircle,
   RefreshCw,
+  Trash2,
 } from 'lucide-react';
 import { useAdminHealthCheck } from '../../hooks/queries/useAdminHealthCheck';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { clearAdminSession } from '../../utils/adminSessionReset';
+import { toast } from 'sonner';
 
 export default function AdminLayoutPage() {
   const { t } = useTranslation();
   const matchRoute = useMatchRoute();
   const { isHealthy, isUnavailable, status, refetch, isFetching } = useAdminHealthCheck();
+
+  const handleClearSession = () => {
+    try {
+      clearAdminSession();
+      toast.success('Admin session cleared. Please refresh the page.');
+    } catch (error) {
+      toast.error('Failed to clear session. Please try again.');
+      console.error('Session clear error:', error);
+    }
+  };
 
   const menuItems = [
     { to: '/admin', label: t('admin.dashboard'), icon: LayoutDashboard, exact: true },
@@ -103,6 +116,19 @@ export default function AdminLayoutPage() {
             );
           })}
         </nav>
+
+        {/* Clear Session Button */}
+        <div className="absolute bottom-0 left-0 right-0 border-t p-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClearSession}
+            className="w-full"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Clear Admin Session
+          </Button>
+        </div>
       </aside>
 
       {/* Main Content - offset by sidebar width */}

@@ -1,125 +1,75 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T07:12:39.056Z",
+  "generatedAt": "2026-02-19T02:20:24.246Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 6,
-    "implemented": 6,
+    "implemented": 0,
     "items": [
       {
-        "id": "REQ-153",
-        "summary": "Add a Web App Manifest for the BISAULI Store and wire it into the app so browsers recognize the site as installable.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/manifest.webmanifest",
-          "frontend/index.html"
-        ],
-        "matchedFiles": [
-          "frontend/public/manifest.webmanifest",
-          "frontend/index.html"
-        ]
+        "id": "REQ-1",
+        "summary": "Verify and fix the data fetching for products in the backend main.mo getProducts() method to ensure it returns all stored products from the products HashMap",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-154",
-        "summary": "Add a Service Worker that enables offline support (app shell caching) and faster repeat loads, and ensure it is registered by the app at runtime.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/sw.js",
-          "frontend/index.html",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/components/pwa/OfflineBanner.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/public/sw.js",
-          "frontend/index.html",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/components/pwa/OfflineBanner.tsx"
-        ]
+        "id": "REQ-2",
+        "summary": "Verify and fix the data fetching for categories in the backend main.mo getCategories() method to ensure it returns all stored categories from the categories HashMap",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-155",
-        "summary": "Implement an Add-to-Home-Screen (A2HS) install prompt experience for mobile users that shows a user-friendly English popup/banner when installation is available.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
-          "frontend/src/hooks/useA2HS.ts",
-          "frontend/src/components/layout/AppLayout.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
-          "frontend/src/hooks/useA2HS.ts",
-          "frontend/src/components/layout/AppLayout.tsx"
-        ]
+        "id": "REQ-3",
+        "summary": "If the products HashMap is empty, populate it with sample products including at least one product in the 'Mobiles' category with realistic data (name, description, price, stock, imageUrl)",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-156",
-        "summary": "Use the existing BISAULI logo as the PWA app icon set (including standard and maskable icons), and ensure the icons are referenced correctly by the manifest.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-          "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
-          "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
-          "frontend/public/manifest.webmanifest"
-        ],
-        "matchedFiles": [
-          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-          "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
-          "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
-          "frontend/public/manifest.webmanifest"
-        ]
+        "id": "REQ-4",
+        "summary": "If the categories HashMap is empty, populate it with sample categories including 'Mobiles' and at least 2-3 other relevant e-commerce categories (e.g., 'Electronics', 'Fashion', 'Home & Kitchen')",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-157",
-        "summary": "Ensure the PWA offline/fast-loading behavior is reliable and does not break core navigation: implement a clear caching strategy and include an offline fallback for navigation when the network is unavailable.",
-        "status": "implemented",
+        "id": "REQ-5",
+        "summary": "Ensure the HomePage's Featured Products section (first 8 products) successfully fetches and displays products using the useGetProducts hook",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/public/offline.html",
-          "frontend/public/sw.js",
-          "frontend/src/components/pwa/OfflineBanner.tsx"
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/hooks/queries/useCatalog.ts",
+          "frontend/src/components/product/ProductCard.tsx"
         ],
-        "matchedFiles": [
-          "frontend/public/offline.html",
-          "frontend/public/sw.js",
-          "frontend/src/components/pwa/OfflineBanner.tsx"
-        ]
+        "matchedFiles": []
       },
       {
-        "id": "REQ-158",
-        "summary": "Update project documentation to include basic PWA testing steps (manifest, service worker, offline test, install prompt test) using English instructions.",
-        "status": "implemented",
+        "id": "REQ-6",
+        "summary": "Ensure the HomePage's Shop by Category section successfully fetches and displays all categories using the useGetCategories hook",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/README.md"
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/components/home/CategoriesGrid.tsx",
+          "frontend/src/hooks/queries/useCatalog.ts",
+          "frontend/src/components/category/CategoryImage.tsx"
         ],
-        "matchedFiles": [
-          "frontend/README.md"
-        ]
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
-    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/README.md",
-    "frontend/index.html",
-    "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
-    "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
-    "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-    "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-    "frontend/public/manifest.webmanifest",
-    "frontend/public/offline.html",
-    "frontend/public/sw.js",
-    "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/components/pwa/A2HSInstallPrompt.tsx",
-    "frontend/src/components/pwa/OfflineBanner.tsx",
-    "frontend/src/hooks/useA2HS.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

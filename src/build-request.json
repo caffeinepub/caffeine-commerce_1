@@ -1,150 +1,128 @@
 {
   "kind": "build_request",
-  "title": "Convert BISAULI Store to a PWA (Manifest, Service Worker, A2HS prompt, Offline)",
-  "projectName": "BISAULI Store",
-  "priority": "normal",
+  "title": "Restore product and category data display",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-153",
-      "text": "Add a Web App Manifest for the BISAULI Store and wire it into the app so browsers recognize the site as installable.",
-      "target": "frontend",
+      "id": "REQ-1",
+      "text": "Verify and fix the data fetching for products in the backend main.mo getProducts() method to ensure it returns all stored products from the products HashMap",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-last"
         ],
         "quotes": [
-          "I want to convert this website into a PWA (Progressive Web App). Please:\n\n1. Add a Web App Manifest and Service Worker."
+          "Restore Data Connection: Reconnect the frontend to the 'products' and 'categories' database tables."
         ]
       },
       "acceptanceCriteria": [
-        "A valid manifest file exists under the frontend static/public assets (e.g., `frontend/public/manifest.webmanifest` or equivalent) and is served by the app.",
-        "`frontend/index.html` includes a `<link rel=\"manifest\" ...>` pointing to the manifest.",
-        "The manifest includes: name/short_name set to BISAULI, start_url, display=standalone, background_color, theme_color, and a set of icons (including 192x192 and 512x512).",
-        "In Chrome DevTools > Application > Manifest, the manifest loads without errors."
+        "The getProducts() method successfully returns all products stored in the backend",
+        "Products are returned with all required fields (id, name, description, price, stock, category, imageUrl)"
       ]
     },
     {
-      "id": "REQ-154",
-      "text": "Add a Service Worker that enables offline support (app shell caching) and faster repeat loads, and ensure it is registered by the app at runtime.",
-      "target": "frontend",
+      "id": "REQ-2",
+      "text": "Verify and fix the data fetching for categories in the backend main.mo getCategories() method to ensure it returns all stored categories from the categories HashMap",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-last"
         ],
         "quotes": [
-          "1. Add a Web App Manifest and Service Worker.",
-          "4. Make it work offline and ensure it loads fast like a native app."
+          "Restore Data Connection: Reconnect the frontend to the 'products' and 'categories' database tables."
         ]
       },
       "acceptanceCriteria": [
-        "A service worker file exists under frontend static/public assets (e.g., `frontend/public/sw.js`) and is served by the app.",
-        "The service worker is registered on app load without requiring edits to immutable `frontend/src/main.tsx` (registration can be done via `frontend/index.html` and/or non-immutable React components).",
-        "First visit online caches the core app shell assets needed to render the UI on subsequent visits.",
-        "When the browser is set to Offline and the user reloads, the app still loads a usable offline experience (at minimum: shell + a clear offline message for data that cannot be fetched).",
-        "In Chrome DevTools > Application > Service Workers, the service worker is installed/activated successfully and controls the page after reload."
+        "The getCategories() method successfully returns all categories stored in the backend",
+        "Categories are returned with all required fields (id, name, imageUrl)"
       ]
     },
     {
-      "id": "REQ-155",
-      "text": "Implement an Add-to-Home-Screen (A2HS) install prompt experience for mobile users that shows a user-friendly English popup/banner when installation is available.",
-      "target": "frontend",
+      "id": "REQ-3",
+      "text": "If the products HashMap is empty, populate it with sample products including at least one product in the 'Mobiles' category with realistic data (name, description, price, stock, imageUrl)",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-last"
         ],
         "quotes": [
-          "Ensure that when a customer opens the site on mobile, they see an 'Add to Home Screen' popup."
+          "Check Table Status: If the tables are empty, please restore the sample products/ categories we had earlier (like 'Mobiles')."
         ]
       },
       "acceptanceCriteria": [
-        "On supported mobile browsers (e.g., Android Chrome) where `beforeinstallprompt` is available, a visible in-app prompt appears after page load (or after a short delay) with clear English text and an Install/Add action.",
-        "Tapping the Install/Add action triggers the browser install prompt (using the captured `beforeinstallprompt` event).",
-        "The prompt includes a Dismiss/Not now action and does not reappear continuously in the same session after dismissal.",
-        "On iOS Safari (where `beforeinstallprompt` is not available), show an English informational prompt with simple steps (e.g., “Tap Share, then ‘Add to Home Screen’.”) and allow dismissing it."
+        "At least 3-5 sample products are created if products HashMap is empty",
+        "Sample products include realistic mobile phone products with prices between 10,000-50,000",
+        "All sample products have valid imageUrl values (placeholder or real product images)"
       ]
     },
     {
-      "id": "REQ-156",
-      "text": "Use the existing BISAULI logo as the PWA app icon set (including standard and maskable icons), and ensure the icons are referenced correctly by the manifest.",
-      "target": "frontend",
+      "id": "REQ-4",
+      "text": "If the categories HashMap is empty, populate it with sample categories including 'Mobiles' and at least 2-3 other relevant e-commerce categories (e.g., 'Electronics', 'Fashion', 'Home & Kitchen')",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-last"
         ],
         "quotes": [
-          "Use my BISAULI logo as the app icon."
+          "Check Table Status: If the tables are empty, please restore the sample products/ categories we had earlier (like 'Mobiles')."
         ]
       },
       "acceptanceCriteria": [
-        "A complete set of PWA icon PNGs is available as static frontend assets and referenced in the manifest (at minimum: 192x192 and 512x512; plus maskable variants).",
-        "The icons visually reflect the BISAULI logo and render crisply at small sizes.",
-        "Chrome DevTools manifest preview shows the correct icon and no icon-related warnings (including maskable warnings if maskable icons are provided)."
+        "'Mobiles' category is created with a valid imageUrl",
+        "At least 3-4 total categories exist after initialization",
+        "Each category has a meaningful name and appropriate imageUrl"
       ]
     },
     {
-      "id": "REQ-157",
-      "text": "Ensure the PWA offline/fast-loading behavior is reliable and does not break core navigation: implement a clear caching strategy and include an offline fallback for navigation when the network is unavailable.",
+      "id": "REQ-5",
+      "text": "Ensure the HomePage's Featured Products section (first 8 products) successfully fetches and displays products using the useGetProducts hook",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-last"
         ],
         "quotes": [
-          "Make it work offline and ensure it loads fast like a native app."
+          "Visibility: Ensure the 'Featured Products' and 'Shop by Category' sections on the home page are fetching data correctly now."
         ]
       },
       "acceptanceCriteria": [
-        "Service worker caching strategy avoids trapping the app in a broken state after deployments (e.g., supports updating to new versions cleanly).",
-        "A dedicated offline fallback page or UI state exists and uses English user-facing text (e.g., “You are offline. Some features may be unavailable.”).",
-        "Core route navigation loads the cached app shell quickly on repeat visits, with noticeably reduced load time vs. a cold load.",
-        "The service worker does not cache backend canister errors as successful responses (i.e., it should not permanently serve an error page as the cached content)."
+        "Featured Products section displays up to 8 product cards on the home page",
+        "Product cards show product images, names, prices, and add-to-cart buttons",
+        "Loading states and error handling work correctly"
       ]
     },
     {
-      "id": "REQ-158",
-      "text": "Update project documentation to include basic PWA testing steps (manifest, service worker, offline test, install prompt test) using English instructions.",
+      "id": "REQ-6",
+      "text": "Ensure the HomePage's Shop by Category section successfully fetches and displays all categories using the useGetCategories hook",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-last"
         ],
         "quotes": [
-          "I want to convert this website into a PWA (Progressive Web App)."
+          "Visibility: Ensure the 'Featured Products' and 'Shop by Category' sections on the home page are fetching data correctly now."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/README.md` (or an appropriate existing doc) includes a short “PWA” section with steps to: verify manifest, verify service worker registration, test offline mode, and test installation/A2HS on mobile.",
-        "Documentation uses English user-facing text and does not reference unsupported tooling or stacks."
+        "Shop by Category section displays all available categories in a grid",
+        "Category cards show category images and names",
+        "Clicking a category navigates to the catalog page filtered by that category"
       ]
     }
   ],
   "constraints": [
-    "Do not edit any paths listed as immutable, including `frontend/src/main.tsx` and `frontend/src/hooks/useActor.ts` (service worker registration must be implemented without modifying immutable paths).",
-    "Keep backend architecture unchanged (single Motoko actor). No backend changes are required for PWA enablement.",
-    "All user-facing text introduced by the PWA install/offline UI must be in English."
+    "Preserve the admin login credentials (username: Prashant, password: Prashant80061)",
+    "Do not modify the authentication or authorization system",
+    "Maintain the existing single-actor backend architecture"
   ],
   "nonGoals": [
-    "Implementing push notifications (not requested here).",
-    "Adding third-party analytics or external monitoring for PWA usage.",
-    "Building a fully offline-capable e-commerce experience that supports placing orders while offline (offline support here is for app shell + graceful offline messaging)."
+    "Changing the admin authentication mechanism",
+    "Modifying the UI design or layout of existing pages",
+    "Adding new product or category management features",
+    "Implementing data persistence migrations"
   ],
   "imageRequirements": {
-    "required": [
-      "Square app icon based on the BISAULI logo (pwa-icon.dim_192x192.png)",
-      "Square app icon based on the BISAULI logo (pwa-icon.dim_512x512.png)",
-      "Maskable square app icon based on the BISAULI logo (pwa-icon-maskable.dim_192x192.png)",
-      "Maskable square app icon based on the BISAULI logo (pwa-icon-maskable.dim_512x512.png)"
-    ],
+    "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

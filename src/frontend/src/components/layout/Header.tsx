@@ -7,7 +7,6 @@ import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '../../hooks/useTheme';
 import { useTranslation } from '../../i18n';
-import { useIsCallerAdmin } from '../../hooks/queries/useAuthz';
 import { useGetCart } from '../../hooks/queries/useCartWishlist';
 import { useGetSiteSettings } from '../../hooks/queries/useSiteSettings';
 import {
@@ -26,7 +25,6 @@ export default function Header() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useTranslation();
-  const { data: isAdmin } = useIsCallerAdmin();
   const { data: cart } = useGetCart();
   const { data: siteSettings, isLoading: siteSettingsLoading } = useGetSiteSettings();
   const [searchQuery, setSearchQuery] = useState('');
@@ -209,14 +207,6 @@ export default function Header() {
                     <DropdownMenuItem asChild>
                       <Link to="/orders">{t('nav.orders')}</Link>
                     </DropdownMenuItem>
-                    {isAdmin && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link to="/admin">{t('nav.admin')}</Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleAuth} disabled={isLoggingIn}>
                       {t('auth.logout')}
@@ -257,6 +247,20 @@ export default function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
                 <div className="flex flex-col gap-6 py-6">
+                  {/* Mobile Search */}
+                  <form onSubmit={handleSearch}>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        type="search"
+                        placeholder={t('search.placeholder')}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                  </form>
+
                   {/* Mobile Navigation */}
                   <nav className="flex flex-col gap-2">
                     {navLinks.map((link) => (
@@ -296,18 +300,9 @@ export default function Header() {
                         >
                           {t('nav.wishlist')}
                         </Link>
-                        {isAdmin && (
-                          <Link
-                            to="/admin"
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                          >
-                            {t('nav.admin')}
-                          </Link>
-                        )}
                         <Button
                           variant="outline"
-                          className="w-full justify-start"
+                          className="w-full"
                           onClick={() => {
                             handleAuth();
                             setMobileMenuOpen(false);
@@ -334,69 +329,49 @@ export default function Header() {
 
                   {/* Mobile Theme & Language */}
                   <div className="space-y-2 border-t pt-4">
-                    <div className="px-3 text-sm font-medium text-muted-foreground">
-                      {t('theme.title')}
+                    <div className="flex items-center justify-between px-3 py-2">
+                      <span className="text-sm font-medium">{t('theme.title')}</span>
+                      <div className="flex gap-1">
+                        <Button
+                          variant={theme === 'light' ? 'default' : 'ghost'}
+                          size="sm"
+                          onClick={() => setTheme('light')}
+                        >
+                          <Sun className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant={theme === 'dark' ? 'default' : 'ghost'}
+                          size="sm"
+                          onClick={() => setTheme('dark')}
+                        >
+                          <Moon className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant={theme === 'light' ? 'default' : 'outline'}
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setTheme('light')}
-                      >
-                        {t('theme.light')}
-                      </Button>
-                      <Button
-                        variant={theme === 'dark' ? 'default' : 'outline'}
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setTheme('dark')}
-                      >
-                        {t('theme.dark')}
-                      </Button>
-                    </div>
-                    <div className="px-3 pt-2 text-sm font-medium text-muted-foreground">
-                      Language
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant={language === 'en' ? 'default' : 'outline'}
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setLanguage('en')}
-                      >
-                        English
-                      </Button>
-                      <Button
-                        variant={language === 'hi' ? 'default' : 'outline'}
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setLanguage('hi')}
-                      >
-                        हिन्दी
-                      </Button>
+                    <div className="flex items-center justify-between px-3 py-2">
+                      <span className="text-sm font-medium">Language</span>
+                      <div className="flex gap-1">
+                        <Button
+                          variant={language === 'en' ? 'default' : 'ghost'}
+                          size="sm"
+                          onClick={() => setLanguage('en')}
+                        >
+                          EN
+                        </Button>
+                        <Button
+                          variant={language === 'hi' ? 'default' : 'ghost'}
+                          size="sm"
+                          onClick={() => setLanguage('hi')}
+                        >
+                          हिं
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </SheetContent>
             </Sheet>
           </div>
-        </div>
-
-        {/* Mobile Search - below main header on small screens */}
-        <div className="flex pb-3 lg:hidden">
-          <form onSubmit={handleSearch} className="w-full">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder={t('search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-full"
-              />
-            </div>
-          </form>
         </div>
       </div>
     </header>

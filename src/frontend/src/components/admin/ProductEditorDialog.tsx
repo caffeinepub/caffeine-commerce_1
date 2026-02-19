@@ -11,7 +11,7 @@ import { useAdminAddProduct, useAdminUpdateProduct, useAdminGetCategories } from
 import type { Product, ProductInput } from '../../backend';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
-import { detectBackendUnavailability } from '../../utils/backendAvailabilityErrors';
+import { formatBackendError } from '../../utils/backendAvailabilityErrors';
 
 interface ProductEditorDialogProps {
   open: boolean;
@@ -214,8 +214,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
       onOpenChange(false);
     } catch (error: any) {
       console.error('Failed to save product:', error);
-      const errorInfo = detectBackendUnavailability(error);
-      setErrorMessage(errorInfo.userMessage);
+      setErrorMessage(formatBackendError(error));
       setLastFailedData(productInput);
     }
   };
@@ -238,8 +237,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
       onOpenChange(false);
     } catch (error: any) {
       console.error('Retry failed:', error);
-      const errorInfo = detectBackendUnavailability(error);
-      setErrorMessage(errorInfo.userMessage);
+      setErrorMessage(formatBackendError(error));
     }
   };
 
@@ -250,16 +248,7 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
 
   const isPending = addProduct.isPending || updateProduct.isPending;
   const categoryList = categories || [];
-  
-  // Detect backend unavailability for categories
-  const categoriesErrorInfo = categoriesError ? detectBackendUnavailability(categoriesError) : null;
-  const isCategoriesBackendUnavailable = categoriesErrorInfo?.isBackendUnavailable || false;
-  const hasCategoriesError = !!categoriesError;
   const hasNoCategories = !categoriesLoading && categoryList.length === 0;
-  
-  // Detect backend unavailability for product save
-  const saveErrorInfo = errorMessage ? detectBackendUnavailability({ message: errorMessage }) : null;
-  const isSaveBackendUnavailable = saveErrorInfo?.isBackendUnavailable || false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -303,18 +292,16 @@ export function ProductEditorDialog({ open, onOpenChange, product }: ProductEdit
             </Alert>
           )}
 
-          {hasCategoriesError && (
+          {categoriesError && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {isCategoriesBackendUnavailable 
-                  ? 'Unable to load categories. Please ensure the backend is running.'
-                  : 'Failed to load categories. Please try again.'}
+                {formatBackendError(categoriesError)}
               </AlertDescription>
             </Alert>
           )}
 
-          {hasNoCategories && !hasCategoriesError && (
+          {hasNoCategories && !categoriesError && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">

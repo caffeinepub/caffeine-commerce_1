@@ -100,18 +100,14 @@ export default function AdminOrdersPage() {
 
   // Helper to get status key from enum value
   const getStatusKey = (status: OrderStatus): string => {
-    const entries = Object.entries(OrderStatus);
-    for (const [key, value] of entries) {
-      if (value === status) {
-        return key;
-      }
-    }
-    return 'pending';
+    const statusOption = availableStatuses.find(s => s.value === status);
+    return statusOption?.key || 'pending';
   };
 
   // Helper to get enum value from key
   const getStatusFromKey = (key: string): OrderStatus => {
-    return (OrderStatus as any)[key] as OrderStatus;
+    const statusOption = availableStatuses.find(s => s.key === key);
+    return statusOption?.value || OrderStatus.pending;
   };
 
   return (
@@ -164,21 +160,21 @@ export default function AdminOrdersPage() {
                 <TableBody>
                   {sortedOrders.map((order) => {
                     const isUpdating = updatingOrderId === order.id;
-                    const statusColor = getOrderStatusColor(order.status);
-                    
+                    const currentStatusKey = getStatusKey(order.status);
+
                     return (
-                      <TableRow key={order.id.toString()}>
-                        <TableCell className="font-medium">#{order.id.toString()}</TableCell>
+                      <TableRow key={Number(order.id)}>
+                        <TableCell className="font-medium">#{Number(order.id)}</TableCell>
                         <TableCell>
                           <div className="space-y-1">
                             <div className="font-medium">{order.shippingAddress.name}</div>
                             <div className="text-sm text-muted-foreground">{order.shippingAddress.phone}</div>
                           </div>
                         </TableCell>
-                        <TableCell>{order.items.length} item(s)</TableCell>
+                        <TableCell>{order.items.length}</TableCell>
                         <TableCell>₹{Number(order.totalAmount).toLocaleString()}</TableCell>
                         <TableCell>
-                          <Badge variant={statusColor as any}>
+                          <Badge variant={getOrderStatusColor(order.status)}>
                             {getOrderStatusLabel(order.status)}
                           </Badge>
                         </TableCell>
@@ -187,7 +183,7 @@ export default function AdminOrdersPage() {
                         </TableCell>
                         <TableCell>
                           <Select
-                            value={getStatusKey(order.status)}
+                            value={currentStatusKey}
                             onValueChange={(value) => {
                               const newStatus = getStatusFromKey(value);
                               handleStatusChange(order.id, newStatus);
@@ -197,7 +193,7 @@ export default function AdminOrdersPage() {
                             <SelectTrigger className="w-[140px]">
                               {isUpdating ? (
                                 <div className="flex items-center gap-2">
-                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  <Loader2 className="h-4 w-4 animate-spin" />
                                   <span>Updating...</span>
                                 </div>
                               ) : (
@@ -206,8 +202,8 @@ export default function AdminOrdersPage() {
                             </SelectTrigger>
                             <SelectContent>
                               {availableStatuses.map((status) => (
-                                <SelectItem key={getStatusKey(status)} value={getStatusKey(status)}>
-                                  {getOrderStatusLabel(status)}
+                                <SelectItem key={status.key} value={status.key}>
+                                  {status.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>

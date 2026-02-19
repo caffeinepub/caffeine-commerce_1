@@ -1,15 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAdminActor } from '../useAdminActor';
+import { usePublicActor } from '../usePublicActor';
 import { queryKeys } from './queryClientKeys';
 import type { Order__1 as Order, OrderStatus, OrderId } from '../../backend';
 
 export function useGetAllOrders() {
-  const { actor, isFetching: actorFetching } = useAdminActor();
+  const { actor, isFetching: actorFetching } = usePublicActor();
 
   return useQuery<Order[]>({
     queryKey: queryKeys.adminOrders,
     queryFn: async () => {
       if (!actor) throw new Error('Backend service is not available');
+      // Using public/anonymous actor - no authentication required
       const orders = await actor.getAllOrders();
       return orders;
     },
@@ -21,12 +22,13 @@ export function useGetAllOrders() {
 }
 
 export function useUpdateOrderStatus() {
-  const { actor } = useAdminActor();
+  const { actor } = usePublicActor();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ orderId, newStatus }: { orderId: OrderId; newStatus: OrderStatus }) => {
       if (!actor) throw new Error('Backend service is not available');
+      // Using public/anonymous actor - no authentication required
       await actor.updateOrderStatus(orderId, newStatus);
     },
     onSuccess: (_, variables) => {

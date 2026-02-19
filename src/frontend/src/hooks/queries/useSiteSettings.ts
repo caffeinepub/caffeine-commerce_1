@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usePublicActor } from '../usePublicActor';
 import { useAdminActor } from '../useAdminActor';
 import { queryKeys } from './queryClientKeys';
 import type { SiteSettings } from '../../backend';
 
 export function useGetSiteSettings() {
-  const { actor, isFetching: actorFetching } = useAdminActor();
+  const { actor, isFetching: actorFetching } = usePublicActor();
 
   return useQuery<SiteSettings>({
     queryKey: queryKeys.siteSettings,

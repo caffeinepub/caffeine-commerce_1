@@ -15,6 +15,8 @@ export default function CategoryImage({ imageUrl, alt, className = '' }: Categor
       src={src}
       alt={alt}
       className={className}
+      loading="lazy"
+      decoding="async"
       onError={(e) => {
         const target = e.target as HTMLImageElement;
         // Only set fallback if not already showing it

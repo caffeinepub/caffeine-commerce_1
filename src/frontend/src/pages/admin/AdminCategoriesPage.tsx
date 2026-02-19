@@ -164,20 +164,14 @@ export default function AdminCategoriesPage() {
                     {categoryList.map((category) => (
                       <TableRow key={Number(category.id)}>
                         <TableCell>
-                          {category.image ? (
-                            <CategoryImage
-                              imageUrl={category.image}
-                              alt={category.name}
-                              className="w-12 h-12 object-cover rounded"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 flex items-center justify-center bg-muted rounded text-xs text-muted-foreground">
-                              No image
-                            </div>
-                          )}
+                          <CategoryImage
+                            imageUrl={category.image}
+                            alt={category.name}
+                            className="h-12 w-12 rounded object-cover"
+                          />
                         </TableCell>
-                        <TableCell className="font-medium">{Number(category.id)}</TableCell>
-                        <TableCell>{category.name}</TableCell>
+                        <TableCell>{Number(category.id)}</TableCell>
+                        <TableCell className="font-medium">{category.name}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button
@@ -194,7 +188,7 @@ export default function AdminCategoriesPage() {
                               onClick={() => handleDeleteClick(category)}
                               title="Delete category"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
                         </TableCell>
@@ -204,11 +198,11 @@ export default function AdminCategoriesPage() {
                 </Table>
               </div>
             </>
-          ) : (
+          ) : !error ? (
             <div className="text-center py-8 text-muted-foreground">
-              No categories yet. Click "Add Category" to create one.
+              No categories available. Click "Add Category" to create your first category.
             </div>
-          )}
+          ) : null}
         </CardContent>
       </Card>
 
@@ -231,8 +225,9 @@ export default function AdminCategoriesPage() {
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteCategory.isPending}
             >
-              Delete
+              {deleteCategory.isPending ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
