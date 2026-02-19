@@ -1,70 +1,28 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "E-commerce application with admin dashboard, user authentication, and product/category management system",
-  "architectural_notes": [
-    "Admin credentials: Username 'Prashant', Password 'Prashant80061'",
-    "Frontend connects to backend canisters for products and categories data",
-    "Dashboard displays product and category statistics",
-    "Home page includes 'Featured Products' and 'Shop by Category' sections"
-  ],
-  "known_issues": [
-    "Products and categories not displaying (showing 0 items)",
-    "Database tables may be empty or disconnected from frontend"
-  ],
-  "isFixRequest": true,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [],
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Verify and fix the data fetching for products in the backend main.mo getProducts() method to ensure it returns all stored products from the products HashMap",
-      "reqIds": [
-        "REQ-1"
-      ],
+      "summary": "Update admin login credentials to Username: Prashant, Password: Prashant80061",
+      "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Verify and fix the data fetching for categories in the backend main.mo getCategories() method to ensure it returns all stored categories from the categories HashMap",
+      "summary": "Update the backend admin authorization logic to authenticate with username 'Prashant' and password 'Prashant80061' instead of current credentials",
       "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "If the products HashMap is empty, populate it with sample products including at least one product in the 'Mobiles' category with realistic data (name, description, price, stock, imageUrl)",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "If the categories HashMap is empty, populate it with sample categories including 'Mobiles' and at least 2-3 other relevant e-commerce categories (e.g., 'Electronics', 'Fashion', 'Home & Kitchen')",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Ensure the HomePage's Featured Products section (first 8 products) successfully fetches and displays products using the useGetProducts hook",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Ensure the HomePage's Shop by Category section successfully fetches and displays all categories using the useGetCategories hook",
-      "reqIds": [
-        "REQ-6"
+        "REQ-1"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Restore product and category data display",
+  "projectName": "BISAULI",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

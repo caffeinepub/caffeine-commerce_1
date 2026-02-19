@@ -1,75 +1,33 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-19T02:20:24.246Z",
+  "generatedAt": "2026-02-19T02:42:45.830Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
+    "total": 1,
     "implemented": 0,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Verify and fix the data fetching for products in the backend main.mo getProducts() method to ensure it returns all stored products from the products HashMap",
+        "summary": "Update the backend admin authorization logic to authenticate with username 'Prashant' and password 'Prashant80061' instead of current credentials",
         "status": "unknown",
         "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Verify and fix the data fetching for categories in the backend main.mo getCategories() method to ensure it returns all stored categories from the categories HashMap",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-3",
-        "summary": "If the products HashMap is empty, populate it with sample products including at least one product in the 'Mobiles' category with realistic data (name, description, price, stock, imageUrl)",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "If the categories HashMap is empty, populate it with sample categories including 'Mobiles' and at least 2-3 other relevant e-commerce categories (e.g., 'Electronics', 'Fashion', 'Home & Kitchen')",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Ensure the HomePage's Featured Products section (first 8 products) successfully fetches and displays products using the useGetProducts hook",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/hooks/queries/useCatalog.ts",
-          "frontend/src/components/product/ProductCard.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Ensure the HomePage's Shop by Category section successfully fetches and displays all categories using the useGetCategories hook",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/home/CategoriesGrid.tsx",
-          "frontend/src/hooks/queries/useCatalog.ts",
-          "frontend/src/components/category/CategoryImage.tsx"
-        ],
         "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

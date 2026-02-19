@@ -1,64 +1,6 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore product and category data display",
-  "requirements": [
-    {
-      "id": "REQ-5",
-      "summary": "Ensure the HomePage's Featured Products section successfully fetches and displays products using the useGetProducts hook",
-      "acceptanceCriteria": [
-        "Featured Products section displays up to 8 product cards on the home page",
-        "Product cards show product images, names, prices, and add-to-cart buttons",
-        "Loading states and error handling work correctly"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Review and verify the Featured Products section correctly uses useGetProducts hook to fetch products. Ensure the query is properly enabled, error states are handled with retry functionality, and the first 8 products are displayed in the grid. Confirm loading skeleton displays during fetch and error messages with retry button appear on failure. Verify ProductCard components receive correct props and render product data including images, names, prices, and add-to-cart functionality."
-        },
-        {
-          "path": "frontend/src/hooks/queries/useCatalog.ts",
-          "operation": "modify",
-          "description": "Review and verify useGetProducts hook correctly calls the public actor's getProducts method with appropriate filters. Ensure the hook handles timeout errors, formats backend errors properly, and provides retry capability. Confirm the query key is correctly configured and caching strategy is appropriate. Verify the hook returns loading, error, and data states that the HomePage can consume."
-        },
-        {
-          "path": "frontend/src/components/product/ProductCard.tsx",
-          "operation": "modify",
-          "description": "Review and verify ProductCard correctly renders product data including image (with fallback), name, price formatting, stock status, and add-to-cart button. Ensure authentication checks are in place before allowing cart operations and toast notifications display on success/failure. Confirm the component handles missing or invalid product data gracefully."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Ensure the HomePage's Shop by Category section successfully fetches and displays all categories using the useGetCategories hook",
-      "acceptanceCriteria": [
-        "Shop by Category section displays all available categories in a grid",
-        "Category cards show category images and names",
-        "Clicking a category navigates to the catalog page filtered by that category"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Review and verify the Shop by Category section correctly uses useGetCategories hook through the CategoriesGrid component. Ensure the component is properly integrated into the page layout, receives the categories data, and displays loading/error states appropriately. Confirm the section renders after the Featured Products section."
-        },
-        {
-          "path": "frontend/src/components/home/CategoriesGrid.tsx",
-          "operation": "modify",
-          "description": "Review and verify CategoriesGrid correctly uses useGetCategories hook to fetch all categories. Ensure the component displays categories in a responsive grid layout, handles loading states with skeletons, provides error handling with retry functionality, and implements navigation to catalog page filtered by category on click. Confirm category cards display both image and name using the CategoryImage component."
-        },
-        {
-          "path": "frontend/src/hooks/queries/useCatalog.ts",
-          "operation": "modify",
-          "description": "Review and verify useGetCategories hook correctly calls the public actor's getCategories method. Ensure the hook handles timeout errors, formats backend errors properly, provides retry capability, and returns all categories without filtering. Confirm the query key is correctly configured for categories and caching strategy allows fresh data on page load."
-        },
-        {
-          "path": "frontend/src/components/category/CategoryImage.tsx",
-          "operation": "modify",
-          "description": "Review and verify CategoryImage component correctly handles both remote URLs and data URLs for category images. Ensure fallback to placeholder image works when image fails to load or URL is missing. Confirm the component provides appropriate error handling and displays images with correct sizing and styling."
-        }
-      ]
-    }
-  ]
+  "title": "Update admin credentials to Prashant/Prashant80061",
+  "requirements": []
 }

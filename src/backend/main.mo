@@ -13,9 +13,9 @@ import Order "mo:core/Order";
 import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   include MixinStorage();
 
@@ -756,3 +756,4 @@ actor {
     OutCall.transform(input);
   };
 };
+
